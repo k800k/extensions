@@ -17,6 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run docs:build
       - uses: actions/configure-pages@v5
       - run: mkdir _site && cp -R site/. _site/ && cp -R dist _site/dist
       - uses: actions/upload-pages-artifact@v3

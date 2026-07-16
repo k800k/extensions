@@ -1,0 +1,86 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* Copyright © 2025 Inkdex */
+/* Copyright © 2026 MangaReader Extension Contributors */
+
+import { defineConfig } from "vitepress";
+
+const base = process.env.MANGAREADER_SITE_BASE || "/extensions/";
+
+export default defineConfig({
+  title: "MangaReader Extensions",
+  titleTemplate: ":title | MangaReader Extensions",
+  description: "Browse, review, and install community extensions for MangaReader.",
+  base,
+  outDir: "../../site",
+  cleanUrls: true,
+  lastUpdated: true,
+  sitemap: {
+    hostname: "https://k800k.github.io/extensions/",
+  },
+  head: [
+    ["meta", { name: "theme-color", content: "#0b6e75" }],
+    ["meta", { name: "color-scheme", content: "light dark" }],
+    ["meta", { name: "referrer", content: "no-referrer-when-downgrade" }],
+  ],
+  themeConfig: {
+    siteTitle: "MangaReader Extensions",
+    search: {
+      provider: "local",
+    },
+    nav: [
+      { text: "Home", link: "/" },
+      { text: "Installation", link: "/installation" },
+      { text: "Extension List", link: "/extension-list" },
+      {
+        text: "Docs",
+        items: [
+          { text: "Guides", link: "/guides/" },
+          { text: "FAQ", link: "/faq" },
+          { text: "Support", link: "/support" },
+          { text: "Development", link: "/development/" },
+        ],
+      },
+    ],
+    sidebar: [
+      { text: "Installation", link: "/installation" },
+      { text: "Extension List", link: "/extension-list" },
+      {
+        text: "Guides",
+        link: "/guides/",
+        collapsed: false,
+        items: [
+          { text: "Review an Extension", link: "/guides/#review-an-extension" },
+          { text: "Custom Catalogs", link: "/guides/#custom-catalogs" },
+          { text: "Content Ratings", link: "/guides/#content-ratings" },
+        ],
+      },
+      { text: "FAQ", link: "/faq" },
+      { text: "Support", link: "/support" },
+      {
+        text: "Development",
+        link: "/development/",
+        collapsed: true,
+        items: [
+          { text: "Repository Layout", link: "/development/#repository-layout" },
+          { text: "Validation", link: "/development/#validation-workflow" },
+          { text: "Publishing", link: "/development/#publishing" },
+        ],
+      },
+    ],
+    socialLinks: [{ icon: "github", link: "https://github.com/k800k/extensions" }],
+    editLink: {
+      pattern: "https://github.com/k800k/extensions/edit/main/website/src/:path",
+      text: "Edit this page on GitHub",
+    },
+    footer: {
+      message: `Documentation site license: <a href="${base}LICENSE">GPL-3.0-or-later</a> · <a href="https://github.com/k800k/extensions">source</a>.`,
+      copyright: "Copyright © 2026 MangaReader Extension Contributors",
+    },
+    outline: [2, 3],
+  },
+  markdown: {
+    image: {
+      lazyLoading: true,
+    },
+  },
+});

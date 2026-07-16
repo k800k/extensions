@@ -5,14 +5,13 @@
  */
 import { createHash, createPrivateKey, createPublicKey, sign, verify } from "node:crypto";
 import { createServer } from "node:http";
-import { access, mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { dirname, extname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { API_VERSION, assertContentExtension } from "../lib/contracts.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const TRACKERS = new Set(["AniList", "MangaUpdates"]);
-const API_VERSION = "1.0";
-const PINNED_COUNT = 68;
+const CONTENT_ROOT = join(ROOT, "extensions", "content");
 const APACHE_HEADER = "/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */";
 
 const args = process.argv.slice(2);
@@ -21,12 +20,10 @@ const option = name => {
   const index = args.indexOf(name);
   return index >= 0 ? args[index + 1] : undefined;
 };
-const has = name => args.includes(name);
-
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 const sha256 = value => createHash("sha256").update(value).digest("hex");
 const safeID = value => /^[A-Za-z0-9._-]{1,128}$/.test(value);
-const extensionDirectory = (kind, id) => join(ROOT, "extensions", kind, id);
+const extensionDirectory = id => join(CONTENT_ROOT, id);
 
 async function writeJSON(path, value) {
   await mkdir(dirname(path), { recursive: true });
@@ -39,105 +36,92 @@ function neutralSVG(id, rating) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="${id} placeholder"><defs><linearGradient id="g" x2="1" y2="1"><stop stop-color="${palette[0]}"/><stop offset="1" stop-color="${palette[1]}"/></linearGradient></defs><rect width="256" height="256" rx="48" fill="url(#g)"/><path d="M59 52h138v152H59z" fill="#fff" opacity=".16"/><text x="128" y="148" text-anchor="middle" font-family="system-ui,sans-serif" font-size="68" font-weight="700" fill="#fff">${initials}</text></svg>\n`;
 }
 
-function scaffoldSource(id, kind) {
+function scaffoldSource(id) {
   const unavailable = `const unavailable = () => { const error = new Error("${id} is awaiting review"); error.name = "ExtensionUnavailableError"; throw error; };`;
-  if (kind === "tracker") {
-    return `${APACHE_HEADER}\n${unavailable}\ndefineTrackerExtension({\n  id: ${JSON.stringify(id)},\n  apiVersion: "1.0",\n  initialize: unavailable,\n  settings: () => ({ id: "settings", title: "${id}", fields: [] }),\n  authentication: () => ({ mode: "none" }),\n  search: unavailable,\n  progress: unavailable,\n  update: unavailable,\n  collections: unavailable\n});\n`;
-  }
-  return `${APACHE_HEADER}\n${unavailable}\ndefineContentExtension({\n  id: ${JSON.stringify(id)},\n  apiVersion: "1.0",\n  initialize: unavailable,\n  settings: () => ({ id: "settings", title: "${id}", fields: [] }),\n  discoverSections: unavailable,\n  discover: unavailable,\n  searchFilters: () => ({ id: "search", title: "Search", fields: [] }),\n  search: unavailable,\n  details: unavailable,\n  installments: unavailable,\n  imagePages: unavailable,\n  imagePageContent: unavailable,\n  updates: unavailable,\n  managedCollections: unavailable\n});\n`;
+  return `${APACHE_HEADER}\n${unavailable}\ndefineContentExtension({\n  id: ${JSON.stringify(id)},\n  apiVersion: "1.0",\n  initialize: unavailable,\n  settings: () => ({ id: "settings", title: ${JSON.stringify(id)}, fields: [] }),\n  discoverSections: unavailable,\n  discover: unavailable,\n  searchFilters: () => ({ id: "search", title: "Search", fields: [] }),\n  search: unavailable,\n  details: unavailable,\n  installments: unavailable,\n  imagePages: unavailable,\n  imagePageContent: unavailable,\n  updates: unavailable,\n  managedCollections: unavailable\n});\n`;
 }
 
 async function createScaffold(entry) {
-  if (!safeID(entry.id)) throw new Error(`Unsafe inventory id: ${entry.id}`);
-  const kind = TRACKERS.has(entry.id) ? "tracker" : "content";
-  const directory = extensionDirectory(kind, entry.id);
+  if (!safeID(entry.id)) throw new Error(`Unsafe extension id: ${entry.id}`);
+  if (entry.kind && entry.kind !== "content") throw new Error("Only content extensions are supported");
+  const directory = extensionDirectory(entry.id);
   await mkdir(join(directory, "tests"), { recursive: true });
   const metadata = {
     id: entry.id,
-    name: entry.name,
-    kind,
+    name: entry.name || entry.id,
+    description: "MangaReader content extension scaffold. Activation is blocked until review is complete.",
+    kind: "content",
     apiVersion: API_VERSION,
     version: "0.1.0",
-    language: entry.language,
-    contentRating: entry.contentRating,
+    language: entry.language || "en",
+    languages: [entry.language || "en"],
+    contentRating: entry.contentRating || "SAFE",
     availability: "approvalRequired",
     capabilities: [],
-    inventoryCapabilities: entry.capabilities,
     permissions: ["network"],
     allowedHTTPSHosts: ["blocked.mangareader.invalid"],
-    authenticationModes: ["none"]
+    authenticationModes: ["none"],
+    developers: [{ name: "MangaReader Extension Contributors" }],
+    iconFile: "icon.svg",
+    license: "Apache-2.0"
   };
   await writeJSON(join(directory, "extension.json"), metadata);
-  await writeFile(join(directory, "main.js"), scaffoldSource(entry.id, kind));
-  await writeFile(join(directory, "specification.md"), `# ${entry.name} extension specification\n\nStatus: **activation prohibited — behavioral specification incomplete**.\n\nCatalog metadata: ID \`${entry.id}\`, language \`${entry.language}\`, rating \`${entry.contentRating}\`, capability categories \`${entry.capabilities.join(", ")}\`.\n\nBefore activation, document the target service's API behavior, terms, authentication flow, pagination, discovery, search, details, installments/pages or tracker operations, challenge behavior, error cases, and representative fixtures. Placeholder host \`blocked.mangareader.invalid\` must be replaced by reviewed service hosts.\n`);
+  await writeFile(join(directory, "main.js"), scaffoldSource(entry.id));
+  await writeFile(join(directory, "icon.svg"), neutralSVG(entry.id, metadata.contentRating));
+  await writeFile(join(directory, "specification.md"), `# ${metadata.name} extension specification\n\nStatus: **activation prohibited — behavioral specification incomplete**.\n\nBefore activation, document the target service API, terms, authentication, pagination, discovery, search, details, installments, pages, challenge behavior, error cases, and representative fixtures. Replace the placeholder host only after review.\n`);
   await writeFile(join(directory, "REVIEW_STATUS.md"), `# Review status for ${entry.id}\n\nActivation review: **pending**. Complete the specification, privacy and rights records, host declarations, contract suite, publisher signature, and MangaReader approval before activation.\n`);
-  await writeFile(join(directory, "PRIVACY.md"), `# Privacy assessment for ${entry.id}\n\nStatus: **pending; activation prohibited**. No live service host is declared. Before activation, document every transmitted data category, credential/cookie use, retention behavior, OAuth or web-session handoff, user controls, and the service privacy policy. MangaReader must route traffic only to the approved HTTPS host list.\n`);
-  await writeFile(join(directory, "RIGHTS.md"), `# Rights record for ${entry.id}\n\nStatus: **authorization evidence pending; activation prohibited**. Record the service terms, API authorization, content-access rights, trademark decision, report contact, reviewer, and review date before requesting MangaReader approval. The generated neutral icon makes no use of service artwork or marks.\n`);
-  await writeJSON(join(directory, "provenance.json"), {
-    catalogFields: ["id", "name", "language", "contentRating", "capabilities"],
-    generatedAt: "2026-07-15T00:00:00Z"
-  });
+  await writeFile(join(directory, "PRIVACY.md"), `# Privacy assessment for ${entry.id}\n\nStatus: **pending; activation prohibited**. Before activation, document every transmitted data category, credential or cookie use, retention behavior, authentication handoff, user controls, and the target service privacy policy.\n`);
+  await writeFile(join(directory, "RIGHTS.md"), `# Rights record for ${entry.id}\n\nStatus: **authorization evidence pending; activation prohibited**. Record the service terms, API authorization, content-access rights, trademark decision, report contact, reviewer, and review date before requesting approval.\n`);
   const relativeHelper = "../../../../packages/cli/lib/contracts.mjs";
-  await writeFile(join(directory, "tests", "contract.test.mjs"), `${APACHE_HEADER}\nimport test from "node:test";\nimport { dirname, resolve } from "node:path";\nimport { fileURLToPath } from "node:url";\nimport { assertExtensionScaffold } from ${JSON.stringify(relativeHelper)};\nconst directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");\ntest(${JSON.stringify(`${entry.id} remains safely blocked until approval`)}, async () => {\n  await assertExtensionScaffold(directory, ${JSON.stringify(kind)}, ${JSON.stringify(entry.id)});\n});\n`);
+  await writeFile(join(directory, "tests", "contract.test.mjs"), `${APACHE_HEADER}\nimport test from "node:test";\nimport { dirname, resolve } from "node:path";\nimport { fileURLToPath } from "node:url";\nimport { assertContentExtension } from ${JSON.stringify(relativeHelper)};\nconst directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");\ntest(${JSON.stringify(`${entry.id} is a valid content extension package`)}, async () => {\n  await assertContentExtension(directory, ${JSON.stringify(entry.id)});\n});\n`);
 }
 
 async function seedCatalog() {
   const input = option("--input");
   if (!input) throw new Error("seed-catalog requires --input");
-  const bytes = await readFile(resolve(input));
-  const raw = JSON.parse(bytes);
+  const raw = JSON.parse(await readFile(resolve(input)));
   if (!Array.isArray(raw.sources)) throw new Error("Catalog seed must contain a sources array");
-  // Select only catalog metadata fields.
-  const entries = raw.sources.map(({ id, name, language, contentRating, capabilities }) => ({
-    id, name, language, contentRating, capabilities: Array.isArray(capabilities) ? capabilities : []
+  const entries = raw.sources.map(source => ({
+    id: source.id,
+    name: source.name,
+    kind: source.kind || "content",
+    language: source.language || source.languages?.[0] || "en",
+    contentRating: source.contentRating || "SAFE"
   }));
   const ids = new Set(entries.map(entry => entry.id));
-  if (entries.length !== PINNED_COUNT || ids.size !== PINNED_COUNT) {
-    throw new Error(`Expected ${PINNED_COUNT} unique entries; found ${entries.length}/${ids.size}`);
-  }
-  await writeJSON(join(ROOT, "inventory", "registry.json"), { entries });
-  await writeJSON(join(ROOT, "inventory", "status.json"), {
-    generatedAt: "2026-07-15T00:00:00Z",
-    counts: { content: entries.filter(entry => !TRACKERS.has(entry.id)).length, tracker: entries.filter(entry => TRACKERS.has(entry.id)).length },
-    entries: entries.map(entry => ({ id: entry.id, kind: TRACKERS.has(entry.id) ? "tracker" : "content", availability: "approvalRequired", reason: "Extension specification, rights review, live contracts, and MangaReader approval are pending." }))
-  });
+  if (ids.size !== entries.length) throw new Error("Catalog seed contains duplicate extension IDs");
+  if (entries.some(entry => entry.kind !== "content")) throw new Error("Catalog seed contains an unsupported tracker or theme extension");
   for (const entry of entries) await createScaffold(entry);
-  console.log(`Seeded ${entries.length} catalog entries and generated extension scaffolds.`);
+  console.log(`Seeded ${entries.length} content extension scaffold${entries.length === 1 ? "" : "s"}.`);
 }
 
-async function inventory() {
-  return JSON.parse(await readFile(join(ROOT, "inventory", "registry.json"), "utf8"));
+async function contentExtensionIDs() {
+  await mkdir(CONTENT_ROOT, { recursive: true });
+  const entries = await readdir(CONTENT_ROOT, { withFileTypes: true });
+  return entries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort((a, b) => a.localeCompare(b));
+}
+
+async function assertContentOnlyLayout() {
+  const entries = await readdir(join(ROOT, "extensions"), { withFileTypes: true });
+  const unsupported = entries.filter(entry => entry.isDirectory() && entry.name !== "content");
+  if (unsupported.length) throw new Error(`Unsupported extension directories: ${unsupported.map(entry => entry.name).join(", ")}`);
 }
 
 async function check() {
-  const data = await inventory();
-  const ids = data.entries.map(entry => entry.id);
-  if (ids.length !== PINNED_COUNT || new Set(ids).size !== PINNED_COUNT) throw new Error("Inventory IDs are not the pinned 68 unique entries");
-  const kinds = { content: 0, tracker: 0 };
-  for (const entry of data.entries) {
-    const kind = TRACKERS.has(entry.id) ? "tracker" : "content";
-    kinds[kind]++;
-    const directory = extensionDirectory(kind, entry.id);
-    for (const required of ["extension.json", "main.js", "specification.md", "REVIEW_STATUS.md", "PRIVACY.md", "RIGHTS.md", "provenance.json", "tests/contract.test.mjs"]) {
-      await access(join(directory, required));
-    }
-    const metadata = JSON.parse(await readFile(join(directory, "extension.json"), "utf8"));
-    if (metadata.id !== entry.id || metadata.kind !== kind || metadata.apiVersion !== API_VERSION) throw new Error(`Invalid metadata for ${entry.id}`);
-    if (metadata.availability !== "approvalRequired") throw new Error(`${entry.id} must remain approvalRequired until reviewed`);
-    const source = await readFile(join(directory, "main.js"), "utf8");
-    if (/from\s+["'][^"']*paperback/i.test(source)) throw new Error(`Forbidden runtime import in ${entry.id}`);
-    if (/\b(?:fetch|XMLHttpRequest|WebSocket|EventSource|WebAssembly)\b/.test(source)) throw new Error(`Direct platform networking in ${entry.id}`);
-  }
-  if (kinds.content !== 66 || kinds.tracker !== 2) throw new Error(`Expected 66 content and 2 tracker directories; found ${JSON.stringify(kinds)}`);
+  await assertContentOnlyLayout();
+  const ids = await contentExtensionIDs();
+  if (new Set(ids).size !== ids.length) throw new Error("Extension IDs must be unique");
+  for (const id of ids) await assertContentExtension(extensionDirectory(id), id);
   const manifestPath = join(ROOT, "dist", "v1", "stable", "mangareader-repository.json");
   try {
     const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
     const manifestIDs = manifest.sources.map(source => source.id);
-    if (manifest.schemaVersion !== 2 || manifestIDs.length !== PINNED_COUNT || new Set(manifestIDs).size !== PINNED_COUNT) throw new Error("Generated V2 manifest IDs are invalid");
+    if (manifest.schemaVersion !== 2 || JSON.stringify(manifestIDs) !== JSON.stringify(ids)) throw new Error("Generated manifest does not match the content extension directories");
+    if (manifest.sources.some(source => source.kind !== "content")) throw new Error("Generated manifest contains a non-content extension");
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
-  console.log(`check: ${kinds.content} content + ${kinds.tracker} tracker directories are valid`);
+  console.log(`check: ${ids.length} content extension${ids.length === 1 ? "" : "s"}; tracker and theme extensions are unsupported`);
 }
 
 const crcTable = (() => {
@@ -184,58 +168,80 @@ function zip(entries) {
   return Buffer.concat([...local, directoryBytes, end]);
 }
 
+async function pruneGeneratedFiles(directory, expected, matchesGeneratedName) {
+  await mkdir(directory, { recursive: true });
+  for (const filename of await readdir(directory)) {
+    if (matchesGeneratedName(filename) && !expected.has(filename)) await unlink(join(directory, filename));
+  }
+}
+
 async function buildArtifacts() {
-  const data = await inventory();
+  await assertContentOnlyLayout();
+  const ids = await contentExtensionIDs();
   const config = JSON.parse(await readFile(join(ROOT, "repository.config.json"), "utf8"));
   const license = await readFile(join(ROOT, "LICENSE"));
   const output = join(ROOT, "dist", "v1", "stable");
-  await mkdir(join(output, "packages"), { recursive: true });
-  await mkdir(join(output, "icons"), { recursive: true });
+  const packagesDirectory = join(output, "packages");
+  const iconsDirectory = join(output, "icons");
+  await mkdir(packagesDirectory, { recursive: true });
+  await mkdir(iconsDirectory, { recursive: true });
   const sources = [];
   const catalog = [];
-  for (const entry of data.entries) {
-    const kind = TRACKERS.has(entry.id) ? "tracker" : "content";
-    const directory = extensionDirectory(kind, entry.id);
+  const packageNames = new Set();
+  const iconNames = new Set();
+  for (const id of ids) {
+    const directory = extensionDirectory(id);
+    const metadata = await assertContentExtension(directory, id);
     const metadataBytes = await readFile(join(directory, "extension.json"));
-    const metadata = JSON.parse(metadataBytes);
     const main = await readFile(join(directory, "main.js"));
     const archive = zip({ "LICENSE": license, "extension.json": metadataBytes, "main.js": main });
-    const packageName = `${entry.id}-${metadata.version}.mrx`;
-    await writeFile(join(output, "packages", packageName), archive);
-    await writeFile(join(output, "icons", `${entry.id}.svg`), neutralSVG(entry.id, entry.contentRating));
-    const uncompressedSize = license.length + metadataBytes.length + main.length;
+    const packageName = `${id}-${metadata.version}.mrx`;
+    packageNames.add(packageName);
+    await writeFile(join(packagesDirectory, packageName), archive);
+    const iconExtension = extname(metadata.iconFile).toLowerCase();
+    const iconName = `${id}${iconExtension}`;
+    iconNames.add(iconName);
+    const iconBytes = await readFile(join(directory, metadata.iconFile));
+    await writeFile(join(iconsDirectory, iconName), iconBytes);
     const source = {
-      id: entry.id,
-      name: entry.name,
-      description: "MangaReader-native extension scaffold. Activation is blocked until its specification, rights review, live contracts, and MangaReader approval are complete.",
+      id,
+      name: metadata.name,
+      description: metadata.description,
       version: metadata.version,
-      icon: `icons/${entry.id}.svg`,
-      languages: [entry.language],
-      contentRating: entry.contentRating,
-      capabilities: [],
-      developers: [{ name: config.publisherName }],
-      universalLink: `https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=${encodeURIComponent(entry.id)}`,
-      rightsDeclaration: "Activation prohibited until the extension rights record and service authorization evidence are approved.",
-      rightsURL: `https://github.com/k800k/extensions/blob/main/extensions/${kind}/${entry.id}/RIGHTS.md`,
+      icon: `icons/${iconName}`,
+      languages: metadata.languages,
+      contentRating: metadata.contentRating,
+      capabilities: metadata.capabilities,
+      developers: metadata.developers.map(developer => ({ name: developer.name })),
+      universalLink: `https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=${encodeURIComponent(id)}`,
+      rightsDeclaration: "Review the extension rights record before installation.",
+      rightsURL: `https://github.com/k800k/extensions/blob/main/extensions/content/${id}/RIGHTS.md`,
       reportURL: "https://github.com/k800k/extensions/issues/new/choose",
       entryType: "mangaReaderExtension",
-      kind,
-      availability: "approvalRequired",
-      permissions: { values: ["network"] },
+      kind: "content",
+      availability: metadata.availability,
+      permissions: { values: metadata.permissions },
       connectorPreset: null,
       mangaReaderExtension: {
         apiVersion: API_VERSION,
         packageURL: `packages/${packageName}`,
         sha256: sha256(archive),
         compressedSize: archive.length,
-        uncompressedSize,
-        allowedHTTPSHosts: ["blocked.mangareader.invalid"],
-        authenticationModes: ["none"]
+        uncompressedSize: license.length + metadataBytes.length + main.length,
+        allowedHTTPSHosts: metadata.allowedHTTPSHosts,
+        authenticationModes: metadata.authenticationModes
       }
     };
     sources.push(source);
-    catalog.push({ ...source, inventoryCapabilities: entry.capabilities, packageSHA256: source.mangaReaderExtension.sha256 });
+    catalog.push({
+      ...source,
+      developers: metadata.developers,
+      packageSHA256: source.mangaReaderExtension.sha256,
+      license: metadata.license || "Apache-2.0"
+    });
   }
+  await pruneGeneratedFiles(packagesDirectory, packageNames, filename => filename.endsWith(".mrx"));
+  await pruneGeneratedFiles(iconsDirectory, iconNames, filename => /\.(?:svg|png|jpe?g|webp|ico)$/i.test(filename));
   const manifest = {
     schemaVersion: 2,
     repository: {
@@ -251,7 +257,9 @@ async function buildArtifacts() {
   };
   await writeFile(join(output, "mangareader-repository.json"), Buffer.from(JSON.stringify(manifest)));
   await writeJSON(join(output, "catalog.json"), { repositoryURL: "https://k800k.github.io/extensions/dist/v1/stable/", sources: catalog });
-  console.log(`Bundled ${sources.length} deterministic .mrx packages.`);
+  await writeJSON(join(ROOT, "inventory", "registry.json"), { entries: ids.map(id => ({ id, kind: "content" })) });
+  await writeJSON(join(ROOT, "inventory", "status.json"), { counts: { content: ids.length }, entries: sources.map(source => ({ id: source.id, kind: "content", availability: source.availability })) });
+  console.log(`Bundled ${sources.length} deterministic content extension package${sources.length === 1 ? "" : "s"}.`);
   return manifest;
 }
 
@@ -284,35 +292,49 @@ async function publish() {
     if (bytes.length !== source.mangaReaderExtension.compressedSize || sha256(bytes) !== source.mangaReaderExtension.sha256) throw new Error(`Package hash mismatch: ${source.id}`);
   }
   if (current.mangaReaderApproval !== null) throw new Error("The offline MangaReader approval must never be generated in extension-repository CI");
-  console.log(`publish dry-run: exact-byte signature and ${current.sources.length} package hashes verified; entries remain approvalRequired`);
+  console.log(`publish dry-run: signature and ${current.sources.length} content package hash${current.sources.length === 1 ? "" : "es"} verified`);
 }
 
 async function createNew() {
   const id = option("--id");
-  const name = option("--name") ?? id;
-  const kind = option("--kind") ?? "content";
-  if (!id || !safeID(id) || !["content", "tracker"].includes(kind)) throw new Error("new requires a safe --id and --kind content|tracker");
-  const entry = { id, name, language: "en", contentRating: "SAFE", capabilities: [] };
-  if (kind === "tracker") TRACKERS.add(id);
-  await createScaffold(entry);
-  console.log(`Created ${relative(ROOT, extensionDirectory(kind, id))}`);
+  const name = option("--name") || id;
+  const kind = option("--kind") || "content";
+  if (!id || !safeID(id)) throw new Error("new requires a safe --id");
+  if (kind !== "content") throw new Error("Only --kind content is supported; tracker and theme extensions have been removed");
+  await createScaffold({ id, name, kind: "content", language: "en", contentRating: "SAFE" });
+  console.log(`Created ${relative(ROOT, extensionDirectory(id))}`);
 }
 
 async function serve() {
-  const port = Number(option("--port") ?? 4173);
-  const contentTypes = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".json": "application/json", ".svg": "image/svg+xml", ".mrx": "application/zip" };
+  const port = Number(option("--port") || 4173);
+  const contentTypes = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".json": "application/json", ".xml": "application/xml", ".woff2": "font/woff2", ".svg": "image/svg+xml", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".ico": "image/x-icon", ".mrx": "application/zip" };
   const server = createServer(async (request, response) => {
     try {
       let pathname = decodeURIComponent(new URL(request.url, `http://localhost:${port}`).pathname);
+      if (pathname === "/extensions") pathname = "/";
+      else if (pathname.startsWith("/extensions/")) pathname = pathname.slice("/extensions".length);
       if (pathname === "/") pathname = "/index.html";
       const base = pathname.startsWith("/dist/") ? ROOT : join(ROOT, "site");
       const path = resolve(base, `.${pathname}`);
       if (!path.startsWith(`${base}${sep}`)) throw new Error("unsafe path");
-      const bytes = await readFile(path);
-      response.writeHead(200, { "Content-Type": contentTypes[extname(path)] ?? "application/octet-stream", "Cache-Control": "no-store" });
+      const candidates = extname(path) ? [path] : [path, `${path}.html`, join(path, "index.html")];
+      let resolvedPath;
+      let bytes;
+      for (const candidate of candidates) {
+        try {
+          bytes = await readFile(candidate);
+          resolvedPath = candidate;
+          break;
+        } catch (error) {
+          if (error.code !== "ENOENT" && error.code !== "EISDIR") throw error;
+        }
+      }
+      if (!resolvedPath) throw new Error("not found");
+      response.writeHead(200, { "Content-Type": contentTypes[extname(resolvedPath)] || "application/octet-stream", "Cache-Control": "no-store" });
       response.end(bytes);
     } catch {
-      response.writeHead(404); response.end("Not found");
+      response.writeHead(404);
+      response.end("Not found");
     }
   });
   server.listen(port, "127.0.0.1", () => console.log(`MangaReader catalog: http://127.0.0.1:${port}`));
@@ -332,6 +354,6 @@ try {
     process.exitCode = command ? 1 : 0;
   }
 } catch (error) {
-  console.error(error.stack ?? error.message);
+  console.error(error.stack || error.message);
   process.exitCode = 1;
 }

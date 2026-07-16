@@ -1,5 +1,5 @@
 export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
-export type ExtensionKind = "content" | "tracker";
+export type ExtensionKind = "content";
 export type AuthenticationMode = "none" | "basic" | "apiKey" | "oauth2PKCE" | "visibleWebSession";
 export type Rating = "SAFE" | "MATURE" | "ADULT";
 
@@ -30,13 +30,6 @@ export interface ContentExtension {
   managedCollections?(input: JSONValue): Promise<JSONValue>; synchronizeManagedCollection?(collection: JSONValue): Promise<void>;
 }
 
-export interface TrackerExtension {
-  id: string; apiVersion: "1.0"; initialize?(context: RuntimeContext): void | Promise<void>; settings?(): JSONValue;
-  authentication?(): JSONValue; search(input: JSONValue): Promise<JSONValue[]>; progress(remoteWorkID: string): Promise<JSONValue | null>;
-  update(progress: JSONValue): Promise<void>; collections?(input: JSONValue): Promise<JSONValue>;
-}
-
 export declare function defineContentExtension<T extends ContentExtension>(value: T): Readonly<T & { kind: "content" }>;
-export declare function defineTrackerExtension<T extends TrackerExtension>(value: T): Readonly<T & { kind: "tracker" }>;
 export declare function unavailable(message?: string): never;
 export declare const apiVersion: "1.0";

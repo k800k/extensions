@@ -16,10 +16,6 @@ export function defineContentExtension(value) {
   return definition("content", value);
 }
 
-export function defineTrackerExtension(value) {
-  return definition("tracker", value);
-}
-
 export function unavailable(message = "This extension is not approved for activation") {
   const error = new Error(message);
   error.name = "ExtensionUnavailableError";

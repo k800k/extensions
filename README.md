@@ -1,10 +1,8 @@
 # MangaReader Extensions
 
-An external, Apache-2.0 monorepo for MangaReader Extension API v1. It contains the SDK, dependency-free publisher CLI, static multi-select catalog, and 68 extension directories: 66 content sources plus AniList and MangaUpdates tracker directories.
+A content-only MangaReader Extension API v1 repository containing the SDK, publisher CLI, signed catalog, and documentation site.
 
-The catalog is **not bundled or advertised inside MangaReader**. Add it explicitly from the website or paste its repository URL into Add Source → Repository.
-
-All catalog entries begin as `approvalRequired`. Generated source files are MangaReader-native scaffolds and cannot activate until their specification, rights/privacy review, live contract suite, publisher signature, and offline MangaReader approval are complete.
+The built-in catalog is currently empty. All previously created content and tracker extensions have been removed. Tracker and theme extension kinds are not accepted by the SDK, CLI, generated manifest, or website catalog loader. Ordinary website and reader color themes are unrelated and remain available.
 
 ## Commands
 
@@ -13,10 +11,16 @@ npm ci
 npm run check
 npm test
 npm run bundle
+npm run docs:build
 npm run publish:dry-run
-node packages/cli/bin/mr-ext.mjs serve
 ```
 
-Publisher keys are external files or encrypted CI secrets. Never commit a private key. MangaReader approval keys are offline and are never available to this repository or CI.
+Create a new content-extension scaffold with:
 
-See [EXTENSION_REVIEW_POLICY.md](EXTENSION_REVIEW_POLICY.md), [CONTRIBUTING.md](CONTRIBUTING.md), and [SECURITY.md](SECURITY.md).
+```sh
+node packages/cli/bin/mr-ext.mjs new --id ExampleSource --name "Example Source"
+```
+
+The catalog is not bundled into MangaReader. Add its repository URL explicitly from the docs site or MangaReader's repository flow. Package activation still requires the publisher signature and MangaReader approval.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md), [EXTENSION_REVIEW_POLICY.md](EXTENSION_REVIEW_POLICY.md), and [SECURITY.md](SECURITY.md).

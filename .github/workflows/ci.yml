@@ -20,5 +20,14 @@ jobs:
       - run: npm run check
       - run: npm test
       - run: npm run bundle
+      - run: npm run docs:check
+      - run: npm run docs:build
       - run: npm run publish:dry-run
-      - run: git diff --exit-code -- dist repository.config.json
+      - name: Verify generated outputs are committed
+        shell: bash
+        run: |
+          generated_status="$(git status --porcelain --untracked-files=all -- dist site repository.config.json)"
+          if [[ -n "$generated_status" ]]; then
+            echo "$generated_status"
+            exit 1
+          fi

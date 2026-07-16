@@ -1,5 +1,5 @@
 # Privacy
 
-The static website performs no analytics and stores selections only in the page URL. It does not install extensions; links open MangaReader's native review flow.
+The static documentation site performs no analytics. Catalog filters and selections remain in the page URL or device-local browser state, and installation links open MangaReader's native review flow.
 
-Downloaded extensions have no direct network, filesystem, sensor, clipboard, or native-platform access. Approved requests are routed by MangaReader to declared HTTPS hosts. Cookies, credentials, OAuth data, and secure state remain in per-extension Keychain namespaces; ordinary state remains in protected per-extension files.
+Content extensions have no direct filesystem, sensor, clipboard, native-network, or arbitrary-code access. MangaReader brokers requests to each package's declared HTTPS hosts and isolates ordinary state, secure state, cookies, and credentials by extension namespace. Each extension must document its declared hosts and service behavior in its own privacy record.
