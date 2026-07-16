@@ -1,0 +1,27 @@
+{
+  "id": "MangaDot",
+  "name": "MangaDot",
+  "kind": "content",
+  "apiVersion": "1.0",
+  "version": "0.1.0",
+  "language": "en",
+  "contentRating": "SAFE",
+  "availability": "approvalRequired",
+  "capabilities": [],
+  "inventoryCapabilities": [
+    1,
+    16,
+    4,
+    64,
+    32
+  ],
+  "permissions": [
+    "network"
+  ],
+  "allowedHTTPSHosts": [
+    "blocked.mangareader.invalid"
+  ],
+  "authenticationModes": [
+    "none"
+  ]
+}

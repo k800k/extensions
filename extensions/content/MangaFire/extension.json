@@ -1,0 +1,26 @@
+{
+  "id": "MangaFire",
+  "name": "MangaFire",
+  "kind": "content",
+  "apiVersion": "1.0",
+  "version": "0.1.0",
+  "language": "multi",
+  "contentRating": "MATURE",
+  "availability": "approvalRequired",
+  "capabilities": [],
+  "inventoryCapabilities": [
+    4,
+    64,
+    1,
+    32
+  ],
+  "permissions": [
+    "network"
+  ],
+  "allowedHTTPSHosts": [
+    "blocked.mangareader.invalid"
+  ],
+  "authenticationModes": [
+    "none"
+  ]
+}

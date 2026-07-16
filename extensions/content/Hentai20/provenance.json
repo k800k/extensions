@@ -1,0 +1,10 @@
+{
+  "catalogFields": [
+    "id",
+    "name",
+    "language",
+    "contentRating",
+    "capabilities"
+  ],
+  "generatedAt": "2026-07-15T00:00:00Z"
+}

@@ -1,0 +1,417 @@
+{
+  "generatedAt": "2026-07-15T00:00:00Z",
+  "counts": {
+    "content": 66,
+    "tracker": 2
+  },
+  "entries": [
+    {
+      "id": "AllManga",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "AllPornComic",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "AniList",
+      "kind": "tracker",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "ArthurScan",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Atsumaru",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "CoffeeManga",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Comix",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "DragonTea",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "DrakeScans",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "FlameComics",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "GourmetScans",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Hentai20",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "HiperDex",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "KunManga",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "LHTranslation",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "LNori",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "LekManga",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "LelManga",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "LilyManga",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MadaraDex",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Manga3asq",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaBat",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaDemon",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaDex",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaDistrict",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaDot",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaFire",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaFox",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaKakalot",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaKatana",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaKoma",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaNato",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaNelo",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaOrigines",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaPlus",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaReadOrg",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaScantrad",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaTaro",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaUpdates",
+      "kind": "tracker",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaWorld",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaWorldAdult",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "MangaZin",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Mangago",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Mangapill",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "ManhuaPlus",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Manhuaus",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "ManhwaClub",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "ManhwaRaw",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "ManhwaTop",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "ManhwaX",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Mgeko",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "PunkRecords",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "QiScans",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "RageScans",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Raw1001",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Roliascan",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "RoyalRoad",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "SamuraiScan",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "SetsuScans",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "SushiScans",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Thunderscans",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "ToonGod",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Toonily",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "UToon",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "Webtoon",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "WebtoonXYZ",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "WeebCentral",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    },
+    {
+      "id": "YaoiScan",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "reason": "Extension specification, rights review, live contracts, and MangaReader approval are pending."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "ManhwaRaw",
+  "name": "ManhwaRaw",
+  "kind": "content",
+  "apiVersion": "1.0",
+  "version": "0.1.0",
+  "language": "ko",
+  "contentRating": "ADULT",
+  "availability": "approvalRequired",
+  "capabilities": [],
+  "inventoryCapabilities": [
+    1,
+    16,
+    4,
+    32,
+    64
+  ],
+  "permissions": [
+    "network"
+  ],
+  "allowedHTTPSHosts": [
+    "blocked.mangareader.invalid"
+  ],
+  "authenticationModes": [
+    "none"
+  ]
+}

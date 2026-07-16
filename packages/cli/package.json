@@ -1,0 +1,7 @@
+{
+  "name": "@mangareader/extension-cli",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": { "mr-ext": "./bin/mr-ext.mjs" },
+  "license": "Apache-2.0"
+}

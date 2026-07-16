@@ -1,0 +1,862 @@
+{
+  "entries": [
+    {
+      "id": "AllManga",
+      "name": "AllManga",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "AllPornComic",
+      "name": "AllPornComic",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "AniList",
+      "name": "AniList",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        2,
+        32,
+        64,
+        8
+      ]
+    },
+    {
+      "id": "ArthurScan",
+      "name": "ArthurScan",
+      "language": "pt",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Atsumaru",
+      "name": "Atsumaru",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "CoffeeManga",
+      "name": "CoffeeManga",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Comix",
+      "name": "Comix",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "DragonTea",
+      "name": "DragonTea",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "DrakeScans",
+      "name": "Drake Scans",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "FlameComics",
+      "name": "FlameComics",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ]
+    },
+    {
+      "id": "GourmetScans",
+      "name": "GourmetScans",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Hentai20",
+      "name": "Hentai20",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "HiperDex",
+      "name": "HiperDex",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "KunManga",
+      "name": "KunManga",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "LHTranslation",
+      "name": "LHTranslation",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "LNori",
+      "name": "LNori",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        64,
+        1
+      ]
+    },
+    {
+      "id": "LekManga",
+      "name": "LekManga",
+      "language": "ar",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "LelManga",
+      "name": "LelManga",
+      "language": "fr",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "LilyManga",
+      "name": "LilyManga",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MadaraDex",
+      "name": "MadaraDex",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Manga3asq",
+      "name": "Manga3asq",
+      "language": "ar",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MangaBat",
+      "name": "MangaBat",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        64,
+        16
+      ]
+    },
+    {
+      "id": "MangaDemon",
+      "name": "MangaDemon",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ]
+    },
+    {
+      "id": "MangaDex",
+      "name": "MangaDex",
+      "language": "multi",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        8,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "MangaDistrict",
+      "name": "MangaDistrict",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MangaDot",
+      "name": "MangaDot",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "MangaFire",
+      "name": "MangaFire",
+      "language": "multi",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        32
+      ]
+    },
+    {
+      "id": "MangaFox",
+      "name": "MangaFox",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ]
+    },
+    {
+      "id": "MangaKakalot",
+      "name": "MangaKakalot",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        64,
+        16
+      ]
+    },
+    {
+      "id": "MangaKatana",
+      "name": "MangaKatana",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ]
+    },
+    {
+      "id": "MangaKoma",
+      "name": "MangaKoma",
+      "language": "ja",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1
+      ]
+    },
+    {
+      "id": "MangaNato",
+      "name": "MangaNato",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        64,
+        16
+      ]
+    },
+    {
+      "id": "MangaNelo",
+      "name": "MangaNelo",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        64,
+        16
+      ]
+    },
+    {
+      "id": "MangaOrigines",
+      "name": "MangaOrigines",
+      "language": "fr",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MangaPlus",
+      "name": "MangaPlus",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MangaReadOrg",
+      "name": "MangaReadOrg",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MangaScantrad",
+      "name": "MangaScantrad",
+      "language": "fr",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MangaTaro",
+      "name": "MangaTaro",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ]
+    },
+    {
+      "id": "MangaUpdates",
+      "name": "MangaUpdates",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        4,
+        2,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "MangaWorld",
+      "name": "MangaWorld",
+      "language": "it",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "MangaWorldAdult",
+      "name": "MangaWorldAdult",
+      "language": "it",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "MangaZin",
+      "name": "MangaZin",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Mangago",
+      "name": "Mangago",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "Mangapill",
+      "name": "Mangapill",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        64
+      ]
+    },
+    {
+      "id": "ManhuaPlus",
+      "name": "ManhuaPlus",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Manhuaus",
+      "name": "Manhuaus",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "ManhwaClub",
+      "name": "ManhwaClub",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "ManhwaRaw",
+      "name": "ManhwaRaw",
+      "language": "ko",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "ManhwaTop",
+      "name": "ManhwaTop",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "ManhwaX",
+      "name": "ManhwaX",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "Mgeko",
+      "name": "Mgeko",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "PunkRecords",
+      "name": "PunkRecords",
+      "language": "fr",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "QiScans",
+      "name": "QiScans",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64
+      ]
+    },
+    {
+      "id": "RageScans",
+      "name": "Rage Scans",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "Raw1001",
+      "name": "Raw1001",
+      "language": "ja",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1
+      ]
+    },
+    {
+      "id": "Roliascan",
+      "name": "Roliascan",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        4,
+        64,
+        1,
+        16
+      ]
+    },
+    {
+      "id": "RoyalRoad",
+      "name": "RoyalRoad",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "SamuraiScan",
+      "name": "SamuraiScan",
+      "language": "es",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "SetsuScans",
+      "name": "SetsuScans",
+      "language": "en",
+      "contentRating": "MATURE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "SushiScans",
+      "name": "SushiScans",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "Thunderscans",
+      "name": "Thunderscans",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "ToonGod",
+      "name": "ToonGod",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Toonily",
+      "name": "Toonily",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "UToon",
+      "name": "UToon",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "Webtoon",
+      "name": "Webtoon",
+      "language": "multi",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "WebtoonXYZ",
+      "name": "WebtoonXYZ",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    },
+    {
+      "id": "WeebCentral",
+      "name": "WeebCentral",
+      "language": "en",
+      "contentRating": "SAFE",
+      "capabilities": [
+        1,
+        16,
+        4,
+        64,
+        32
+      ]
+    },
+    {
+      "id": "YaoiScan",
+      "name": "YaoiScan",
+      "language": "en",
+      "contentRating": "ADULT",
+      "capabilities": [
+        1,
+        16,
+        4,
+        32,
+        64
+      ]
+    }
+  ]
+}

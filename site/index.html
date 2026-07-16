@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>MangaReader Extensions</title>
+  <meta name="description" content="Select MangaReader-native extensions and open MangaReader's install review.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="eyebrow">External catalog · API v1</p>
+      <h1>MangaReader Extensions</h1>
+      <p class="lede">Choose any subset, review its rating and status, then open MangaReader. Nothing installs silently.</p>
+    </div>
+    <a class="button secondary" id="add-repository" href="#">Add Repository</a>
+  </header>
+
+  <main>
+    <section class="controls" aria-label="Catalog filters">
+      <label class="search">Search <input id="search" type="search" placeholder="Name or ID" autocomplete="off"></label>
+      <label>Language <select id="language"><option value="">All</option></select></label>
+      <label>Rating <select id="rating"><option value="">All</option><option>SAFE</option><option>MATURE</option><option>ADULT</option></select></label>
+      <label>Type <select id="kind"><option value="">All</option><option value="content">Content</option><option value="tracker">Tracker</option></select></label>
+      <label>Status <select id="status"><option value="">All</option><option value="approvalRequired">Approval required</option><option value="available">Available</option><option value="serviceUnavailable">Service unavailable</option><option value="retired">Retired</option></select></label>
+      <label>Registry capability <select id="capability"><option value="">All</option></select></label>
+    </section>
+
+    <section class="actions" aria-live="polite">
+      <div><strong id="selected-count">0 selected</strong><span id="visible-count"></span></div>
+      <div class="action-buttons">
+        <button id="select-visible" type="button">Select visible</button>
+        <button id="clear" type="button">Clear</button>
+        <button id="share" type="button">Share selection</button>
+        <a class="button" id="install-selected" aria-disabled="true">Install Selected</a>
+        <a class="button" id="install-all">Install All</a>
+      </div>
+    </section>
+
+    <p class="notice" id="notice">All catalog entries are visible but blocked until extension review and MangaReader approval.</p>
+    <section id="catalog" class="catalog" aria-label="Extensions"></section>
+  </main>
+
+  <template id="card-template">
+    <article class="card">
+      <label class="card-select"><input type="checkbox"><span class="sr-only">Select</span></label>
+      <img width="64" height="64" alt="">
+      <div class="card-content">
+        <div class="title-row"><h2></h2><span class="status"></span></div>
+        <p class="meta"></p>
+        <p class="description"></p>
+        <details><summary>Details</summary><dl></dl></details>
+      </div>
+    </article>
+  </template>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

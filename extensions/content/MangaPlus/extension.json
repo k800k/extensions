@@ -1,0 +1,26 @@
+{
+  "id": "MangaPlus",
+  "name": "MangaPlus",
+  "kind": "content",
+  "apiVersion": "1.0",
+  "version": "0.1.0",
+  "language": "en",
+  "contentRating": "SAFE",
+  "availability": "approvalRequired",
+  "capabilities": [],
+  "inventoryCapabilities": [
+    1,
+    4,
+    32,
+    64
+  ],
+  "permissions": [
+    "network"
+  ],
+  "allowedHTTPSHosts": [
+    "blocked.mangareader.invalid"
+  ],
+  "authenticationModes": [
+    "none"
+  ]
+}

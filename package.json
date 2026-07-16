@@ -1,0 +1,15 @@
+{
+  "name": "@mangareader/extensions-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "check": "node packages/cli/bin/mr-ext.mjs check",
+    "test": "node --test packages/cli/test/*.test.mjs extensions/content/*/tests/*.test.mjs extensions/tracker/*/tests/*.test.mjs",
+    "bundle": "node packages/cli/bin/mr-ext.mjs bundle --all",
+    "publish:dry-run": "node packages/cli/bin/mr-ext.mjs publish --dry-run"
+  },
+  "engines": { "node": ">=20" },
+  "license": "Apache-2.0"
+}

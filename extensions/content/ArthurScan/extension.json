@@ -1,0 +1,27 @@
+{
+  "id": "ArthurScan",
+  "name": "ArthurScan",
+  "kind": "content",
+  "apiVersion": "1.0",
+  "version": "0.1.0",
+  "language": "pt",
+  "contentRating": "MATURE",
+  "availability": "approvalRequired",
+  "capabilities": [],
+  "inventoryCapabilities": [
+    1,
+    16,
+    4,
+    32,
+    64
+  ],
+  "permissions": [
+    "network"
+  ],
+  "allowedHTTPSHosts": [
+    "blocked.mangareader.invalid"
+  ],
+  "authenticationModes": [
+    "none"
+  ]
+}
