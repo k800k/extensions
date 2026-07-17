@@ -8,24 +8,27 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-test("the checked-in repository publishes thirteen pinned content packages", async () => {
+test("the checked-in repository publishes fifteen content and two tracker packages", async () => {
   const contentEntries = await readdir(join(root, "extensions", "content"), { withFileTypes: true });
   const expectedIDs = [
-    "AllPornComic", "Atsumaru", "Comix", "LNori", "MadaraDex", "MangaBat", "MangaDemon",
-    "MangaDex", "MangaDot", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
-  ];
-  assert.deepEqual(contentEntries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort(), expectedIDs);
-  await assert.rejects(readdir(join(root, "extensions", "tracker")), { code: "ENOENT" });
+    "AniList",
+    "AllPornComic", "Atsumaru", "Comix", "HitomiLA", "LNori", "MadaraDex", "MangaBat",
+    "MangaDemon", "MangaDex", "MangaDot", "MangaKakalot", "MyAnimeList", "NHentai", "RoyalRoad", "Webtoon",
+    "WeebCentral"
+  ].sort();
+  assert.deepEqual(contentEntries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort(), expectedIDs.filter(id => !["AniList", "MyAnimeList"].includes(id)));
+  const trackerEntries = await readdir(join(root, "extensions", "tracker"), { withFileTypes: true });
+  assert.deepEqual(trackerEntries.filter(entry => entry.isDirectory()).map(entry => entry.name).sort(), ["AniList", "MyAnimeList"]);
   await assert.rejects(readdir(join(root, "extensions", "theme")), { code: "ENOENT" });
 
   const inventory = JSON.parse(await readFile(join(root, "inventory", "registry.json"), "utf8"));
   const catalog = JSON.parse(await readFile(join(root, "dist", "v1", "stable", "catalog.json"), "utf8"));
   assert.deepEqual(inventory.entries.map(entry => entry.id), expectedIDs);
   assert.deepEqual(catalog.sources.map(source => source.id), expectedIDs);
-  assert.ok(catalog.sources.every(source => source.availability === "approvalRequired"));
+  assert.ok(catalog.sources.every(source => source.availability === "available"));
   assert.deepEqual(
     catalog.sources.filter(source => source.mangaReaderExtension.apiVersion === "1.1").map(source => source.id),
-    ["Comix", "LNori", "RoyalRoad"]
+    ["AniList", "Comix", "LNori", "MyAnimeList", "RoyalRoad"]
   );
   const mangaDex = catalog.sources.find(source => source.id === "MangaDex");
   assert.deepEqual(mangaDex.mangaReaderExtension.allowedHTTPSHosts, [

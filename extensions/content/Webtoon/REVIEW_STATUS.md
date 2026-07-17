@@ -6,6 +6,6 @@
 - MangaReader compatibility: **enabled** through the public API 1.0 adapter.
 - Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): Anonymous HTTPS landing page redirected within `www.webtoons.com` to `/en/`; exact image hosts `webtoon-phinf.pstatic.net` and `swebtoon-phinf.pstatic.net` were reachable and returned HTTP 403/404 for root requests. The probe discarded response bodies beyond browser rendering and used no account, cookies, or activation approval.
+- Live smoke (2026-07-17): Anonymous HTTPS landing page redirected within `www.webtoons.com` to `/en/`; exact image hosts `webtoon-phinf.pstatic.net` and `swebtoon-phinf.pstatic.net` were reachable and returned HTTP 403/404 for root requests. The probe discarded response bodies beyond browser rendering and used no account or cookies.
 
 Generated metadata declares 4 reviewed literal/base hosts. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.

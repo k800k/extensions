@@ -6,6 +6,6 @@
 - MangaReader compatibility: **enabled** through the public API 1.0 adapter.
 - Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): Anonymous HTTPS landing page returned HTML on `atsu.moe`. The probe discarded response bodies beyond browser rendering and used no account, cookies, or activation approval.
+- Live smoke (2026-07-17): Anonymous HTTPS landing page returned HTML on `atsu.moe`. The probe discarded response bodies beyond browser rendering and used no account or cookies.
 
 Generated metadata declares 1 reviewed literal/base host. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.

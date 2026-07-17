@@ -10,7 +10,7 @@ pageClass: catalog-doc
 
 # Extension List
 
-This catalog contains 13 provenance-pinned content ports. Use this page to search, filter, inspect declared hosts and permissions, and select an extension for MangaReader's review flow. Custom catalogs are accepted only when every entry is a content extension and are stored only in this browser.
+This catalog contains 15 content packages plus AniList and MyAnimeList tracker packages. Use this page to search by kind, inspect declared access and supported features, and open the exact source revision before installing. Custom catalogs may contain content or tracker entries and are stored only in this browser.
 
 <ClientOnly>
   <CatalogBrowser />

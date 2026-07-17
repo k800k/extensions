@@ -25,7 +25,7 @@ export interface CatalogSource {
   iconURL: string | null;
   languages: string[];
   contentRating: string;
-  kind: "content";
+  kind: "content" | "tracker";
   availability: string;
   capabilities: string[];
   developers: Developer[];
@@ -35,6 +35,8 @@ export interface CatalogSource {
   rightsURL?: string;
   reportURL?: string;
   packageSHA256?: string;
+  sourceURL?: string;
+  sourceRevision?: string;
   license?: string;
   compatibility: {
     adapter?: string;
@@ -178,8 +180,8 @@ export function normalizeCatalog(
     if (ids.has(id)) throw new TypeError(`Catalog contains duplicate source ID ${id}.`);
     ids.add(id);
     const kind = stringValue(raw.kind, "content").toLowerCase();
-    if (kind !== "content") {
-      throw new TypeError(`Source ${id} uses unsupported extension kind ${kind}. Only content extensions are accepted.`);
+    if (kind !== "content" && kind !== "tracker") {
+      throw new TypeError(`Source ${id} uses unsupported extension kind ${kind}.`);
     }
 
     const extensionRaw =
@@ -212,7 +214,7 @@ export function normalizeCatalog(
       iconURL: httpURL(raw.icon, repositoryURL),
       languages: stringList(raw.languages ?? raw.language).map((language) => language.toLowerCase()),
       contentRating: stringValue(raw.contentRating, "UNKNOWN").toUpperCase(),
-      kind: "content",
+      kind,
       availability: stringValue(raw.availability, "unknown"),
       capabilities: stringList(raw.capabilities),
       developers,
@@ -229,6 +231,8 @@ export function normalizeCatalog(
       ...(stringValue(raw.packageSHA256 ?? raw.sha256)
         ? { packageSHA256: stringValue(raw.packageSHA256 ?? raw.sha256) }
         : {}),
+      ...(httpURL(raw.sourceURL) ? { sourceURL: httpURL(raw.sourceURL)! } : {}),
+      ...(stringValue(raw.sourceRevision) ? { sourceRevision: stringValue(raw.sourceRevision) } : {}),
       ...(stringValue(raw.license) ? { license: stringValue(raw.license) } : {}),
       compatibility: compatibilityRaw
         ? {

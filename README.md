@@ -1,8 +1,8 @@
 # MangaReader Extensions
 
-A content-only MangaReader Extension API 1.0/1.1 repository containing the SDK, publisher CLI, signed catalog, and documentation site.
+An open-source MangaReader Extension API 1.0/1.1 repository containing the SDK, publisher CLI, package catalog, and documentation site.
 
-The catalog contains 13 provenance-pinned content ports. Comix, LNori, and RoyalRoad use API 1.1; the remaining packages retain API 1.0 compatibility. Every entry remains `approvalRequired`. Tracker and theme extension kinds are not accepted by this catalog.
+The catalog contains 15 content packages and two API 1.1 tracker packages: AniList and MyAnimeList. Every catalog entry links to its source and source revision. Packages are not safety-reviewed, verified, approved, or endorsed by MangaReader; inspect the code and declared access before installing.
 
 ## Commands
 
@@ -15,12 +15,15 @@ npm run docs:build
 npm run publish:dry-run
 ```
 
-Create a new content-extension scaffold with:
+Create a content or tracker scaffold with:
 
 ```sh
 node packages/cli/bin/mr-ext.mjs new --id ExampleSource --name "Example Source"
+node packages/cli/bin/mr-ext.mjs new --kind tracker --id ExampleTracker --name "Example Tracker"
 ```
 
-The catalog is not bundled into MangaReader. Add its repository URL explicitly from the docs site or MangaReader's repository flow. Package activation still requires the publisher signature and MangaReader approval.
+The catalog is not bundled into MangaReader. Add its repository URL explicitly from the docs site or MangaReader's repository flow. MangaReader confirms first installation and asks again only when an update expands declared hosts, capabilities, permissions, or authentication modes.
+
+SHA-256 checksums confirm that a downloaded artifact matches the catalog. Schema, API, operation, and load checks confirm compatibility. Neither is a safety certification.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md), [EXTENSION_REVIEW_POLICY.md](EXTENSION_REVIEW_POLICY.md), and [SECURITY.md](SECURITY.md).

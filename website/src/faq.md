@@ -7,25 +7,25 @@
 ## General
 
 ::: details Are any extensions published right now?
-Yes. The catalog contains 13 provenance-pinned content ports, all awaiting activation approval.
+Yes. The catalog lists 15 content packages and two tracker packages: AniList and MyAnimeList.
 :::
 
 ::: details What extension types are supported?
-Only content extensions. Tracker and theme extension kinds are rejected by the SDK, CLI, catalog generator, and website catalog loader. This does not remove ordinary website or reader color themes.
+Content and tracker extensions. Theme extension packages remain unsupported; this does not remove ordinary website or reader color themes.
 :::
 
 ::: details Does this repository include manga or comics?
-No. It publishes extension metadata and package artifacts only when an approved content extension exists. External services decide what they host, and users remain responsible for accessing only services and material they are authorized to use.
+No. It publishes extension metadata and package artifacts. External services decide what they host, and users remain responsible for accessing only services and material they are authorized to use.
 :::
 
 ::: details Does adding the repository install every extension?
-No. Adding a repository makes its catalog visible to MangaReader. You still choose and review each content extension through MangaReader's install flow.
+No. Adding a repository makes its catalog visible to MangaReader. You still choose each extension through MangaReader's install flow.
 :::
 
 ## Installation and repositories
 
 ::: details What is a compatible custom catalog?
-It is an HTTP(S) directory containing `catalog.json`, or the full URL to that file. The JSON must include a `sources` array with unique source IDs, and every source must have `kind: "content"` or omit the kind. Tracker and theme entries cause the catalog to be rejected.
+It is an HTTP(S) directory containing `catalog.json`, or the full URL to that file. The JSON must include a `sources` array with unique source IDs, and every source must be a `content` or `tracker` package. Theme entries are rejected.
 :::
 
 ::: details Where are custom catalogs stored?
@@ -39,7 +39,7 @@ Common causes are a missing `catalog.json`, invalid JSON, duplicate source IDs, 
 ## Safety and support
 
 ::: details Are external catalogs reviewed by MangaReader?
-Not necessarily. MangaReader applies its own package and approval policy, and you should independently evaluate the publisher.
+No safety certification is made. MangaReader validates package integrity, compatibility, and declared runtime access, then leaves the install decision to you. Review the linked open-source revision independently.
 :::
 
 ::: details Where should I report a security vulnerability?

@@ -4,10 +4,10 @@
 
 # Installation
 
-Add the external repository once, then review extensions individually inside MangaReader. The repository contains metadata and signed package artifacts; adding it does not activate every catalog entry.
+Add the external repository once, then review extensions individually inside MangaReader. Adding a repository does not activate every catalog entry.
 
-::: warning MangaReader review required
-An install link opens MangaReader's own review flow, where availability, publisher identity, permissions, package integrity, and the app's package approval are checked again. A catalog's `available` label describes port compatibility; it does not bypass MangaReader's executable-code trust gate.
+::: warning You decide what to trust
+Extensions execute third-party code. MangaReader does not safety-review, approve, verify, or endorse packages. Install only after reviewing the linked source revision and declared access.
 :::
 
 ## Add the repository
@@ -21,24 +21,23 @@ An install link opens MangaReader's own review flow, where availability, publish
 1. Open **MangaReader** and go to **Settings**.
 2. Choose **Extensions**, then **Add Repository**.
 3. Copy the repository URL shown above and paste it into the repository field.
-4. Review the repository address and publisher information before confirming.
+4. Review the repository address before confirming.
 
 :::
 
-## Choose content extensions
+## Choose extensions
 
-Open the [Extension List](/extension-list) to compare the 13 content ports by content rating, language, approval state, permissions, exact allowed network hosts, package checksum, and rights-review record.
+Open the [Extension List](/extension-list) to compare content and tracker packages, supported features, language coverage, content rating, API version, permissions, exact allowed network hosts, OAuth requirements, checksum, source revision, and audit records.
 
-Tracker and theme extension packages are not supported and are rejected by this repository.
+MangaReader shows a disclosure before first installation. An ordinary code/package update does not ask again; an update that expands hosts, capabilities, permissions, or authentication modes does.
 
-Selecting **Review in MangaReader** does not bypass app policy. MangaReader remains responsible for verifying the package and deciding whether it can be activated.
+SHA-256 confirms that the downloaded artifact matches the catalog. Manifest, API-version, operation, and load checks confirm that it can run in MangaReader. Neither mechanism proves a package is safe.
 
 ## Availability labels
 
 | Label | Meaning |
 | --- | --- |
-| Available | The content extension supports its declared MangaReader API surface and can be selected for review. |
-| Approval required | The entry can be inspected, but activation remains blocked pending review. |
+| Available | The extension supports its declared MangaReader API surface and can be installed after the user disclosure. |
 | Service unavailable | The package requires a runtime feature MangaReader intentionally does not expose. |
 | Retired | The entry remains visible for migration context but is no longer supported. |
 

@@ -356,7 +356,7 @@ test("a compiled MangaDex bundle maps content operations to MangaReader API v1",
   assert.equal(calls[3][1].sourceManga.mangaId, "manga-1");
 });
 
-test("all thirteen generated packages execute search, details, installments, and content contracts", { skip: registrySkip }, async () => {
+test("all fifteen generated packages execute search, details, installments, and content contracts", { skip: registrySkip }, async () => {
   const ids = [
     "AllPornComic", "Atsumaru", "Comix", "LNori", "MadaraDex", "MangaBat", "MangaDemon",
     "MangaDex", "MangaDot", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
