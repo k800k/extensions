@@ -17,6 +17,7 @@ const API_1_1 = new Set(["Comix", "LNori", "RoyalRoad"]);
 const XHTML_SOURCES = new Set(["LNori", "RoyalRoad"]);
 const EXTRA_HOSTS = new Map([
   ["Comix", ["static.comix.to"]],
+  ["MangaDex", ["*.mangadex.network"]],
   ["Webtoon", ["webtoon-phinf.pstatic.net", "swebtoon-phinf.pstatic.net"]]
 ]);
 const EXCLUDED_HOSTS = new Map([
@@ -30,7 +31,7 @@ const LIVE_SMOKE_AUDIT = new Map([
   ["MadaraDex", "Anonymous HTTPS landing page rendered HTML on `madaradex.org`"],
   ["MangaBat", "Anonymous HTTPS landing page rendered HTML on `www.mangabats.com`"],
   ["MangaDemon", "Anonymous HTTPS landing page rendered on `demonicscans.org`; exact CDN roots on `cdn.demoniclibs.com`, `demoniclibs.com`, and `mangareadon.org` returned HTTP 200, while `librarydm.com` returned an empty root response"],
-  ["MangaDex", "Anonymous `api.mangadex.org/ping` returned HTTP 200, and the public page and cover hosts `mangadex.org` and `uploads.mangadex.org` returned HTTP 200; OAuth and status-page hosts were not exercised or declared"],
+  ["MangaDex", "Anonymous search, details, installments, at-home page enumeration, and image retrieval passed; MangaDex supplied a randomized `*.mangadex.network` image host, which is explicitly declared"],
   ["MangaDot", "Anonymous HTTPS landing page rendered HTML on `mangadot.net`"],
   ["MangaKakalot", "Anonymous HTTPS landing page rendered HTML on `www.mangakakalot.gg`"],
   ["RoyalRoad", "Anonymous HTTPS landing page redirected within `www.royalroad.com` to `/home` and rendered HTML"],

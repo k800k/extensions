@@ -32,7 +32,7 @@ test("the checked-in repository publishes fifteen content and two tracker packag
   );
   const mangaDex = catalog.sources.find(source => source.id === "MangaDex");
   assert.deepEqual(mangaDex.mangaReaderExtension.allowedHTTPSHosts, [
-    "api.mangadex.org", "mangadex.org", "uploads.mangadex.org"
+    "*.mangadex.network", "api.mangadex.org", "mangadex.org", "uploads.mangadex.org"
   ]);
 });
 

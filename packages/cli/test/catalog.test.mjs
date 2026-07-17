@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isAllowedHTTPSHost } from "../lib/contracts.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const dist = join(root, "dist", "v1", "stable");
@@ -43,4 +44,12 @@ test("the public extension API supports content and tracker packages but exclude
   assert.match(sdkRuntime, /defineTrackerExtension/);
   assert.doesNotMatch(sdkTypes, /ThemeExtension|defineThemeExtension/);
   assert.doesNotMatch(sdkRuntime, /defineThemeExtension/);
+});
+
+test("declared hosts accept explicit subdomain wildcards only", () => {
+  assert.equal(isAllowedHTTPSHost("api.mangadex.org"), true);
+  assert.equal(isAllowedHTTPSHost("*.mangadex.network"), true);
+  assert.equal(isAllowedHTTPSHost("*mangadex.network"), false);
+  assert.equal(isAllowedHTTPSHost("foo.*.mangadex.network"), false);
+  assert.equal(isAllowedHTTPSHost("*.local"), false);
 });
