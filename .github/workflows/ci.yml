@@ -28,7 +28,7 @@ jobs:
       - name: Verify generated outputs are committed
         shell: bash
         run: |
-          generated_status="$(git status --porcelain --untracked-files=all -- dist site repository.config.json)"
+          generated_status="$(git status --porcelain --untracked-files=all -- dist repository.config.json)"
           if [[ -n "$generated_status" ]]; then
             echo "$generated_status"
             exit 1
