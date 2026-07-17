@@ -38,6 +38,7 @@ SHA-256 confirms that the downloaded artifact matches the catalog. Manifest, API
 | Label | Meaning |
 | --- | --- |
 | Available | The extension supports its declared MangaReader API surface and can be installed after the user disclosure. |
+| Approval required | Legacy repository metadata retained for compatibility. MangaReader still relies on package SHA-256, schema/runtime validation, declared access, and the explicit user install disclosure; this label does not block review or installation. |
 | Service unavailable | The package requires a runtime feature MangaReader intentionally does not expose. |
 | Retired | The entry remains visible for migration context but is no longer supported. |
 

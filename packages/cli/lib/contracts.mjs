@@ -23,7 +23,7 @@ export const authenticationModes = new Set([
   "none", "basic", "apiKey", "oauth2Implicit", "oauth2PKCE", "visibleWebSession"
 ]);
 
-const availabilities = new Set(["available", "serviceUnavailable", "retired"]);
+const availabilities = new Set(["approvalRequired", "available", "serviceUnavailable", "retired"]);
 const contentRatings = new Set(["SAFE", "MATURE", "ADULT"]);
 const forbiddenRuntimeFragments = ["eval(", "new Function", "Function(", "WebAssembly", "import("];
 

@@ -25,7 +25,7 @@ test("the checked-in repository publishes fifteen content and two tracker packag
   const catalog = JSON.parse(await readFile(join(root, "dist", "v1", "stable", "catalog.json"), "utf8"));
   assert.deepEqual(inventory.entries.map(entry => entry.id), expectedIDs);
   assert.deepEqual(catalog.sources.map(source => source.id), expectedIDs);
-  assert.ok(catalog.sources.every(source => source.availability === "available"));
+  assert.ok(catalog.sources.every(source => source.availability === "approvalRequired"));
   assert.deepEqual(
     catalog.sources.filter(source => source.mangaReaderExtension.apiVersion === "1.1").map(source => source.id),
     ["AniList", "Comix", "LNori", "MyAnimeList", "RoyalRoad"]

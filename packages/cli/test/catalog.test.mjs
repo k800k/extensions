@@ -22,7 +22,7 @@ test("the catalog contains fifteen content and two tracker packages", async () =
   assert.deepEqual(manifest.sources.map(source => source.id), expectedIDs);
   assert.equal(catalog.sources.filter(source => source.kind === "content").length, 15);
   assert.equal(catalog.sources.filter(source => source.kind === "tracker").length, 2);
-  assert.ok(catalog.sources.every(source => source.availability === "available"));
+  assert.ok(catalog.sources.every(source => source.availability === "approvalRequired"));
   assert.ok(catalog.sources.every(source => source.sourceURL && source.sourceRevision));
   assert.deepEqual(
     Object.fromEntries(manifest.sources.map(source => [source.id, source.mangaReaderExtension.apiVersion])),

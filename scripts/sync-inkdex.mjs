@@ -123,7 +123,7 @@ const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 test(${JSON.stringify(`${id} is a provenance-pinned Paperback compatibility port`)}, async () => {
   const metadata = await assertContentExtension(directory, ${JSON.stringify(id)});
   if (metadata.apiVersion !== ${JSON.stringify(apiVersion)}) throw new Error("unexpected API version");
-  if (metadata.availability !== "available") throw new Error("imported package must be published as available");
+  if (metadata.availability !== "approvalRequired") throw new Error("imported package did not retain approvalRequired metadata");
   const license = await readFile(join(directory, "LICENSE"), "utf8");
   if (!license.includes("GNU GENERAL PUBLIC LICENSE")) throw new Error("GPL package license is missing");
 });
@@ -244,7 +244,7 @@ async function main() {
       ...(EXTRA_HOSTS.get(source.id) ?? [])
     ].map(publicHost).filter(host => !excludedHosts.has(host)));
     if (!allowedHTTPSHosts.length) throw new Error(`No reviewed host declarations for ${source.id}`);
-    const availability = UNSUPPORTED.has(source.id) ? "serviceUnavailable" : "available";
+    const availability = UNSUPPORTED.has(source.id) ? "serviceUnavailable" : "approvalRequired";
     const apiVersion = API_1_1.has(source.id) ? "1.1" : "1.0";
     const metadata = {
       id: source.id,
@@ -320,7 +320,7 @@ async function main() {
     });
   }
 
-  console.log(`Imported ${statuses.length} selected GPL extensions (${statuses.filter(item => item.availability === "available").length} available).`);
+  console.log(`Imported ${statuses.length} selected GPL extensions (${statuses.filter(item => item.availability === "approvalRequired").length} retaining approvalRequired metadata).`);
 }
 
 main().catch(error => {

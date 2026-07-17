@@ -8,5 +8,5 @@ const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 test("HitomiLA is a valid content extension package", async () => {
   const metadata = await assertContentExtension(directory, "HitomiLA");
-  if (metadata.availability !== "available" || metadata.contentRating !== "ADULT") throw new Error("unexpected HitomiLA catalog metadata");
+  if (metadata.availability !== "approvalRequired" || metadata.contentRating !== "ADULT") throw new Error("unexpected HitomiLA catalog metadata");
 });

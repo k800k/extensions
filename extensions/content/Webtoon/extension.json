@@ -10,7 +10,7 @@
     "multi"
   ],
   "contentRating": "SAFE",
-  "availability": "available",
+  "availability": "approvalRequired",
   "capabilities": [
     "browse",
     "cookies",

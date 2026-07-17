@@ -10,7 +10,7 @@ MangaReader content and tracker extensions are small, separately reviewed integr
 
 Before opening an install link, check these fields in the [Extension List](/extension-list):
 
-1. **Availability** — `Service unavailable` identifies a known runtime blocker; `Available` means the declared compatibility surface can proceed to MangaReader review.
+1. **Availability** — `Service unavailable` identifies a known runtime blocker. `Approval required` is retained legacy metadata and does not replace MangaReader's package validation, declared-access review, or explicit user install disclosure.
 2. **Permissions** — compare requested access with the extension's stated purpose.
 3. **Allowed HTTPS hosts** — network access should be narrow and recognizable.
 4. **Rights and provenance** — inspect the source license, package notice, and service-rights record.

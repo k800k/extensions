@@ -10,7 +10,7 @@
     "en"
   ],
   "contentRating": "SAFE",
-  "availability": "available",
+  "availability": "approvalRequired",
   "capabilities": [
     "acquisition",
     "browse",
