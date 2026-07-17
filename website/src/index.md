@@ -31,7 +31,7 @@ features:
     linkText: Get support
   - icon: 🧰
     title: Open development
-    details: Build and validate MangaReader Extension API v1 packages with the repository tooling.
+    details: Build and validate MangaReader Extension API 1.0/1.1 packages with the repository tooling.
     link: /development/
     linkText: Start developing
 ---
@@ -40,4 +40,4 @@ features:
 <!-- Copyright © 2025 Inkdex -->
 <!-- Copyright © 2026 MangaReader Extension Contributors -->
 
-The built-in catalog is currently empty. New integrations must use the content-extension API; tracker and theme extension kinds are not supported.
+The catalog contains 13 content ports. Comix, LNori, and RoyalRoad use API 1.1; all entries remain approval-required. Tracker and theme extension kinds are not supported.

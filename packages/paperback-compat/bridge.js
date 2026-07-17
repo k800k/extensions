@@ -160,6 +160,18 @@
     return textarea.value;
   };
 
+  // Paperback exposes HTMLCanvasElement as a constructible polyfill. WebKit's
+  // native interface is not directly constructible, so retain browser canvas
+  // behavior while matching the Paperback call shape used by Comix.
+  const PaperbackCanvas = function () { return document.createElement("canvas"); };
+  try {
+    Object.defineProperty(globalThis, "HTMLCanvasElement", {
+      value: PaperbackCanvas,
+      writable: false,
+      configurable: false
+    });
+  } catch (_) {}
+
   const scheduleRequest = adaptOperation(async input => {
     let request = clone(input ?? {});
     request.url = String(request.url ?? "");
@@ -234,8 +246,20 @@
     formDidChange() {},
     invalidateDiscoverSections() {},
     setRedirectHandler(selector) { redirectHandler = selector ?? null; },
-    async executeInWebView() {
-      throw new Error("This source requires Paperback's interactive WebView execution, which MangaReader API v1 intentionally does not expose");
+    async executeInWebView(input) {
+      if (!context.web?.execute) {
+        throw new Error("This source requires MangaReader API 1.1 webExecution permission");
+      }
+      const source = input?.source ?? {};
+      return context.web.execute({
+        html: string(source.html),
+        baseURL: string(source.baseUrl ?? source.baseURL),
+        script: string(input?.inject, "return null"),
+        userAgent: source.userAgent === undefined ? undefined : string(source.userAgent),
+        loadCSS: source.loadCSS !== false,
+        loadImages: source.loadImages !== false,
+        cookies: clone(input?.storage?.cookies ?? [])
+      });
     }
   });
   Object.defineProperty(globalThis, "Application", { value: Application, writable: false, configurable: false });
@@ -271,11 +295,12 @@
       status: info.status,
       artist: info.artist,
       author: info.author,
-      shareUrl: info.shareUrl
+      shareUrl: info.shareUrl,
+      contentType: info.mediaKind === "lightNovel" || info.mediaKind === "book" ? "novel" : info.contentType
     };
   };
   const sourceMangaFromWork = work => ({ mangaId: string(work?.workId), mangaInfo: mangaInfoFromWork(work) });
-  const workFromSourceManga = manga => {
+  const workFromSourceManga = (manga, fallbackMediaKind = "manga") => {
     const info = manga?.mangaInfo ?? {};
     return {
       workId: string(manga?.mangaId),
@@ -288,7 +313,8 @@
         status: info.status,
         artist: info.artist,
         author: info.author,
-        shareUrl: info.shareUrl
+        shareUrl: info.shareUrl,
+        mediaKind: info.contentType === "novel" ? "lightNovel" : fallbackMediaKind
       })
     };
   };
@@ -354,6 +380,21 @@
   const resource = async url => {
     const [response, data] = await scheduleRequest({ url, method: "GET", headers: {} });
     return { dataBase64: encodeBase64(data), mimeType: response.mimeType ?? response.headers?.["content-type"] ?? undefined };
+  };
+
+  const sanitizedXHTML = value => {
+    let html = string(value).trim();
+    if (!html) throw new Error("Paperback returned an empty XHTML chapter");
+    html = html
+      .replace(/<(script|style|iframe|frame|frameset|object|embed|form)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "")
+      .replace(/<(script|style|iframe|frame|frameset|object|embed|form|link)\b[^>]*\/?\s*>/gi, "")
+      .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+      .replace(/\s+(?:src|href|poster|action)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+      .replace(/javascript\s*:/gi, "");
+    if (!/<html\b/i.test(html)) {
+      html = `<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body>${html}</body></html>`;
+    }
+    return html;
   };
 
   const sourceCursor = metadata => {
@@ -451,11 +492,22 @@
     return null;
   };
 
-  const registerContent = (id, instance) => {
+  const registerContent = (id, instance, options = {}) => {
     if (!instance) throw new Error(`Paperback bundle did not export ${id}`);
+    const apiVersion = options.apiVersion === "1.1" ? "1.1" : "1.0";
+    const mediaKind = options.mediaKind === "lightNovel" ? "lightNovel" : "manga";
+    const paperbackChapter = (installment, sourceWork) => compact({
+      chapterId: string(installment?.installmentId),
+      langCode: string(installment?.langCode, "unknown"),
+      chapNum: number(installment?.number),
+      title: installment?.title,
+      volume: optionalNumber(installment?.volume),
+      publishDate: installment?.publishDate ? new Date(installment.publishDate) : undefined,
+      sourceManga: sourceMangaFromWork(sourceWork)
+    });
     defineContentExtension(adaptDefinition({
       id,
-      apiVersion: "1.0",
+      apiVersion,
       initialize: async () => { if (typeof instance.initialise === "function") await instance.initialise(); },
       settings: () => formSchema(instance, "getSettingsForm", "settings", id),
       discoverSections: async () => {
@@ -470,31 +522,28 @@
       search: async ({ query, cursor }) => {
         const searchQuery = { title: string(query), metadata: {} };
         const result = await instance.getSearchResults(searchQuery, cursor ?? undefined, await sortingOption(instance, searchQuery));
-        return { items: (result?.items ?? []).map(item => mapSearchItem(item)), metadata: result?.metadata ?? null };
+        return { items: (result?.items ?? []).map(item => mapSearchItem(item, mediaKind)), metadata: result?.metadata ?? null };
       },
-      details: async workID => workFromSourceManga(await instance.getMangaDetails(string(workID))),
+      details: async workID => workFromSourceManga(await instance.getMangaDetails(string(workID)), mediaKind),
       installments: async sourceWork => {
         const chapters = await instance.getChapters(sourceMangaFromWork(sourceWork));
+        const format = sourceWork?.workInfo?.mediaKind === "lightNovel" || sourceWork?.workInfo?.mediaKind === "book"
+          ? "xhtml"
+          : "imageSequence";
         return (chapters ?? []).map(chapter => compact({
           installmentId: string(chapter.chapterId),
+          workId: string(sourceWork?.workId),
           langCode: string(chapter.langCode, "unknown"),
           number: number(chapter.chapNum),
           title: chapter.title,
           volume: optionalNumber(chapter.volume),
-          publishDate: isoDate(chapter.publishDate)
+          publishDate: isoDate(chapter.publishDate),
+          format
         }));
       },
       imagePages: async installment => {
         const sourceWork = installment?.sourceWork ?? { workId: installment?.workId, workInfo: {} };
-        const chapter = compact({
-          chapterId: string(installment?.installmentId),
-          langCode: string(installment?.langCode, "unknown"),
-          chapNum: number(installment?.number),
-          title: installment?.title,
-          volume: optionalNumber(installment?.volume),
-          publishDate: installment?.publishDate ? new Date(installment.publishDate) : undefined,
-          sourceManga: sourceMangaFromWork(sourceWork)
-        });
+        const chapter = paperbackChapter(installment, sourceWork);
         const details = await instance.getChapterDetails(chapter);
         return {
           id: string(details?.id, string(installment?.installmentId)),
@@ -503,6 +552,21 @@
         };
       },
       imagePageContent: ({ url }) => resource(url),
+      ...(apiVersion === "1.1" ? {
+        publicationContent: async installment => {
+          const sourceWork = installment?.sourceWork ?? { workId: installment?.workId, workInfo: {} };
+          const details = await instance.getChapterDetails(paperbackChapter(installment, sourceWork));
+          if (details?.type !== "html" || typeof details?.html !== "string") {
+            throw new Error("Paperback source did not return an XHTML chapter");
+          }
+          return {
+            id: string(details.id, string(installment?.installmentId)),
+            workId: string(details.mangaId, string(sourceWork?.workId)),
+            mimeType: "application/xhtml+xml",
+            text: sanitizedXHTML(details.html)
+          };
+        }
+      } : {}),
       updates: args => latestUpdates(instance, args),
       managedCollections: () => managedCollections(instance),
       ...(canWriteManagedCollections(instance) ? {

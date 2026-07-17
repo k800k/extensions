@@ -1,0 +1,75 @@
+{
+  "id": "MangaKakalot",
+  "name": "MangaKakalot",
+  "description": "Extension that pulls content from mangakakalot.gg.",
+  "kind": "content",
+  "apiVersion": "1.0",
+  "version": "1.0.0-alpha.11",
+  "language": "en",
+  "languages": [
+    "en"
+  ],
+  "contentRating": "SAFE",
+  "availability": "approvalRequired",
+  "capabilities": [
+    "browse",
+    "challengeHandoff",
+    "cookies",
+    "details",
+    "discover",
+    "imageSequence",
+    "installments",
+    "interceptors",
+    "search"
+  ],
+  "inventoryCapabilities": [
+    1,
+    4,
+    64,
+    16
+  ],
+  "permissions": [
+    "challengeHandoff",
+    "cookies",
+    "network",
+    "rateLimiting",
+    "redactedLogging",
+    "secureState",
+    "state"
+  ],
+  "allowedHTTPSHosts": [
+    "www.mangakakalot.gg"
+  ],
+  "authenticationModes": [
+    "none"
+  ],
+  "developers": [
+    {
+      "name": "Saw_6",
+      "website": null,
+      "github": null
+    }
+  ],
+  "license": "GPL-3.0-or-later",
+  "iconFile": "icon.png",
+  "compatibility": {
+    "adapter": "paperback-0.9",
+    "status": "supported",
+    "scope": "core",
+    "note": null,
+    "limitations": [
+      "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+      "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+    ]
+  },
+  "upstream": {
+    "repository": "https://github.com/inkdex/mangabox-extensions",
+    "branch": "0.9/stable",
+    "commit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
+    "sourcePath": "src/MangaKakalot",
+    "sourceObjectSHA": "89604480d0caf5b4ff9ca130286a81d8e308a687",
+    "relationship": "auditedSnapshotNotRecordedBuildInput",
+    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+    "registryArtifactSHA256": "05b485f71d4e330311abaad6c6a55b2ea2e3f870598f015bf506704a6fd00fe3"
+  }
+}

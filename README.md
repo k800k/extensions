@@ -1,8 +1,8 @@
 # MangaReader Extensions
 
-A content-only MangaReader Extension API v1 repository containing the SDK, publisher CLI, signed catalog, and documentation site.
+A content-only MangaReader Extension API 1.0/1.1 repository containing the SDK, publisher CLI, signed catalog, and documentation site.
 
-The built-in catalog is currently empty. All previously created content and tracker extensions have been removed. Tracker and theme extension kinds are not accepted by the SDK, CLI, generated manifest, or website catalog loader. Ordinary website and reader color themes are unrelated and remain available.
+The catalog contains 13 provenance-pinned content ports. Comix, LNori, and RoyalRoad use API 1.1; the remaining packages retain API 1.0 compatibility. Every entry remains `approvalRequired`. Tracker and theme extension kinds are not accepted by this catalog.
 
 ## Commands
 

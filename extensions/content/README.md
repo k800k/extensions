@@ -1,6 +1,8 @@
 # Content extensions
 
-No content extensions are currently published.
+The catalog contains 13 provenance-pinned content ports: AllPornComic, Atsumaru, Comix, LNori, MadaraDex, MangaBat, MangaDemon, MangaDex, MangaDot, MangaKakalot, RoyalRoad, Webtoon, and WeebCentral.
+
+Every package includes its declared GPL license, upstream provenance, exact host declarations, review records, icon, and contract tests. All entries remain `approvalRequired` pending publisher signing and MangaReader approval.
 
 Create a new reviewed scaffold from the repository root with:
 

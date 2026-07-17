@@ -10,7 +10,7 @@ pageClass: catalog-doc
 
 # Extension List
 
-No built-in content extensions are currently published. When reviewed content extensions are added, this page will let you search, filter, inspect, and select them. Custom catalogs are accepted only when every entry is a content extension and are stored only in this browser.
+This catalog contains 13 provenance-pinned content ports. Use this page to search, filter, inspect declared hosts and permissions, and select an extension for MangaReader's review flow. Custom catalogs are accepted only when every entry is a content extension and are stored only in this browser.
 
 <ClientOnly>
   <CatalogBrowser />

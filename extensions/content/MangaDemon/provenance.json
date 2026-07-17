@@ -1,0 +1,52 @@
+{
+  "id": "MangaDemon",
+  "upstreamRepository": "general-extensions",
+  "upstreamURL": "https://github.com/inkdex/general-extensions",
+  "upstreamBranch": "0.9/stable",
+  "upstreamCommit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+  "upstreamCommitURL": "https://github.com/inkdex/general-extensions/commit/b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+  "sourcePath": "src/MangaDemon",
+  "sourceObjectSHA": "c4f5cbd6602cfb750c4c321d12ca466660bb6fab",
+  "sourceRelationship": "auditedSnapshotNotRecordedBuildInput",
+  "license": {
+    "spdx": "GPL-3.0-or-later",
+    "path": "LICENSE",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  },
+  "baseHosts": [
+    "demonicscans.org"
+  ],
+  "likelyCDNAPIHosts": [
+    "cdn.demoniclibs.com",
+    "demoniclibs.com",
+    "librarydm.com",
+    "mangareadon.org"
+  ],
+  "dynamicHostEvidence": [
+    "HTML/API-derived artwork and chapter URLs require runtime host observation unless explicitly listed"
+  ],
+  "kind": "content",
+  "version": "1.0.0-alpha.15",
+  "language": "en",
+  "rating": "SAFE",
+  "capabilities": [
+    1,
+    16,
+    4,
+    64
+  ],
+  "description": "Extension that pulls content from demonicscans.org.",
+  "registryArtifact": {
+    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+    "buildTime": "2026-06-13T15:59:36.706Z",
+    "sha256": "dd5ea16770df3b75a4e06350f72201afdaf57dca0eb1b764638722d0cae992fe",
+    "sourceCommitRecordedByRegistry": null
+  },
+  "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
+  "adapter": {
+    "name": "@mangareader/paperback-compat",
+    "version": "1.1.0",
+    "license": "GPL-3.0-or-later"
+  },
+  "generatedMainSHA256": "0a0fb0074d01f6bab4a5660991f61054bd36ed8a1f17e2e819f6409dda1d9d54"
+}

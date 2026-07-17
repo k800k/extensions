@@ -1,0 +1,47 @@
+{
+  "id": "MangaBat",
+  "upstreamRepository": "mangabox-extensions",
+  "upstreamURL": "https://github.com/inkdex/mangabox-extensions",
+  "upstreamBranch": "0.9/stable",
+  "upstreamCommit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
+  "upstreamCommitURL": "https://github.com/inkdex/mangabox-extensions/commit/8c426aff4eff7ae719c00ddf22c9181d21f3c712",
+  "sourcePath": "src/MangaBat",
+  "sourceObjectSHA": "d0c6d9d8c5f2ed507af61ee84e11b77c9c87e49b",
+  "sourceRelationship": "auditedSnapshotNotRecordedBuildInput",
+  "license": {
+    "spdx": "GPL-3.0-or-later",
+    "path": "LICENSE",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  },
+  "baseHosts": [
+    "www.mangabats.com"
+  ],
+  "likelyCDNAPIHosts": [],
+  "dynamicHostEvidence": [
+    "artwork/chapter URLs are parsed from live HTML and may use site-specific CDNs"
+  ],
+  "kind": "content",
+  "version": "1.0.0-alpha.11",
+  "language": "en",
+  "rating": "SAFE",
+  "capabilities": [
+    1,
+    4,
+    64,
+    16
+  ],
+  "description": "Extension that pulls content from mangabat.com.",
+  "registryArtifact": {
+    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+    "buildTime": "2026-06-16T12:25:31.942Z",
+    "sha256": "ec9a212b2ebc2354619bc30ef24836e838eebc51a50a42eccd9e733211d3d08f",
+    "sourceCommitRecordedByRegistry": null
+  },
+  "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
+  "adapter": {
+    "name": "@mangareader/paperback-compat",
+    "version": "1.1.0",
+    "license": "GPL-3.0-or-later"
+  },
+  "generatedMainSHA256": "a2f276c8ac9851d336646819c5f0f6dd229fcf33ca5a285f95b15dff5d935a3d"
+}

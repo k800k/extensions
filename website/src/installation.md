@@ -27,7 +27,7 @@ An install link opens MangaReader's own review flow, where availability, publish
 
 ## Choose content extensions
 
-The built-in catalog is currently empty. When content extensions are published, open the [Extension List](/extension-list) to compare their content rating, language, approval state, permissions, allowed network hosts, package checksum, and rights-review record.
+Open the [Extension List](/extension-list) to compare the 13 content ports by content rating, language, approval state, permissions, exact allowed network hosts, package checksum, and rights-review record.
 
 Tracker and theme extension packages are not supported and are rejected by this repository.
 
@@ -37,7 +37,7 @@ Selecting **Review in MangaReader** does not bypass app policy. MangaReader rema
 
 | Label | Meaning |
 | --- | --- |
-| Available | The content extension supports MangaReader API v1's declared surface and can be selected for review. |
+| Available | The content extension supports its declared MangaReader API surface and can be selected for review. |
 | Approval required | The entry can be inspected, but activation remains blocked pending review. |
 | Service unavailable | The package requires a runtime feature MangaReader intentionally does not expose. |
 | Retired | The entry remains visible for migration context but is no longer supported. |

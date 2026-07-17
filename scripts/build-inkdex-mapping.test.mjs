@@ -15,14 +15,21 @@ const inventory = JSON.parse(
 );
 const contentSources = mapping.sources.filter(source => source.kind === "content");
 const sourcesByID = new Map(contentSources.map(source => [source.id, source]));
+const allSourcesByID = new Map(mapping.sources.map(source => [source.id, source]));
 
-test("historical import mapping contains only the 66 content candidates used by the content-only importer", () => {
+test("historical import mapping pins the selected ports and remains separate from native packages", () => {
   const mappedIDs = contentSources.map(source => source.id);
+  const importedIDs = [
+    "AllPornComic", "Atsumaru", "Comix", "LNori", "MadaraDex", "MangaBat", "MangaDemon",
+    "MangaDex", "MangaDot", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
+  ];
 
   assert.equal(mappedIDs.length, 66);
   assert.equal(new Set(mappedIDs).size, 66);
   assert.deepEqual(mappedIDs, [...mappedIDs].sort((a, b) => a.localeCompare(b)));
-  assert.deepEqual(inventory.entries, []);
+  const contentInventory = inventory.entries.filter(entry => entry.kind === "content");
+  assert.deepEqual(contentInventory.filter(entry => allSourcesByID.has(entry.id)).map(entry => entry.id), importedIDs);
+  assert.deepEqual(contentInventory.filter(entry => !allSourcesByID.has(entry.id)), []);
 });
 
 test("published repository ownership matches the registry partition", () => {

@@ -1,0 +1,78 @@
+{
+  "id": "Comix",
+  "name": "Comix",
+  "description": "Extension that pulls content from Comix.to.",
+  "kind": "content",
+  "apiVersion": "1.1",
+  "version": "1.0.0-alpha.44",
+  "language": "en",
+  "languages": [
+    "en"
+  ],
+  "contentRating": "SAFE",
+  "availability": "approvalRequired",
+  "capabilities": [
+    "browse",
+    "challengeHandoff",
+    "cookies",
+    "details",
+    "discover",
+    "imageSequence",
+    "installments",
+    "interceptors",
+    "search"
+  ],
+  "inventoryCapabilities": [
+    1,
+    16,
+    4,
+    64,
+    32
+  ],
+  "permissions": [
+    "challengeHandoff",
+    "cookies",
+    "network",
+    "rateLimiting",
+    "redactedLogging",
+    "secureState",
+    "state",
+    "webExecution"
+  ],
+  "allowedHTTPSHosts": [
+    "comix.to",
+    "static.comix.to"
+  ],
+  "authenticationModes": [
+    "none"
+  ],
+  "developers": [
+    {
+      "name": "Catta1997",
+      "website": null,
+      "github": "https://github.com/Catta1997"
+    }
+  ],
+  "license": "GPL-3.0-or-later",
+  "iconFile": "icon.png",
+  "compatibility": {
+    "adapter": "paperback-0.9",
+    "status": "supported",
+    "scope": "core",
+    "note": null,
+    "limitations": [
+      "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+      "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+    ]
+  },
+  "upstream": {
+    "repository": "https://github.com/inkdex/general-extensions",
+    "branch": "0.9/stable",
+    "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+    "sourcePath": "src/Comix",
+    "sourceObjectSHA": "c394394b858ef6ae9cbe390ddb2780cbf5166fcc",
+    "relationship": "auditedSnapshotNotRecordedBuildInput",
+    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+    "registryArtifactSHA256": "7795e9842c680b89ba65dadc9598ddb355407c5356de0e617de2195ae0b9059b"
+  }
+}
