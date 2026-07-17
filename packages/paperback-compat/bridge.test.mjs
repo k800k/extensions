@@ -10,6 +10,7 @@ import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 
 const packageRoot = dirname(fileURLToPath(import.meta.url));
+const monorepoRoot = resolve(packageRoot, "../..");
 const bridgeSource = await readFile(join(packageRoot, "bridge.js"), "utf8");
 const registryRoot = resolve(process.env.INKDEX_REGISTRY_ROOT ?? "/tmp/inkdex-registry/0.9/stable");
 const registrySkip = existsSync(registryRoot)
@@ -29,6 +30,14 @@ function makeTextarea() {
         .replaceAll("&gt;", ">")
         .replaceAll("&quot;", "\"")
         .replaceAll("&#39;", "'");
+    }
+  };
+}
+
+function makeDocument() {
+  return {
+    createElement(tag) {
+      return String(tag).toLowerCase() === "canvas" ? { kind: "canvas" } : makeTextarea();
     }
   };
 }
@@ -65,7 +74,7 @@ function loadBridge() {
     btoa,
     setTimeout,
     clearTimeout,
-    document: { createElement: () => makeTextarea() }
+    document: makeDocument()
   };
   const context = vm.createContext(sandbox);
   vm.runInContext(bridgeSource, context, { filename: "bridge.js", timeout: 5_000 });
@@ -96,8 +105,22 @@ test("Paperback base64 decoding parses an unpadded base64url JWT payload", () =>
   assert.deepEqual(JSON.parse(decoded), expected);
 });
 
-async function loadBundle(id, { prepare, response, initialState = {}, initialSecureState = {} } = {}) {
-  const bundleSource = await readFile(join(registryRoot, id, "index.js"), "utf8");
+test("Paperback canvas compatibility is constructible without exposing network APIs", () => {
+  const context = loadBridge();
+  assert.equal(vm.runInContext("new HTMLCanvasElement().kind", context), "canvas");
+  assert.equal(
+    vm.runInContext("typeof fetch + ':' + typeof XMLHttpRequest + ':' + typeof WebSocket", context),
+    "undefined:undefined:undefined"
+  );
+});
+
+async function loadBundle(id, { prepare, response, web, globals = {}, apiVersion = "1.0", generated = false, initialState = {}, initialSecureState = {} } = {}) {
+  const bundleSource = await readFile(
+    generated
+      ? join(monorepoRoot, "extensions", "content", id, "main.js")
+      : join(registryRoot, id, "index.js"),
+    "utf8"
+  );
   const state = new Map(Object.entries(plain(initialState)));
   const secureState = new Map(Object.entries(plain(initialSecureState)));
   const requests = [];
@@ -132,7 +155,8 @@ async function loadBundle(id, { prepare, response, initialState = {}, initialSec
           remove: key => secureState.delete(key)
         },
         rateLimit: { sleep: async () => {} },
-        challenge: { request: url => challenges.push(url) }
+        challenge: { request: url => challenges.push(url) },
+        ...(web ? { web: { execute: web } } : {})
       }
     },
     defineContentExtension(candidate) {
@@ -151,17 +175,20 @@ async function loadBundle(id, { prepare, response, initialState = {}, initialSec
     btoa,
     setTimeout,
     clearTimeout,
-    document: { createElement: () => makeTextarea() }
+    document: makeDocument(),
+    ...globals
   };
   const context = vm.createContext(sandbox);
-  vm.runInContext(bridgeSource, context, { filename: "bridge.js", timeout: 5_000 });
+  if (!generated) vm.runInContext(bridgeSource, context, { filename: "bridge.js", timeout: 5_000 });
   vm.runInContext(bundleSource, context, { filename: `${id}/index.js`, timeout: 5_000 });
   if (prepare) vm.runInContext(prepare, context, { filename: `${id}/prepare.js`, timeout: 5_000 });
-  vm.runInContext(
-    `PaperbackCompat.registerContent(${JSON.stringify(id)}, source[${JSON.stringify(id)}]);`,
-    context,
-    { filename: `${id}/register.js`, timeout: 5_000 }
-  );
+  if (!generated) {
+    vm.runInContext(
+      `PaperbackCompat.registerContent(${JSON.stringify(id)}, source[${JSON.stringify(id)}], { apiVersion: ${JSON.stringify(apiVersion)} });`,
+      context,
+      { filename: `${id}/register.js`, timeout: 5_000 }
+    );
+  }
   assert.ok(definition, `${id} did not register an extension`);
   return { context, definition, requests, challenges, state, secureState };
 }
@@ -294,17 +321,20 @@ test("a compiled MangaDex bundle maps content operations to MangaReader API v1",
       status: "Completed",
       artist: "Mock Artist",
       author: "Mock Author",
-      shareUrl: "https://mock.test/title/manga-1"
+      shareUrl: "https://mock.test/title/manga-1",
+      mediaKind: "manga"
     }
   });
   const installments = await definition.installments(work);
   assert.deepEqual(plain(installments), [{
     installmentId: "chapter-12",
+    workId: "manga-1",
     langCode: "en",
     number: 12.5,
     title: "Chapter 12.5",
     volume: 2,
-    publishDate: "2026-07-16T00:00:00.000Z"
+    publishDate: "2026-07-16T00:00:00.000Z",
+    format: "imageSequence"
   }]);
   assert.deepEqual(plain(await definition.imagePages({ ...installments[0], sourceWork: work })), {
     id: "chapter-12",
@@ -326,8 +356,243 @@ test("a compiled MangaDex bundle maps content operations to MangaReader API v1",
   assert.equal(calls[3][1].sourceManga.mangaId, "manga-1");
 });
 
+test("all thirteen generated packages execute search, details, installments, and content contracts", { skip: registrySkip }, async () => {
+  const ids = [
+    "AllPornComic", "Atsumaru", "Comix", "LNori", "MadaraDex", "MangaBat", "MangaDemon",
+    "MangaDex", "MangaDot", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
+  ];
+  const novels = new Set(["LNori", "RoyalRoad"]);
+
+  for (const id of ids) {
+    const runtime = await loadBundle(id, {
+      generated: true,
+      prepare: `
+        globalThis.__fixtureCalls = [];
+        const instance = source[${JSON.stringify(id)}];
+        instance.initialise = async () => __fixtureCalls.push(["initialize"]);
+        instance.getSortingOptions = async () => [{ id: "fixture", label: "Fixture" }];
+        instance.getSearchResults = async (query, cursor) => {
+          __fixtureCalls.push(["search", query, cursor]);
+          return {
+            items: [{ mangaId: "work-1", title: query.title, imageUrl: "https://fixture.example/cover.jpg", contentRating: "SAFE" }],
+            metadata: cursor ? undefined : { page: 2 }
+          };
+        };
+        instance.getMangaDetails = async mangaId => ({ mangaId, mangaInfo: {
+          primaryTitle: "Fixture ${id}", synopsis: "Fixture details", contentRating: "SAFE",
+          contentType: ${JSON.stringify(novels.has(id) ? "novel" : "manga")}
+        }});
+        instance.getChapters = async sourceManga => [{
+          sourceManga, chapterId: "chapter-1", langCode: "en", chapNum: 1, title: "Chapter 1"
+        }];
+        instance.getChapterDetails = async chapter => ${novels.has(id)
+          ? `({ id: chapter.chapterId, mangaId: chapter.sourceManga.mangaId, type: "html", html: "<p>Fixture <em>chapter</em></p>" })`
+          : `({ id: chapter.chapterId, mangaId: chapter.sourceManga.mangaId, pages: ["https://fixture.example/1.jpg"] })`};
+      `
+    });
+    const { definition, context } = runtime;
+    assert.equal(definition.apiVersion, id === "Comix" || novels.has(id) ? "1.1" : "1.0", id);
+    await definition.initialize();
+    const first = await definition.search({ query: "Needle", cursor: undefined });
+    const second = await definition.search({ query: "Needle", cursor: first.metadata });
+    assert.equal(first.items[0].workId, "work-1", id);
+    assert.deepEqual(plain(first.metadata), { page: 2 }, id);
+    assert.ok(second.metadata === undefined || second.metadata === null, id);
+    const work = await definition.details("work-1");
+    assert.equal(work.workInfo.primaryTitle, `Fixture ${id}`, id);
+    assert.equal(work.workInfo.mediaKind, novels.has(id) ? "lightNovel" : "manga", id);
+    const installments = await definition.installments(work);
+    assert.equal(installments[0].format, novels.has(id) ? "xhtml" : "imageSequence", id);
+    if (novels.has(id)) {
+      const publication = await definition.publicationContent({ ...installments[0], sourceWork: work });
+      assert.equal(publication.mimeType, "application/xhtml+xml", id);
+      assert.match(publication.text, /Fixture <em>chapter<\/em>/, id);
+    } else {
+      const pages = await definition.imagePages({ ...installments[0], sourceWork: work });
+      assert.deepEqual(plain(pages.pages), ["https://fixture.example/1.jpg"], id);
+    }
+
+    vm.runInContext(`source[${JSON.stringify(id)}].getChapters = async () => ({ malformed: true })`, context);
+    await assert.rejects(
+      definition.installments(work),
+      error => error?.name === "TypeError",
+      `${id} accepted malformed chapters`
+    );
+  }
+});
+
+test("API 1.1 maps Paperback web execution through the broker", { skip: registrySkip }, async () => {
+  const calls = [];
+  const { context, definition } = await loadBundle("Comix", {
+    apiVersion: "1.1",
+    web: async request => {
+      calls.push(plain(request));
+      return { result: ["page-1", "page-2"], cookies: [] };
+    }
+  });
+  assert.equal(definition.apiVersion, "1.1");
+  context.__webResult = await vm.runInContext(`Application.executeInWebView({
+    source: { html: "<main>chapter</main>", baseUrl: "https://comix.to/title/1", loadCSS: false, loadImages: false },
+    inject: "return window.__comixResult__",
+    storage: { cookies: [{ name: "approved", value: "one" }] }
+  })`, context);
+  assert.deepEqual(plain(context.__webResult), { result: ["page-1", "page-2"], cookies: [] });
+  assert.deepEqual(calls, [{
+    html: "<main>chapter</main>",
+    baseURL: "https://comix.to/title/1",
+    script: "return window.__comixResult__",
+    loadCSS: false,
+    loadImages: false,
+    cookies: [{ name: "approved", value: "one" }]
+  }]);
+});
+
+test("Comix deterministically descrambles a known tiled image fixture", { skip: registrySkip }, async () => {
+  const width = 4;
+  const height = 4;
+  const cols = 2;
+  const rows = 2;
+  const seed = 7;
+  const expected = new Uint8ClampedArray(width * height * 4);
+  for (let pixel = 0; pixel < width * height; pixel++) {
+    expected.set([pixel + 1, 100 + pixel, 200 - pixel, 255], pixel * 4);
+  }
+
+  const flipRows = pixels => {
+    const output = new Uint8ClampedArray(pixels.length);
+    const stride = width * 4;
+    for (let row = 0; row < height; row++) {
+      output.set(pixels.subarray(row * stride, (row + 1) * stride), (height - 1 - row) * stride);
+    }
+    return output;
+  };
+  const shuffled = Array.from({ length: cols * rows }, (_, index) => index);
+  let state = seed >>> 0;
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    const target = state % (index + 1);
+    [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
+  }
+  const sourceForDestination = Array(shuffled.length);
+  for (let index = 0; index < shuffled.length; index++) sourceForDestination[shuffled[index]] = index;
+
+  const restoredBeforeFinalFlip = flipRows(expected);
+  const scrambledBeforeInitialFlip = new Uint8ClampedArray(expected.length);
+  const tileWidth = width / cols;
+  const tileHeight = height / rows;
+  for (let destination = 0; destination < sourceForDestination.length; destination++) {
+    const destinationRow = Math.floor(destination / cols);
+    const destinationColumn = destination % cols;
+    const source = sourceForDestination[destination];
+    const sourceRow = Math.floor(source / cols);
+    const sourceColumn = source % cols;
+    for (let row = 0; row < tileHeight; row++) {
+      const destinationOffset = ((destinationRow * tileHeight + row) * width + destinationColumn * tileWidth) * 4;
+      const sourceOffset = ((sourceRow * tileHeight + row) * width + sourceColumn * tileWidth) * 4;
+      scrambledBeforeInitialFlip.set(
+        restoredBeforeFinalFlip.subarray(destinationOffset, destinationOffset + tileWidth * 4),
+        sourceOffset
+      );
+    }
+  }
+  const scrambled = flipRows(scrambledBeforeInitialFlip);
+
+  class FixtureImage {
+    complete = false;
+    naturalWidth = 0;
+    naturalHeight = 0;
+    set src(value) {
+      this.pixels = new Uint8ClampedArray(Buffer.from(String(value).split(",")[1], "base64"));
+      this.naturalWidth = width;
+      this.naturalHeight = height;
+      this.width = width;
+      this.height = height;
+      this.complete = true;
+      this.onload?.();
+    }
+  }
+  class FixtureImageData {
+    constructor(data, imageWidth, imageHeight) {
+      this.data = data;
+      this.width = imageWidth;
+      this.height = imageHeight;
+    }
+  }
+  const pixelDocument = {
+    createElement(tag) {
+      if (String(tag).toLowerCase() !== "canvas") return makeTextarea();
+      const state = { source: new Uint8ClampedArray(), output: new Uint8ClampedArray() };
+      return {
+        getContext() {
+          return {
+            drawImage(image) { state.source = new Uint8ClampedArray(image.pixels); },
+            getImageData() { return { data: new Uint8ClampedArray(state.source) }; },
+            putImageData(imageData) { state.output = new Uint8ClampedArray(imageData.data); }
+          };
+        },
+        toDataURL(mimeType) {
+          return `data:${mimeType};base64,${Buffer.from(state.output).toString("base64")}`;
+        }
+      };
+    }
+  };
+
+  const runtime = await loadBundle("Comix", {
+    apiVersion: "1.1",
+    globals: { document: pixelDocument, Image: FixtureImage, ImageData: FixtureImageData },
+    response: input => ({
+      url: input.url,
+      status: 200,
+      headers: {
+        "content-type": "application/octet-stream",
+        "x-scramble-seed": String(seed),
+        "x-scramble-grid": `${cols}x${rows}`,
+        "x-scramble-algo": "2"
+      },
+      mimeType: "application/octet-stream",
+      cookies: [],
+      dataBase64: Buffer.from(scrambled).toString("base64")
+    })
+  });
+  await runtime.definition.initialize();
+  const first = await runtime.definition.imagePageContent({ url: "https://comix.to/tile.bin" });
+  const second = await runtime.definition.imagePageContent({ url: "https://comix.to/tile.bin" });
+  assert.deepEqual([...Buffer.from(first.dataBase64, "base64")], [...expected]);
+  assert.equal(first.dataBase64, second.dataBase64);
+});
+
+test("API 1.1 maps novel chapters to sanitized XHTML publication content", { skip: registrySkip }, async () => {
+  const { definition } = await loadBundle("LNori", {
+    apiVersion: "1.1",
+    prepare: `
+      const instance = source.LNori;
+      instance.getMangaDetails = async mangaId => ({ mangaId, mangaInfo: {
+        primaryTitle: "Mock Novel", synopsis: "Novel text", contentType: "novel", contentRating: "SAFE"
+      }});
+      instance.getChapters = async sourceManga => [{
+        sourceManga, chapterId: "chapter-1", langCode: "en", chapNum: 1, title: "Arrival"
+      }];
+      instance.getChapterDetails = async chapter => ({
+        id: chapter.chapterId,
+        mangaId: chapter.sourceManga.mangaId,
+        type: "html",
+        html: '<article onclick="steal()"><h1>Arrival</h1><script>alert(1)</script><p>Safe <em>text</em>.</p><iframe src="https://evil.invalid/"></iframe><a href="https://evil.invalid/">remote</a></article>'
+      });
+    `
+  });
+  const work = await definition.details("novel-1");
+  assert.equal(work.workInfo.mediaKind, "lightNovel");
+  const installments = await definition.installments(work);
+  assert.equal(installments[0].format, "xhtml");
+  const publication = await definition.publicationContent({ ...installments[0], sourceWork: work });
+  assert.equal(publication.mimeType, "application/xhtml+xml");
+  assert.match(publication.text, /<h1>Arrival<\/h1>/);
+  assert.match(publication.text, /Safe <em>text<\/em>/);
+  assert.doesNotMatch(publication.text, /script|iframe|onclick|evil\.invalid/i);
+});
+
 test("Paperback Cloudflare errors become MangaReader challenge errors exactly once", { skip: registrySkip }, async () => {
-  const mangaFox = await loadBundle("MangaFox", {
+  const allPornComic = await loadBundle("AllPornComic", {
     response: input => ({
       url: input.url,
       status: 403,
@@ -337,17 +602,17 @@ test("Paperback Cloudflare errors become MangaReader challenge errors exactly on
       dataBase64: base64("challenge")
     })
   });
-  await mangaFox.definition.initialize();
+  await allPornComic.definition.initialize();
   await assert.rejects(
-    mangaFox.definition.imagePageContent({ url: "https://fanfox.net/challenge.jpg" }),
+    allPornComic.definition.imagePageContent({ url: "https://allporncomic.com/challenge.jpg" }),
     error => {
       assert.equal(error.name, "ChallengeRequiredError");
       assert.equal(error.type, "challengeRequired");
-      assert.equal(error.url, "https://fanfox.net/");
+      assert.equal(error.url, "https://allporncomic.com");
       return true;
     }
   );
-  assert.deepEqual(mangaFox.challenges, ["https://fanfox.net/"]);
+  assert.deepEqual(allPornComic.challenges, ["https://allporncomic.com"]);
 
   const mangaDex = await loadBundle("MangaDex", {
     prepare: `

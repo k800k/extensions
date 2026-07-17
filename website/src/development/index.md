@@ -4,7 +4,7 @@
 
 # Development
 
-This monorepo contains the MangaReader content-extension API v1 SDK, publisher CLI, signed catalog, and VitePress documentation app. The built-in catalog is empty. Tracker and theme extension APIs are intentionally unsupported.
+This monorepo contains the MangaReader content-extension API 1.0/1.1 SDK, publisher CLI, signed catalog, and VitePress documentation app. The catalog contains 13 provenance-pinned content ports. Tracker and theme extension APIs are intentionally unsupported.
 
 ## Repository layout
 
@@ -13,7 +13,7 @@ extensions/
 └── content/          # Reviewed content-extension directories
 packages/
 ├── cli/              # Validation, bundling, and publishing commands
-└── sdk/              # MangaReader content-extension API v1 types and helpers
+└── sdk/              # MangaReader content-extension API 1.0/1.1 types and helpers
 dist/v1/stable/
 ├── catalog.json      # Public catalog consumed by this website
 ├── icons/            # Published content-extension icons
@@ -44,7 +44,7 @@ npm run publish:dry-run
 
 - `check` validates the content-only directory layout and package contracts.
 - `test` verifies SDK and generated-catalog behavior.
-- `bundle` produces deterministic content packages and empty or populated catalog artifacts.
+- `bundle` produces deterministic content packages and catalog artifacts.
 - `docs:build` produces the local documentation site.
 - `publish:dry-run` checks the publisher signature and package hashes without releasing anything.
 

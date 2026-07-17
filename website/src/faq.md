@@ -7,7 +7,7 @@
 ## General
 
 ::: details Are any extensions published right now?
-No. The built-in catalog is intentionally empty after the previously created extensions were removed.
+Yes. The catalog contains 13 provenance-pinned content ports, all awaiting activation approval.
 :::
 
 ::: details What extension types are supported?

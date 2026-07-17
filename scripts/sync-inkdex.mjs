@@ -13,15 +13,37 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const EXPECTED_COUNT = 66;
+const API_1_1 = new Set(["Comix", "LNori", "RoyalRoad"]);
+const XHTML_SOURCES = new Set(["LNori", "RoyalRoad"]);
+const EXTRA_HOSTS = new Map([
+  ["Comix", ["static.comix.to"]],
+  ["Webtoon", ["webtoon-phinf.pstatic.net", "swebtoon-phinf.pstatic.net"]]
+]);
+const EXCLUDED_HOSTS = new Map([
+  ["MangaDex", new Set(["auth.mangadex.org", "status.mangadex.org"])]
+]);
+const LIVE_SMOKE_AUDIT = new Map([
+  ["AllPornComic", "Anonymous HTTPS landing page rendered HTML on `allporncomic.com`; protected follow-up requests remain covered by challenge handoff"],
+  ["Atsumaru", "Anonymous HTTPS landing page returned HTML on `atsu.moe`"],
+  ["Comix", "Anonymous HTTPS landing page rendered on `comix.to`; the exact static host `static.comix.to` was reachable and denied a root request with HTTP 403"],
+  ["LNori", "Anonymous HTTPS landing page rendered HTML on `lnori.com`"],
+  ["MadaraDex", "Anonymous HTTPS landing page rendered HTML on `madaradex.org`"],
+  ["MangaBat", "Anonymous HTTPS landing page rendered HTML on `www.mangabats.com`"],
+  ["MangaDemon", "Anonymous HTTPS landing page rendered on `demonicscans.org`; exact CDN roots on `cdn.demoniclibs.com`, `demoniclibs.com`, and `mangareadon.org` returned HTTP 200, while `librarydm.com` returned an empty root response"],
+  ["MangaDex", "Anonymous `api.mangadex.org/ping` returned HTTP 200, and the public page and cover hosts `mangadex.org` and `uploads.mangadex.org` returned HTTP 200; OAuth and status-page hosts were not exercised or declared"],
+  ["MangaDot", "Anonymous HTTPS landing page rendered HTML on `mangadot.net`"],
+  ["MangaKakalot", "Anonymous HTTPS landing page rendered HTML on `www.mangakakalot.gg`"],
+  ["RoyalRoad", "Anonymous HTTPS landing page redirected within `www.royalroad.com` to `/home` and rendered HTML"],
+  ["Webtoon", "Anonymous HTTPS landing page redirected within `www.webtoons.com` to `/en/`; exact image hosts `webtoon-phinf.pstatic.net` and `swebtoon-phinf.pstatic.net` were reachable and returned HTTP 403/404 for root requests"],
+  ["WeebCentral", "Anonymous HTTPS landing page rendered HTML on `weebcentral.com`"]
+]);
 const UNSUPPORTED = new Map([
   ["AllManga", "Uses Paperback executeInWebView to resolve protected chapter pages."],
-  ["Comix", "Uses Paperback executeInWebView and a canvas image transform that MangaReader API v1 does not expose."],
   ["MangaFox", "Uses dynamic eval during service-response parsing; MangaReader blocks dynamic code."],
   ["Mangago", "Uses a dynamic Function constructor during service-response parsing; MangaReader blocks dynamic code."]
 ]);
 const UNSUPPORTED_STATUS = new Map([
   ["AllManga", "requiresWebView"],
-  ["Comix", "requiresWebView"],
   ["MangaFox", "blockedDynamicCode"],
   ["Mangago", "blockedDynamicCode"]
 ]);
@@ -52,10 +74,11 @@ async function writeJSON(path, value) {
 
 function capabilities(upstream, bundle) {
   const flags = new Set(upstream.capabilities ?? []);
-  const values = ["browse", "details", "installments", "imageSequence"];
+  const values = ["browse", "details", "installments"];
+  values.push(XHTML_SOURCES.has(upstream.id) ? "acquisition" : "imageSequence");
   if (flags.has(4)) values.push("discover");
   if (flags.has(64)) values.push("search");
-  if (flags.has(8)) values.push("managedCollections");
+  if (flags.has(8) && upstream.id !== "MangaDex") values.push("managedCollections");
   if (flags.has(16)) values.push("challengeHandoff");
   if (/getLatestUpdates|processTitlesForUpdates/.test(bundle)) values.push("updates");
   if (bundle.includes("registerInterceptor")) values.push("interceptors");
@@ -67,6 +90,7 @@ function permissions(upstream, bundle) {
   const values = ["network", "state", "rateLimiting", "redactedLogging"];
   if (/SecureState|secureState|cookie/i.test(bundle)) values.push("secureState", "cookies");
   if ((upstream.capabilities ?? []).includes(16)) values.push("challengeHandoff");
+  if (bundle.includes("executeInWebView")) values.push("webExecution");
   return unique(values);
 }
 
@@ -83,19 +107,24 @@ function sourceHeader(source, mapping) {
  * Audited snapshot path: ${mapping.sourcePath}
  * Snapshot relationship: not recorded by the registry as this artifact's build input
  * Registry artifact: ${mapping.registryArtifact.registryCommit}/${source.id}/index.js
- * Adapter: MangaReader Paperback compatibility bridge v1
+ * Adapter: MangaReader Paperback compatibility bridge v1.1
  */`;
 }
 
-function contractTest(id) {
+function contractTest(id, apiVersion) {
   return `/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 import test from "node:test";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { readFile } from "node:fs/promises";
 import { assertContentExtension } from "../../../../packages/cli/lib/contracts.mjs";
 const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 test(${JSON.stringify(`${id} is a provenance-pinned Paperback compatibility port`)}, async () => {
-  await assertContentExtension(directory, ${JSON.stringify(id)});
+  const metadata = await assertContentExtension(directory, ${JSON.stringify(id)});
+  if (metadata.apiVersion !== ${JSON.stringify(apiVersion)}) throw new Error("unexpected API version");
+  if (metadata.availability !== "approvalRequired") throw new Error("imported package bypassed activation review");
+  const license = await readFile(join(directory, "LICENSE"), "utf8");
+  if (!license.includes("GNU GENERAL PUBLIC LICENSE")) throw new Error("GPL package license is missing");
 });
 `;
 }
@@ -108,13 +137,13 @@ This package adapts the GPL-3.0-or-later Paperback registry artifact for ${sourc
 
 - Kind: \`${metadata.kind}\`
 - Upstream version: \`${source.version}\`
-- MangaReader API: \`1.0\`
+- MangaReader API: \`${metadata.apiVersion}\`
 - Language: \`${source.language}\`
 - Rating: \`${source.contentRating}\`
 - HTTPS hosts: ${metadata.allowedHTTPSHosts.map(host => `\`${host}\``).join(", ")}
 - Compatibility: **${incompatibility ? "unavailable" : "supported"}**${incompatibility ? ` — ${incompatibility}` : ""}
 
-Core discovery, title search, details, chapters, pages, request interception, and state are translated at the public content-extension boundary. Paperback settings/search forms can be described, but MangaReader API v1 does not yet send form actions or selected advanced-filter values back into an extension. Live sites can change independently, and response-provided image CDNs may require host-list maintenance when their service changes.
+Core discovery, title search, details, chapters, content delivery, request interception, and state are translated at the public content-extension boundary. API 1.1 provides constrained web execution for Comix and XHTML publication delivery for RoyalRoad and LNori. Paperback settings/search forms can be described, but MangaReader does not send form actions or selected advanced-filter values back into an extension. Live sites can change independently, and response-provided image CDNs require exact-host review.
 `;
 }
 
@@ -125,8 +154,10 @@ function reviewStatus(source, mapping, metadata) {
 - Import integrity: **verified** against InkDex registry artifact SHA-256 \`${mapping.registryArtifact.sha256}\`.
 - Source reference: **audited snapshot** [${mapping.upstreamCommit.slice(0, 12)}](${mapping.upstreamCommitURL}), path \`${mapping.sourcePath}\`; the registry did not record the artifact's exact source commit/lockfile.
 - License: **GPL-3.0-or-later**; package license and source attribution included.
-- MangaReader compatibility: **${incompatibility ? "blocked" : "enabled"}**${incompatibility ? ` — ${incompatibility}` : " through the public API v1 adapter."}
+- MangaReader compatibility: **${incompatibility ? "blocked" : "enabled"}**${incompatibility ? ` — ${incompatibility}` : ` through the public API ${metadata.apiVersion} adapter.`}
+- Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
+- Live smoke (2026-07-17): ${LIVE_SMOKE_AUDIT.get(source.id) ?? "not performed"}. The probe discarded response bodies beyond browser rendering and used no account, cookies, or activation approval.
 
 Generated metadata declares ${metadata.allowedHTTPSHosts.length} reviewed literal/base host${metadata.allowedHTTPSHosts.length === 1 ? "" : "s"}. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.
 `;
@@ -182,11 +213,20 @@ async function main() {
   if (versionedSources.length !== EXPECTED_COUNT || mappingByID.size !== EXPECTED_COUNT) {
     throw new Error(`Expected ${EXPECTED_COUNT} versioned and mapped content extensions`);
   }
-  await access(join(ROOT, "licenses", "GPL-3.0-or-later.txt"));
+  const licensePath = join(ROOT, "licenses", "GPL-3.0-or-later.txt");
+  await access(licensePath);
+  const licenseBytes = await readFile(licensePath);
+  const requestedIDs = option("--ids")?.split(",").map(value => value.trim()).filter(Boolean);
+  const requested = requestedIDs ? new Set(requestedIDs) : null;
+  if (requested && requested.size !== requestedIDs.length) throw new Error("--ids must not contain duplicates");
+  const selectedSources = requested ? versionedSources.filter(source => requested.has(source.id)) : versionedSources;
+  if (requested) {
+    const missing = [...requested].filter(id => !selectedSources.some(source => source.id === id));
+    if (missing.length) throw new Error(`Unknown content extension IDs: ${missing.join(", ")}`);
+  }
 
-  const inventory = [];
   const statuses = [];
-  for (const source of versionedSources) {
+  for (const source of selectedSources) {
     const mapping = mappingByID.get(source.id);
     if (!mapping) throw new Error(`No audit mapping for ${source.id}`);
     const directory = join(ROOT, "extensions", "content", source.id);
@@ -196,18 +236,21 @@ async function main() {
     if (sha256(upstreamBundle) !== mapping.registryArtifact.sha256) {
       throw new Error(`Registry artifact hash changed for ${source.id}`);
     }
+    const excludedHosts = EXCLUDED_HOSTS.get(source.id) ?? new Set();
     const allowedHTTPSHosts = unique([
       ...(mapping.baseHosts ?? []),
-      ...(mapping.likelyCDNAPIHosts ?? [])
-    ].map(publicHost));
+      ...(mapping.likelyCDNAPIHosts ?? []),
+      ...(EXTRA_HOSTS.get(source.id) ?? [])
+    ].map(publicHost).filter(host => !excludedHosts.has(host)));
     if (!allowedHTTPSHosts.length) throw new Error(`No reviewed host declarations for ${source.id}`);
-    const availability = UNSUPPORTED.has(source.id) ? "serviceUnavailable" : "available";
+    const availability = UNSUPPORTED.has(source.id) ? "serviceUnavailable" : "approvalRequired";
+    const apiVersion = API_1_1.has(source.id) ? "1.1" : "1.0";
     const metadata = {
       id: source.id,
       name: source.name,
       description: source.description,
       kind: "content",
-      apiVersion: "1.0",
+      apiVersion,
       version: source.version,
       language: source.language,
       languages: [source.language],
@@ -244,12 +287,17 @@ async function main() {
     };
 
     await mkdir(join(directory, "tests"), { recursive: true });
-    const footer = `PaperbackCompat.registerContent(${JSON.stringify(source.id)}, source[${JSON.stringify(source.id)}]);`;
+    const registrationOptions = {
+      apiVersion,
+      ...(XHTML_SOURCES.has(source.id) ? { mediaKind: "lightNovel" } : {})
+    };
+    const footer = `PaperbackCompat.registerContent(${JSON.stringify(source.id)}, source[${JSON.stringify(source.id)}], ${JSON.stringify(registrationOptions)});`;
     const combined = `${sourceHeader(source, mapping)}\n${bridge.trim()}\n\n/* Unmodified compiled InkDex/Paperback bundle follows. */\n${upstreamBundle.trim()}\n\n/* MangaReader registration footer. */\n${footer}\n`;
     await Promise.all([
       writeJSON(join(directory, "extension.json"), metadata),
       writeFile(join(directory, "main.js"), combined),
       writeFile(join(directory, metadata.iconFile), iconBytes),
+      writeFile(join(directory, "LICENSE"), licenseBytes),
       writeFile(join(directory, "specification.md"), specification(source, mapping, metadata)),
       writeFile(join(directory, "REVIEW_STATUS.md"), reviewStatus(source, mapping, metadata)),
       writeFile(join(directory, "PRIVACY.md"), privacy(source, metadata, mapping)),
@@ -257,39 +305,21 @@ async function main() {
       writeJSON(join(directory, "provenance.json"), {
         ...mapping,
         importedFromRegistryBuild: versioning.buildTime,
-        adapter: { name: "@mangareader/paperback-compat", version: "1.0.0", license: "GPL-3.0-or-later" },
+        adapter: { name: "@mangareader/paperback-compat", version: "1.1.0", license: "GPL-3.0-or-later" },
         generatedMainSHA256: sha256(combined)
       }),
-      writeFile(join(directory, "tests", "contract.test.mjs"), contractTest(source.id))
+      writeFile(join(directory, "tests", "contract.test.mjs"), contractTest(source.id, apiVersion))
     ]);
 
-    inventory.push({
-      id: source.id,
-      name: source.name,
-      language: source.language,
-      contentRating: source.contentRating,
-      capabilities: source.capabilities ?? []
-    });
     statuses.push({
       id: source.id,
       kind: "content",
       availability,
-      reason: UNSUPPORTED.get(source.id) ?? "Imported from a pinned GPL registry artifact and adapted to MangaReader Extension API v1."
+      reason: UNSUPPORTED.get(source.id) ?? `Imported from a pinned GPL registry artifact and adapted to MangaReader Extension API ${apiVersion}; activation review is pending.`
     });
   }
 
-  await writeJSON(join(ROOT, "inventory", "registry.json"), { entries: inventory });
-  await writeJSON(join(ROOT, "inventory", "status.json"), {
-    generatedAt: versioning.buildTime,
-    upstreamRegistryCommit: mappingDocument.registry.commit,
-    counts: {
-      content: statuses.filter(item => item.kind === "content").length,
-      available: statuses.filter(item => item.availability === "available").length,
-      serviceUnavailable: statuses.filter(item => item.availability === "serviceUnavailable").length
-    },
-    entries: statuses
-  });
-  console.log(`Imported ${statuses.length} GPL extensions (${statuses.filter(item => item.availability === "available").length} compatible, ${UNSUPPORTED.size} runtime-blocked).`);
+  console.log(`Imported ${statuses.length} selected GPL extensions (${statuses.filter(item => item.availability === "approvalRequired").length} awaiting activation review).`);
 }
 
 main().catch(error => {

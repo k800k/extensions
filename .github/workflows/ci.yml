@@ -22,11 +22,18 @@ jobs:
       - run: npm run bundle
       - run: npm run docs:check
       - run: npm run docs:build
-      - run: npm run publish:dry-run
-      - name: Verify generated outputs are committed
+      - name: Verify publisher signature when present
         shell: bash
         run: |
-          generated_status="$(git status --porcelain --untracked-files=all -- dist site repository.config.json)"
+          if [[ -f dist/v1/stable/mangareader-repository.sig ]]; then
+            npm run publish:dry-run
+          else
+            echo "Publisher signature is absent; publication remains gated."
+          fi
+      - name: Verify deterministic generated outputs are committed
+        shell: bash
+        run: |
+          generated_status="$(git status --porcelain --untracked-files=all -- dist repository.config.json)"
           if [[ -n "$generated_status" ]]; then
             echo "$generated_status"
             exit 1

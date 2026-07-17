@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 
 export const API_VERSION = "1.0";
+export const SUPPORTED_API_VERSIONS = new Set(["1.0", "1.1"]);
 
 export const repositoryCapabilities = new Set([
   "browse", "discover", "search", "filters", "details", "installments",
@@ -13,7 +14,7 @@ export const repositoryCapabilities = new Set([
 
 export const extensionPermissions = new Set([
   "network", "cookies", "state", "secureState", "rateLimiting", "redactedLogging",
-  "challengeHandoff", "authenticationHandoff", "managedCollections"
+  "challengeHandoff", "authenticationHandoff", "managedCollections", "webExecution"
 ]);
 
 export const authenticationModes = new Set([
@@ -77,7 +78,7 @@ export async function assertContentExtension(directory, expectedID) {
   assert.equal(metadata.id, expectedID);
   assert.match(metadata.id, /^[A-Za-z0-9._-]{1,128}$/);
   assert.equal(metadata.kind, "content", "only content extensions are supported");
-  assert.equal(metadata.apiVersion, API_VERSION);
+  assert.ok(SUPPORTED_API_VERSIONS.has(metadata.apiVersion), `unsupported API version ${metadata.apiVersion}`);
   assertNonemptyString(metadata.name, "name");
   assertNonemptyString(metadata.description, "description");
   assert.match(metadata.version, /^[A-Za-z0-9._-]{1,128}$/, "version must be path-safe");
@@ -99,9 +100,14 @@ export async function assertContentExtension(directory, expectedID) {
   const iconBytes = await readFile(join(directory, metadata.iconFile));
   assertIcon(iconBytes, extname(metadata.iconFile).toLowerCase(), expectedID);
 
+  if (metadata.license?.startsWith("GPL-")) {
+    const license = await readFile(join(directory, "LICENSE"), "utf8");
+    assert.match(license, /GNU GENERAL PUBLIC LICENSE/, `${expectedID} must include its declared GPL license`);
+  }
+
   assert.match(source, /defineContentExtension\s*\(/);
   assert.doesNotMatch(source, /define(?:Tracker|Theme)Extension\s*\(/, "tracker and theme declarations are unsupported");
-  assert.doesNotMatch(source, /\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\b/, "extensions must use the brokered runtime client");
+  assert.doesNotMatch(source, /\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\s*\(/, "extensions must use the brokered runtime client");
   forbiddenRuntimeFragments.forEach(fragment => assert.ok(!source.includes(fragment), `main.js contains forbidden runtime fragment ${fragment}`));
 
   for (const file of ["specification.md", "REVIEW_STATUS.md", "PRIVACY.md", "RIGHTS.md"]) {

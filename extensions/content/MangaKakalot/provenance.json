@@ -1,0 +1,47 @@
+{
+  "id": "MangaKakalot",
+  "upstreamRepository": "mangabox-extensions",
+  "upstreamURL": "https://github.com/inkdex/mangabox-extensions",
+  "upstreamBranch": "0.9/stable",
+  "upstreamCommit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
+  "upstreamCommitURL": "https://github.com/inkdex/mangabox-extensions/commit/8c426aff4eff7ae719c00ddf22c9181d21f3c712",
+  "sourcePath": "src/MangaKakalot",
+  "sourceObjectSHA": "89604480d0caf5b4ff9ca130286a81d8e308a687",
+  "sourceRelationship": "auditedSnapshotNotRecordedBuildInput",
+  "license": {
+    "spdx": "GPL-3.0-or-later",
+    "path": "LICENSE",
+    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  },
+  "baseHosts": [
+    "www.mangakakalot.gg"
+  ],
+  "likelyCDNAPIHosts": [],
+  "dynamicHostEvidence": [
+    "artwork/chapter URLs are parsed from live HTML and may use site-specific CDNs"
+  ],
+  "kind": "content",
+  "version": "1.0.0-alpha.11",
+  "language": "en",
+  "rating": "SAFE",
+  "capabilities": [
+    1,
+    4,
+    64,
+    16
+  ],
+  "description": "Extension that pulls content from mangakakalot.gg.",
+  "registryArtifact": {
+    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+    "buildTime": "2026-06-16T12:25:31.942Z",
+    "sha256": "05b485f71d4e330311abaad6c6a55b2ea2e3f870598f015bf506704a6fd00fe3",
+    "sourceCommitRecordedByRegistry": null
+  },
+  "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
+  "adapter": {
+    "name": "@mangareader/paperback-compat",
+    "version": "1.1.0",
+    "license": "GPL-3.0-or-later"
+  },
+  "generatedMainSHA256": "394d5a708e90e659361c1cb910d657904840ba5a3a32efa73e25bc9ca1afe25f"
+}

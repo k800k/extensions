@@ -1,4 +1,1086 @@
 {
   "repositoryURL": "https://k800k.github.io/extensions/dist/v1/stable/",
-  "sources": []
+  "sources": [
+    {
+      "id": "AllPornComic",
+      "name": "AllPornComic",
+      "description": "Extension that pulls content from allporncomic.com.",
+      "version": "1.0.0-alpha.14",
+      "icon": "icons/AllPornComic.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "ADULT",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex",
+          "website": "https://inkdex.github.io",
+          "github": "https://github.com/inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=AllPornComic",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/AllPornComic/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/AllPornComic-1.0.0-alpha.14.mrx",
+        "sha256": "72f4b5fb2459c8ebaf360cc14cc63a6c3e3038cfc01641a2c4c4279cd032a0ab",
+        "compressedSize": 378845,
+        "uncompressedSize": 378539,
+        "allowedHTTPSHosts": [
+          "allporncomic.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "72f4b5fb2459c8ebaf360cc14cc63a6c3e3038cfc01641a2c4c4279cd032a0ab",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/madara-extensions",
+        "branch": "0.9/stable",
+        "commit": "7f5046d09025d99cfe8bb633b9d55b721739fb3f",
+        "sourcePath": "src/AllPornComic",
+        "sourceObjectSHA": "133d37d43f03ed02538e6afd6e91f7d48eadb288",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "0be983e76ce203fa793513470186706b8308a0ee8f74477a7d2b6889d57dddc5"
+      }
+    },
+    {
+      "id": "Atsumaru",
+      "name": "Atsumaru",
+      "description": "Extension that pulls content from atsu.moe.",
+      "version": "1.0.0-alpha.23",
+      "icon": "icons/Atsumaru.ico",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Lucifers Circle",
+          "website": null,
+          "github": null
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Atsumaru",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Atsumaru/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/Atsumaru-1.0.0-alpha.23.mrx",
+        "sha256": "da286fe50e8be4786ed25fede403bf5b84f1c828f5341e4f14b7f3e966cfae6f",
+        "compressedSize": 95122,
+        "uncompressedSize": 94816,
+        "allowedHTTPSHosts": [
+          "atsu.moe"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "da286fe50e8be4786ed25fede403bf5b84f1c828f5341e4f14b7f3e966cfae6f",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/Atsumaru",
+        "sourceObjectSHA": "7e74710a82d3843a51479a133fe35a9f002dd59e",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "32e6daf809f6b3bf37be6d7d08a20b85355443697cab7224bb98987bedc29a0e"
+      }
+    },
+    {
+      "id": "Comix",
+      "name": "Comix",
+      "description": "Extension that pulls content from Comix.to.",
+      "version": "1.0.0-alpha.44",
+      "icon": "icons/Comix.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Catta1997",
+          "website": null,
+          "github": "https://github.com/Catta1997"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Comix",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Comix/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state",
+          "webExecution"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.1",
+        "packageURL": "packages/Comix-1.0.0-alpha.44.mrx",
+        "sha256": "7208b142239584358aebd5c42e3744159329631e9546fa65df67d4f764cdb33c",
+        "compressedSize": 388746,
+        "uncompressedSize": 388440,
+        "allowedHTTPSHosts": [
+          "comix.to",
+          "static.comix.to"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "7208b142239584358aebd5c42e3744159329631e9546fa65df67d4f764cdb33c",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/Comix",
+        "sourceObjectSHA": "c394394b858ef6ae9cbe390ddb2780cbf5166fcc",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "7795e9842c680b89ba65dadc9598ddb355407c5356de0e617de2195ae0b9059b"
+      }
+    },
+    {
+      "id": "LNori",
+      "name": "LNori",
+      "description": "Extension that pulls content from LNori.",
+      "version": "1.0.0-alpha.1",
+      "icon": "icons/LNori.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "acquisition",
+        "browse",
+        "details",
+        "discover",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Catta1997",
+          "website": null,
+          "github": "https://github.com/Catta1997"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=LNori",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/LNori/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.1",
+        "packageURL": "packages/LNori-1.0.0-alpha.1.mrx",
+        "sha256": "44178e375d8d399ccff5bb6b0415137fe342a4d6e897a23184b0370e08fb2786",
+        "compressedSize": 357922,
+        "uncompressedSize": 357616,
+        "allowedHTTPSHosts": [
+          "lnori.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "44178e375d8d399ccff5bb6b0415137fe342a4d6e897a23184b0370e08fb2786",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/LNori",
+        "sourceObjectSHA": "2bcdc0bf7f11fd043c62e76e0a6d0f2a6abae027",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "cb18ab61cbe6829337ac00a3e2fc591dba9628139aa42f42ef00f4749e834a1a"
+      }
+    },
+    {
+      "id": "MadaraDex",
+      "name": "MadaraDex",
+      "description": "Extension that pulls content from madaradex.org.",
+      "version": "1.0.0-alpha.15",
+      "icon": "icons/MadaraDex.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "ADULT",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex",
+          "website": "https://inkdex.github.io",
+          "github": "https://github.com/inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MadaraDex",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MadaraDex/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/MadaraDex-1.0.0-alpha.15.mrx",
+        "sha256": "8b8951f87ab2a01e8c4cac10e2cb4beb708e7aeb5c803e08d03699d111a64b75",
+        "compressedSize": 379998,
+        "uncompressedSize": 379692,
+        "allowedHTTPSHosts": [
+          "madaradex.org"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "8b8951f87ab2a01e8c4cac10e2cb4beb708e7aeb5c803e08d03699d111a64b75",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/madara-extensions",
+        "branch": "0.9/stable",
+        "commit": "7f5046d09025d99cfe8bb633b9d55b721739fb3f",
+        "sourcePath": "src/MadaraDex",
+        "sourceObjectSHA": "3bb6f06eb8d3c14ba4866ed063d1f96b81acd1f0",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "5fffd6eec45b1180232598b3cc75b0ba562bd1b77ce0f5c595fecc819f5540db"
+      }
+    },
+    {
+      "id": "MangaBat",
+      "name": "MangaBat",
+      "description": "Extension that pulls content from mangabat.com.",
+      "version": "1.0.0-alpha.11",
+      "icon": "icons/MangaBat.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Saw_6",
+          "website": null,
+          "github": null
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaBat",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaBat/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/MangaBat-1.0.0-alpha.11.mrx",
+        "sha256": "328a776331a14f9569f992d1e025566811d73789ee4bbb61316732d20383a543",
+        "compressedSize": 374593,
+        "uncompressedSize": 374287,
+        "allowedHTTPSHosts": [
+          "www.mangabats.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "328a776331a14f9569f992d1e025566811d73789ee4bbb61316732d20383a543",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/mangabox-extensions",
+        "branch": "0.9/stable",
+        "commit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
+        "sourcePath": "src/MangaBat",
+        "sourceObjectSHA": "d0c6d9d8c5f2ed507af61ee84e11b77c9c87e49b",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "ec9a212b2ebc2354619bc30ef24836e838eebc51a50a42eccd9e733211d3d08f"
+      }
+    },
+    {
+      "id": "MangaDemon",
+      "name": "MangaDemon",
+      "description": "Extension that pulls content from demonicscans.org.",
+      "version": "1.0.0-alpha.15",
+      "icon": "icons/MangaDemon.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "samipmainali",
+          "website": null,
+          "github": "https://github.com/samipmainali"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDemon",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDemon/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/MangaDemon-1.0.0-alpha.15.mrx",
+        "sha256": "9fa0386255e8815e017d890f25eecad0465d77f017a936714d310451e30eabbb",
+        "compressedSize": 379234,
+        "uncompressedSize": 378928,
+        "allowedHTTPSHosts": [
+          "cdn.demoniclibs.com",
+          "demoniclibs.com",
+          "demonicscans.org",
+          "librarydm.com",
+          "mangareadon.org"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "9fa0386255e8815e017d890f25eecad0465d77f017a936714d310451e30eabbb",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/MangaDemon",
+        "sourceObjectSHA": "c4f5cbd6602cfb750c4c321d12ca466660bb6fab",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "dd5ea16770df3b75a4e06350f72201afdaf57dca0eb1b764638722d0cae992fe"
+      }
+    },
+    {
+      "id": "MangaDex",
+      "name": "MangaDex",
+      "description": "Extension that pulls content from mangadex.org.",
+      "version": "1.0.0-alpha.27",
+      "icon": "icons/MangaDex.png",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search",
+        "updates"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex",
+          "website": "https://inkdex.github.io",
+          "github": "https://github.com/inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDex",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDex/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/MangaDex-1.0.0-alpha.27.mrx",
+        "sha256": "cccef43f3f87b4e705d9f1ff11a3f91a49067541fa38cfe1b0f5aa68b9eddc1b",
+        "compressedSize": 441941,
+        "uncompressedSize": 441635,
+        "allowedHTTPSHosts": [
+          "api.mangadex.org",
+          "mangadex.org",
+          "uploads.mangadex.org"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "cccef43f3f87b4e705d9f1ff11a3f91a49067541fa38cfe1b0f5aa68b9eddc1b",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/MangaDex",
+        "sourceObjectSHA": "5915c36a5cd9f54eee649e3b9e8da67383660a14",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "46f1532d3ec4582f8789a8b9c41840dfbaeee933319bc462c795c4f8fbf5e716"
+      }
+    },
+    {
+      "id": "MangaDot",
+      "name": "MangaDot",
+      "description": "Extension that pulls content from MangaDot.net",
+      "version": "1.0.0-alpha.4",
+      "icon": "icons/MangaDot.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Catta1997",
+          "website": null,
+          "github": "https://github.com/Catta1997"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDot",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDot/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/MangaDot-1.0.0-alpha.4.mrx",
+        "sha256": "fecaf964c3fd124cfbeab19a02b93d669e3e90689e0e6fca0d4ba87db2b331a8",
+        "compressedSize": 106826,
+        "uncompressedSize": 106520,
+        "allowedHTTPSHosts": [
+          "mangadot.net"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "fecaf964c3fd124cfbeab19a02b93d669e3e90689e0e6fca0d4ba87db2b331a8",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/MangaDot",
+        "sourceObjectSHA": "7c2e0861581a77b741287e611630faa624703953",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "5b98135cc1f5f494c2780085e8a9a3686509ec3af87ea46da2bc62d8cf792eeb"
+      }
+    },
+    {
+      "id": "MangaKakalot",
+      "name": "MangaKakalot",
+      "description": "Extension that pulls content from mangakakalot.gg.",
+      "version": "1.0.0-alpha.11",
+      "icon": "icons/MangaKakalot.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Saw_6",
+          "website": null,
+          "github": null
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaKakalot",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaKakalot/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/MangaKakalot-1.0.0-alpha.11.mrx",
+        "sha256": "67329730722c7a6da0d9afd180e40104ad74d9dddac86f472d2e608a40c371e2",
+        "compressedSize": 374724,
+        "uncompressedSize": 374418,
+        "allowedHTTPSHosts": [
+          "www.mangakakalot.gg"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "67329730722c7a6da0d9afd180e40104ad74d9dddac86f472d2e608a40c371e2",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/mangabox-extensions",
+        "branch": "0.9/stable",
+        "commit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
+        "sourcePath": "src/MangaKakalot",
+        "sourceObjectSHA": "89604480d0caf5b4ff9ca130286a81d8e308a687",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "05b485f71d4e330311abaad6c6a55b2ea2e3f870598f015bf506704a6fd00fe3"
+      }
+    },
+    {
+      "id": "RoyalRoad",
+      "name": "RoyalRoad",
+      "description": "Extension that pulls web novels from royalroad.com and renders their chapters as readable pages.",
+      "version": "1.0.0-alpha.1",
+      "icon": "icons/RoyalRoad.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "acquisition",
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex",
+          "website": null,
+          "github": "https://github.com/Inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=RoyalRoad",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/RoyalRoad/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.1",
+        "packageURL": "packages/RoyalRoad-1.0.0-alpha.1.mrx",
+        "sha256": "aecf5ba790df853723b26de84f27b8cf7776ab23b091c9de36b9edb7f816bb80",
+        "compressedSize": 375115,
+        "uncompressedSize": 374809,
+        "allowedHTTPSHosts": [
+          "www.royalroad.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "aecf5ba790df853723b26de84f27b8cf7776ab23b091c9de36b9edb7f816bb80",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/RoyalRoad",
+        "sourceObjectSHA": "16115bc0f7f220933b3c125b7775faee55ec29ae",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "c32e475ae316fee4dfa0de01ece8b6462e769d6639dfd2c6a322b3c99ec48049"
+      }
+    },
+    {
+      "id": "Webtoon",
+      "name": "Webtoon",
+      "description": "Extension that pulls content from webtoons.com.",
+      "version": "1.0.0-alpha.18",
+      "icon": "icons/Webtoon.png",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Yves Pa",
+          "website": null,
+          "github": "https://github.com/YvesPa"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Webtoon",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Webtoon/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/Webtoon-1.0.0-alpha.18.mrx",
+        "sha256": "225bc77ab29d78908b261ee444679a03153f74c16c43901d53abf3cc53c7dd9d",
+        "compressedSize": 368674,
+        "uncompressedSize": 368368,
+        "allowedHTTPSHosts": [
+          "m.webtoons.com",
+          "swebtoon-phinf.pstatic.net",
+          "webtoon-phinf.pstatic.net",
+          "www.webtoons.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "225bc77ab29d78908b261ee444679a03153f74c16c43901d53abf3cc53c7dd9d",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/Webtoon",
+        "sourceObjectSHA": "b948f30dba43373318bcf15c79f59fdaedd1d644",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "785d79492c240f3a50c9cc7159d41b416f878c364c2b0443efb6f5668cac5bc8"
+      }
+    },
+    {
+      "id": "WeebCentral",
+      "name": "WeebCentral",
+      "description": "Extension that pulls content from weebcentral.com.",
+      "version": "1.0.0-alpha.23",
+      "icon": "icons/WeebCentral.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "GabrielCWT",
+          "website": null,
+          "github": "https://github.com/GabrielCWT"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=WeebCentral",
+      "rightsDeclaration": "Review the extension rights record before installation.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/WeebCentral/RIGHTS.md",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "entryType": "mangaReaderExtension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "connectorPreset": null,
+      "mangaReaderExtension": {
+        "apiVersion": "1.0",
+        "packageURL": "packages/WeebCentral-1.0.0-alpha.23.mrx",
+        "sha256": "d1c1f4d57ce3341f34308b53f4891ab7fc1d6229b7857994e1afd55bee862629",
+        "compressedSize": 371396,
+        "uncompressedSize": 371090,
+        "allowedHTTPSHosts": [
+          "weebcentral.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      },
+      "packageSHA256": "d1c1f4d57ce3341f34308b53f4891ab7fc1d6229b7857994e1afd55bee862629",
+      "license": "GPL-3.0-or-later",
+      "compatibility": {
+        "adapter": "paperback-0.9",
+        "status": "supported",
+        "scope": "core",
+        "note": null,
+        "limitations": [
+          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
+          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+        ]
+      },
+      "upstream": {
+        "repository": "https://github.com/inkdex/general-extensions",
+        "branch": "0.9/stable",
+        "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
+        "sourcePath": "src/WeebCentral",
+        "sourceObjectSHA": "edf93b97fdcb7c282c52ad8cd3b968d6e19b465f",
+        "relationship": "auditedSnapshotNotRecordedBuildInput",
+        "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
+        "registryArtifactSHA256": "498deeb0c1fc94b6ffd21d27759c0c534fdea79330cb1ed5c8d9c358bf8e5030"
+      }
+    }
+  ]
 }

@@ -179,7 +179,7 @@ async function buildArtifacts() {
   await assertContentOnlyLayout();
   const ids = await contentExtensionIDs();
   const config = JSON.parse(await readFile(join(ROOT, "repository.config.json"), "utf8"));
-  const license = await readFile(join(ROOT, "LICENSE"));
+  const repositoryLicense = await readFile(join(ROOT, "LICENSE"));
   const output = join(ROOT, "dist", "v1", "stable");
   const packagesDirectory = join(output, "packages");
   const iconsDirectory = join(output, "icons");
@@ -194,6 +194,13 @@ async function buildArtifacts() {
     const metadata = await assertContentExtension(directory, id);
     const metadataBytes = await readFile(join(directory, "extension.json"));
     const main = await readFile(join(directory, "main.js"));
+    let license;
+    try {
+      license = await readFile(join(directory, "LICENSE"));
+    } catch (error) {
+      if (error.code !== "ENOENT") throw error;
+      license = repositoryLicense;
+    }
     const archive = zip({ "LICENSE": license, "extension.json": metadataBytes, "main.js": main });
     const packageName = `${id}-${metadata.version}.mrx`;
     packageNames.add(packageName);
@@ -223,7 +230,7 @@ async function buildArtifacts() {
       permissions: { values: metadata.permissions },
       connectorPreset: null,
       mangaReaderExtension: {
-        apiVersion: API_VERSION,
+        apiVersion: metadata.apiVersion,
         packageURL: `packages/${packageName}`,
         sha256: sha256(archive),
         compressedSize: archive.length,
@@ -237,7 +244,9 @@ async function buildArtifacts() {
       ...source,
       developers: metadata.developers,
       packageSHA256: source.mangaReaderExtension.sha256,
-      license: metadata.license || "Apache-2.0"
+      license: metadata.license || "Apache-2.0",
+      compatibility: metadata.compatibility || null,
+      upstream: metadata.upstream || null
     });
   }
   await pruneGeneratedFiles(packagesDirectory, packageNames, filename => filename.endsWith(".mrx"));

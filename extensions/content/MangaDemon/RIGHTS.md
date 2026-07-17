@@ -1,0 +1,5 @@
+# Rights record for MangaDemon
+
+The compatibility adapter and combined executable package are distributed under **GPL-3.0-or-later**. The authoritative imported bytes are the compiled InkDex registry artifact pinned by commit and SHA-256; it is retained without source-level feature changes and combined with the GPL compatibility bridge. [https://github.com/inkdex/general-extensions at b03d78c35dfb](https://github.com/inkdex/general-extensions/commit/b03d78c35dfb0ad305660dd3aa8618a006cbd73f), path `src/MangaDemon`, is a later audited source snapshot. InkDex's combined registry did not record the artifact's exact source commit or lockfile, so this snapshot is not represented as the artifact's exact build input; recovering that linkage requires upstream build provenance.
+
+The service name and icon identify the interoperated service; no affiliation or endorsement is claimed. Website content remains subject to its respective owner and service terms. Report removal, trademark, security, or rights concerns through the repository issue tracker.

@@ -6,7 +6,7 @@
   "workspaces": ["packages/*", "website"],
   "scripts": {
     "check": "node packages/cli/bin/mr-ext.mjs check",
-    "test": "node --test packages/cli/test/*.test.mjs packages/paperback-compat/*.test.mjs scripts/*.test.mjs",
+    "test": "node --test packages/cli/test/*.test.mjs packages/paperback-compat/*.test.mjs scripts/*.test.mjs extensions/content/*/tests/*.test.mjs",
     "bundle": "node packages/cli/bin/mr-ext.mjs bundle --all",
     "publish:dry-run": "node packages/cli/bin/mr-ext.mjs publish --dry-run",
     "docs:dev": "npm --workspace @mangareader/extensions-website run dev",
