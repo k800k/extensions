@@ -794,10 +794,11 @@
       "mangaReaderExtension": {
         "apiVersion": "1.0",
         "packageURL": "packages/MangaDex-1.0.0-alpha.27.mrx",
-        "sha256": "0d1f9d69598431b74d82d501658fcb0889042b0581dc1cc7c77fad9c62014eb8",
-        "compressedSize": 441934,
-        "uncompressedSize": 441628,
+        "sha256": "dd4239732be0f0cf8c05f479d769b02a8ef2b6308b5a4dbe83362b00c090a1e6",
+        "compressedSize": 441960,
+        "uncompressedSize": 441654,
         "allowedHTTPSHosts": [
+          "*.mangadex.network",
           "api.mangadex.org",
           "mangadex.org",
           "uploads.mangadex.org"
@@ -806,7 +807,7 @@
           "none"
         ]
       },
-      "packageSHA256": "0d1f9d69598431b74d82d501658fcb0889042b0581dc1cc7c77fad9c62014eb8",
+      "packageSHA256": "dd4239732be0f0cf8c05f479d769b02a8ef2b6308b5a4dbe83362b00c090a1e6",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",

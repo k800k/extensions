@@ -65,11 +65,12 @@ function assertIcon(bytes, extension, id) {
 }
 
 export function isAllowedHTTPSHost(value) {
-  return typeof value === "string"
-    && value === value.toLowerCase()
-    && /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?)+$/.test(value)
-    && value !== "localhost"
-    && !value.endsWith(".local");
+  if (typeof value !== "string" || value !== value.toLowerCase()) return false;
+  const host = value.startsWith("*.") ? value.slice(2) : value;
+  return !host.includes("*")
+    && /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?)+$/.test(host)
+    && host !== "localhost"
+    && !host.endsWith(".local");
 }
 
 /** Validate one open-source content or tracker extension package. */
@@ -94,7 +95,7 @@ export async function assertExtensionPackage(directory, expectedKind, expectedID
   assertStringArray(metadata.permissions, "permissions", extensionPermissions, { required: true });
   assert.ok(metadata.permissions.includes("network"), "network permission is required by API v1");
   assertStringArray(metadata.allowedHTTPSHosts, "allowedHTTPSHosts", undefined, { required: true });
-  assert.ok(metadata.allowedHTTPSHosts.every(isAllowedHTTPSHost), "allowedHTTPSHosts must contain exact public lower-case hostnames");
+  assert.ok(metadata.allowedHTTPSHosts.every(isAllowedHTTPSHost), "allowedHTTPSHosts must contain exact public lower-case hostnames or explicit *. subdomain patterns");
   assertStringArray(metadata.authenticationModes, "authenticationModes", authenticationModes, { required: true });
   assert.ok(Array.isArray(metadata.developers) && metadata.developers.length > 0, "developers must not be empty");
   metadata.developers.forEach((developer, index) => assertNonemptyString(developer?.name, `developers[${index}].name`));

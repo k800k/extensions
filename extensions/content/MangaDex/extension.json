@@ -37,6 +37,7 @@
     "state"
   ],
   "allowedHTTPSHosts": [
+    "*.mangadex.network",
     "api.mangadex.org",
     "mangadex.org",
     "uploads.mangadex.org"

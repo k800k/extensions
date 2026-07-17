@@ -8,7 +8,7 @@ const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 test("MangaDex is a provenance-pinned Paperback compatibility port", async () => {
   const metadata = await assertContentExtension(directory, "MangaDex");
   if (metadata.apiVersion !== "1.0") throw new Error("unexpected API version");
-  if (metadata.availability !== "available") throw new Error("extension is not published as available");
+  if (metadata.availability !== "available") throw new Error("imported package must be published as available");
   const license = await readFile(join(directory, "LICENSE"), "utf8");
   if (!license.includes("GNU GENERAL PUBLIC LICENSE")) throw new Error("GPL package license is missing");
 });

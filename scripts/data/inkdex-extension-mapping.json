@@ -1081,13 +1081,14 @@
         "mangadex.org"
       ],
       "likelyCDNAPIHosts": [
+        "*.mangadex.network",
         "api.mangadex.org",
         "uploads.mangadex.org",
         "auth.mangadex.org",
         "status.mangadex.org"
       ],
       "dynamicHostEvidence": [
-        "at-home/image base URLs can be supplied by MangaDex responses"
+        "at-home/image base URLs can be supplied on declared `*.mangadex.network` subdomains by MangaDex responses"
       ],
       "kind": "content",
       "version": "1.0.0-alpha.27",
