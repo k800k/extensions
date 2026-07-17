@@ -4,7 +4,7 @@
 
 # Guides
 
-MangaReader content extensions are small, separately reviewed integrations. The repository does not host comics, and an extension does not become trusted merely because it appears in a catalog. Tracker and theme extension kinds are not supported.
+MangaReader content and tracker extensions are small, separately reviewed integrations. The repository does not host comics, and an extension does not become trusted merely because it appears in a catalog. Theme extension packages are not supported.
 
 ## Review an extension
 
@@ -28,7 +28,7 @@ The catalog browser accepts either a full `catalog.json` URL or the directory co
 - be served over HTTP or HTTPS without embedded credentials;
 - expose a JSON object with a `sources` array;
 - give every source a unique, non-empty `id`;
-- contain only content extensions (`kind: "content"`, or an omitted kind that defaults to content);
+- contain content or tracker extensions (`kind: "content"` or `kind: "tracker"`; an omitted kind defaults to content);
 - publish package and icon paths relative to its repository URL; and
 - permit browser access with appropriate cross-origin response headers.
 
