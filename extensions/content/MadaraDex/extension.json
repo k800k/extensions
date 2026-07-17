@@ -10,7 +10,7 @@
     "en"
   ],
   "contentRating": "ADULT",
-  "availability": "available",
+  "availability": "approvalRequired",
   "capabilities": [
     "browse",
     "challengeHandoff",

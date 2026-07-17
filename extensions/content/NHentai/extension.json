@@ -8,7 +8,7 @@
   "language": "multi",
   "languages": ["multi", "en", "ja", "zh", "es", "fr", "de", "ko", "ru"],
   "contentRating": "ADULT",
-  "availability": "available",
+  "availability": "approvalRequired",
   "capabilities": ["browse", "discover", "search", "details", "installments", "acquisition", "imageSequence", "cookies", "challengeHandoff"],
   "permissions": ["network", "cookies", "rateLimiting", "redactedLogging", "challengeHandoff"],
   "allowedHTTPSHosts": ["nhentai.net", "t.nhentai.net", "i.nhentai.net"],

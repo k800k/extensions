@@ -8,7 +8,7 @@
   "language": "multi",
   "languages": ["multi"],
   "contentRating": "SAFE",
-  "availability": "available",
+  "availability": "approvalRequired",
   "capabilities": ["authentication", "progress", "trackerCollections", "trackerSearch"],
   "permissions": ["authenticationHandoff", "network", "secureState", "trackerUpdates"],
   "allowedHTTPSHosts": ["anilist.co", "graphql.anilist.co", "s4.anilist.co"],

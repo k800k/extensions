@@ -2,7 +2,7 @@
 
 An open-source MangaReader Extension API 1.0/1.1 repository containing the SDK, publisher CLI, package catalog, and documentation site.
 
-The catalog contains 15 content packages and two API 1.1 tracker packages: AniList and MyAnimeList. Every catalog entry links to its source and source revision. Packages are not safety-reviewed, verified, approved, or endorsed by MangaReader; inspect the code and declared access before installing.
+The catalog contains 15 content packages and two API 1.1 tracker packages: AniList and MyAnimeList. Every catalog entry links to its source and source revision and retains the legacy `approvalRequired` availability value. MangaReader does not use that legacy value as an execution gate: package SHA-256, schema/runtime validation, declared access, and explicit user approval remain the integrity model. Packages are not safety-reviewed, verified, approved, or endorsed by MangaReader; inspect the code and declared access before installing.
 
 ## Commands
 

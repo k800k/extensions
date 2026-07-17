@@ -292,7 +292,7 @@ function installLinkFor(source: CatalogSource): string {
 }
 
 function isInstallable(source: CatalogSource): boolean {
-  return source.availability === "available";
+  return source.availability === "available" || source.availability === "approvalRequired";
 }
 
 const installCandidates = computed(() =>

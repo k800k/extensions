@@ -8,5 +8,5 @@ const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 test("NHentai is a valid content extension package", async () => {
   const metadata = await assertContentExtension(directory, "NHentai");
-  if (metadata.availability !== "available" || metadata.contentRating !== "ADULT") throw new Error("unexpected NHentai catalog metadata");
+  if (metadata.availability !== "approvalRequired" || metadata.contentRating !== "ADULT") throw new Error("unexpected NHentai catalog metadata");
 });
