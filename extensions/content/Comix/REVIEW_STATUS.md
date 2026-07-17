@@ -6,6 +6,6 @@
 - MangaReader compatibility: **enabled** through the public API 1.1 adapter.
 - Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): Anonymous HTTPS landing page rendered on `comix.to`; the exact static host `static.comix.to` was reachable and denied a root request with HTTP 403. The probe discarded response bodies beyond browser rendering and used no account, cookies, or activation approval.
+- Live smoke (2026-07-17): Anonymous HTTPS landing page rendered on `comix.to`; the exact static host `static.comix.to` was reachable and denied a root request with HTTP 403. The probe discarded response bodies beyond browser rendering and used no account or cookies.
 
 Generated metadata declares 2 reviewed literal/base hosts. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.

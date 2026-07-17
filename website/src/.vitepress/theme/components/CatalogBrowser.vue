@@ -16,7 +16,7 @@ import {
   type Repository,
 } from "../lib/catalog";
 
-type FilterDimension = "ratings" | "languages" | "statuses" | "repositories";
+type FilterDimension = "kinds" | "ratings" | "languages" | "statuses" | "repositories";
 type FilterState = Record<FilterDimension, { include: Set<string>; exclude: Set<string> }>;
 
 interface FilterOption {
@@ -38,6 +38,7 @@ interface InstallGroup {
 
 const STORAGE_KEY = "mangareader-custom-catalogs-v1";
 const FILTER_QUERY: Record<FilterDimension, { include: string; exclude: string }> = {
+  kinds: { include: "type", exclude: "excludeType" },
   ratings: { include: "rating", exclude: "excludeRating" },
   languages: { include: "language", exclude: "excludeLanguage" },
   statuses: { include: "status", exclude: "excludeStatus" },
@@ -54,6 +55,7 @@ const KNOWN_STATE_PARAMS = [
 
 function createFilters(useSafeDefault = false): FilterState {
   return {
+    kinds: { include: new Set(), exclude: new Set() },
     ratings: {
       include: new Set(useSafeDefault ? ["safe"] : []),
       exclude: new Set(),
@@ -112,6 +114,11 @@ const filterGroups = computed<FilterGroup[]>(() => {
   );
   return [
     {
+      dimension: "kinds",
+      title: "Type",
+      options: uniqueOptions(sources.value.map((source) => source.kind)),
+    },
+    {
       dimension: "ratings",
       title: "Content rating",
       options: ratingOrder.map((value) => ({ value, label: formatLabel(value) })),
@@ -131,6 +138,8 @@ const filterGroups = computed<FilterGroup[]>(() => {
 
 function sourceValues(source: CatalogSource, dimension: FilterDimension): string[] {
   switch (dimension) {
+    case "kinds":
+      return [normalizedValue(source.kind)];
     case "ratings":
       return [normalizedValue(source.contentRating)];
     case "languages":
@@ -151,6 +160,7 @@ function matchesFilters(source: CatalogSource): boolean {
       source.description,
       source.availability,
       source.contentRating,
+      source.kind,
       source.repository.label,
       ...source.languages,
       ...source.permissions,
@@ -711,6 +721,7 @@ onUnmounted(() => {
               <span class="rating-badge" :class="source.contentRating.toLowerCase()">
                 {{ formatLabel(source.contentRating) }}
               </span>
+              <span class="version-badge">{{ formatLabel(source.kind) }}</span>
               <span class="version-badge">v{{ source.version }}</span>
             </div>
           </div>
@@ -809,7 +820,7 @@ onUnmounted(() => {
               />
             </div>
             <div>
-              <p class="details-eyebrow">Content extension</p>
+              <p class="details-eyebrow">{{ formatLabel(detailsSource.kind) }} extension</p>
               <h2 :id="`details-${detailsSource.id}`">{{ detailsSource.name }}</h2>
               <div class="card-badges">
                 <span class="rating-badge" :class="detailsSource.contentRating.toLowerCase()">
@@ -828,7 +839,7 @@ onUnmounted(() => {
               <p>{{ detailsSource.description || "No description provided." }}</p>
             </section>
             <section v-if="detailsSource.rightsDeclaration" class="rights-callout">
-              <h3>Review status</h3>
+              <h3>Audit information</h3>
               <p>{{ detailsSource.rightsDeclaration }}</p>
             </section>
             <section v-if="detailsSource.compatibility" class="compatibility-callout">
@@ -883,6 +894,12 @@ onUnmounted(() => {
             <section v-if="detailsSource.packageSHA256">
               <h3>Package SHA-256</h3>
               <code class="checksum">{{ detailsSource.packageSHA256 }}</code>
+              <p>This confirms the downloaded bytes match this catalog entry. It is not a safety review.</p>
+            </section>
+            <section v-if="detailsSource.sourceURL">
+              <h3>Package source</h3>
+              <a :href="detailsSource.sourceURL" target="_blank" rel="noopener noreferrer">Review the open-source package</a>
+              <p v-if="detailsSource.sourceRevision">Revision <code>{{ detailsSource.sourceRevision }}</code></p>
             </section>
             <section v-if="detailsSource.upstream?.repository">
               <h3>Audited source snapshot</h3>

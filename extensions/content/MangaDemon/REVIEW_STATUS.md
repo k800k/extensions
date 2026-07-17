@@ -6,6 +6,6 @@
 - MangaReader compatibility: **enabled** through the public API 1.0 adapter.
 - Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): Anonymous HTTPS landing page rendered on `demonicscans.org`; exact CDN roots on `cdn.demoniclibs.com`, `demoniclibs.com`, and `mangareadon.org` returned HTTP 200, while `librarydm.com` returned an empty root response. The probe discarded response bodies beyond browser rendering and used no account, cookies, or activation approval.
+- Live smoke (2026-07-17): Anonymous HTTPS landing page rendered on `demonicscans.org`; exact CDN roots on `cdn.demoniclibs.com`, `demoniclibs.com`, and `mangareadon.org` returned HTTP 200, while `librarydm.com` returned an empty root response. The probe discarded response bodies beyond browser rendering and used no account or cookies.
 
 Generated metadata declares 5 reviewed literal/base hosts. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.

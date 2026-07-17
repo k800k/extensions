@@ -1,0 +1,19 @@
+{
+  "id": "NHentai",
+  "name": "nHentai",
+  "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
+  "kind": "content",
+  "apiVersion": "1.0",
+  "version": "0.1.0",
+  "language": "multi",
+  "languages": ["multi", "en", "ja", "zh", "es", "fr", "de", "ko", "ru"],
+  "contentRating": "ADULT",
+  "availability": "available",
+  "capabilities": ["browse", "discover", "search", "details", "installments", "acquisition", "imageSequence", "cookies", "challengeHandoff"],
+  "permissions": ["network", "cookies", "rateLimiting", "redactedLogging", "challengeHandoff"],
+  "allowedHTTPSHosts": ["nhentai.net", "t.nhentai.net", "i.nhentai.net"],
+  "authenticationModes": ["none"],
+  "developers": [{ "name": "MangaReader Extension Contributors" }],
+  "iconFile": "icon.svg",
+  "license": "Apache-2.0"
+}

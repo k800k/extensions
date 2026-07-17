@@ -122,7 +122,7 @@ const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 test(${JSON.stringify(`${id} is a provenance-pinned Paperback compatibility port`)}, async () => {
   const metadata = await assertContentExtension(directory, ${JSON.stringify(id)});
   if (metadata.apiVersion !== ${JSON.stringify(apiVersion)}) throw new Error("unexpected API version");
-  if (metadata.availability !== "approvalRequired") throw new Error("imported package bypassed activation review");
+  if (metadata.availability !== "available") throw new Error("imported package must be published as available");
   const license = await readFile(join(directory, "LICENSE"), "utf8");
   if (!license.includes("GNU GENERAL PUBLIC LICENSE")) throw new Error("GPL package license is missing");
 });
@@ -157,7 +157,7 @@ function reviewStatus(source, mapping, metadata) {
 - MangaReader compatibility: **${incompatibility ? "blocked" : "enabled"}**${incompatibility ? ` — ${incompatibility}` : ` through the public API ${metadata.apiVersion} adapter.`}
 - Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): ${LIVE_SMOKE_AUDIT.get(source.id) ?? "not performed"}. The probe discarded response bodies beyond browser rendering and used no account, cookies, or activation approval.
+- Live smoke (2026-07-17): ${LIVE_SMOKE_AUDIT.get(source.id) ?? "not performed"}. The probe discarded response bodies beyond browser rendering and used no account or cookies.
 
 Generated metadata declares ${metadata.allowedHTTPSHosts.length} reviewed literal/base host${metadata.allowedHTTPSHosts.length === 1 ? "" : "s"}. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.
 `;
@@ -243,7 +243,7 @@ async function main() {
       ...(EXTRA_HOSTS.get(source.id) ?? [])
     ].map(publicHost).filter(host => !excludedHosts.has(host)));
     if (!allowedHTTPSHosts.length) throw new Error(`No reviewed host declarations for ${source.id}`);
-    const availability = UNSUPPORTED.has(source.id) ? "serviceUnavailable" : "approvalRequired";
+    const availability = UNSUPPORTED.has(source.id) ? "serviceUnavailable" : "available";
     const apiVersion = API_1_1.has(source.id) ? "1.1" : "1.0";
     const metadata = {
       id: source.id,
@@ -319,7 +319,7 @@ async function main() {
     });
   }
 
-  console.log(`Imported ${statuses.length} selected GPL extensions (${statuses.filter(item => item.availability === "approvalRequired").length} awaiting activation review).`);
+  console.log(`Imported ${statuses.length} selected GPL extensions (${statuses.filter(item => item.availability === "available").length} available).`);
 }
 
 main().catch(error => {

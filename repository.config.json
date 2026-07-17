@@ -4,6 +4,5 @@
   "description": "External MangaReader Extension API v1 catalog.",
   "homepage": "https://k800k.github.io/extensions/",
   "privacyURL": "https://github.com/k800k/extensions/blob/main/PRIVACY.md",
-  "publisherName": "MangaReader Extension Contributors",
-  "publisherPublicKey": "ED0W3NTfp336zrsStnKKUslh883N+p1yUmmTBrYwjDE="
+  "publisherName": "MangaReader Extension Contributors"
 }

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: MangaReader
   text: Extension Registry
-  tagline: A content-only extension repository for your MangaReader library.
+  tagline: Open-source content and tracker extensions for your MangaReader library.
   actions:
     - theme: brand
       text: Add the Repository
@@ -16,7 +16,7 @@ hero:
 features:
   - icon: 🧭
     title: Review before installing
-    details: Inspect ratings, languages, permissions, allowed hosts, package hashes, and approval status.
+    details: Inspect source revisions, permissions, allowed hosts, features, and package integrity before deciding what to install.
     link: /extension-list
     linkText: Open the catalog
   - icon: 📖
@@ -40,4 +40,4 @@ features:
 <!-- Copyright © 2025 Inkdex -->
 <!-- Copyright © 2026 MangaReader Extension Contributors -->
 
-The catalog contains 13 content ports. Comix, LNori, and RoyalRoad use API 1.1; all entries remain approval-required. Tracker and theme extension kinds are not supported.
+The catalog contains 15 content packages plus AniList and MyAnimeList tracker extensions. Packages are open source and auditable, but MangaReader does not review or certify them as safe. Users remain responsible for deciding what to install.

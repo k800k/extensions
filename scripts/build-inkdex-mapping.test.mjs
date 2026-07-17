@@ -29,7 +29,9 @@ test("historical import mapping pins the selected ports and remains separate fro
   assert.deepEqual(mappedIDs, [...mappedIDs].sort((a, b) => a.localeCompare(b)));
   const contentInventory = inventory.entries.filter(entry => entry.kind === "content");
   assert.deepEqual(contentInventory.filter(entry => allSourcesByID.has(entry.id)).map(entry => entry.id), importedIDs);
-  assert.deepEqual(contentInventory.filter(entry => !allSourcesByID.has(entry.id)), []);
+  assert.deepEqual(contentInventory.filter(entry => !allSourcesByID.has(entry.id)), [
+    { id: "HitomiLA", kind: "content" }, { id: "NHentai", kind: "content" }
+  ]);
 });
 
 test("published repository ownership matches the registry partition", () => {

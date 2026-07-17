@@ -9,19 +9,21 @@ export const SUPPORTED_API_VERSIONS = new Set(["1.0", "1.1"]);
 export const repositoryCapabilities = new Set([
   "browse", "discover", "search", "filters", "details", "installments",
   "acquisition", "imageSequence", "updates", "managedCollections", "settings",
-  "authentication", "interceptors", "cookies", "challengeHandoff"
+  "authentication", "interceptors", "cookies", "challengeHandoff",
+  "progress", "trackerCollections", "trackerSearch"
 ]);
 
 export const extensionPermissions = new Set([
   "network", "cookies", "state", "secureState", "rateLimiting", "redactedLogging",
-  "challengeHandoff", "authenticationHandoff", "managedCollections", "webExecution"
+  "challengeHandoff", "authenticationHandoff", "managedCollections", "trackerUpdates",
+  "webExecution"
 ]);
 
 export const authenticationModes = new Set([
-  "none", "basic", "apiKey", "oauth2PKCE", "visibleWebSession"
+  "none", "basic", "apiKey", "oauth2Implicit", "oauth2PKCE", "visibleWebSession"
 ]);
 
-const availabilities = new Set(["approvalRequired", "available", "serviceUnavailable"]);
+const availabilities = new Set(["available", "serviceUnavailable", "retired"]);
 const contentRatings = new Set(["SAFE", "MATURE", "ADULT"]);
 const forbiddenRuntimeFragments = ["eval(", "new Function", "Function(", "WebAssembly", "import("];
 
@@ -70,14 +72,15 @@ export function isAllowedHTTPSHost(value) {
     && !value.endsWith(".local");
 }
 
-/** Validate one content extension package. Tracker and theme kinds are intentionally unsupported. */
-export async function assertContentExtension(directory, expectedID) {
+/** Validate one open-source content or tracker extension package. */
+export async function assertExtensionPackage(directory, expectedKind, expectedID) {
   const metadata = JSON.parse(await readFile(join(directory, "extension.json"), "utf8"));
   const source = await readFile(join(directory, "main.js"), "utf8");
 
   assert.equal(metadata.id, expectedID);
   assert.match(metadata.id, /^[A-Za-z0-9._-]{1,128}$/);
-  assert.equal(metadata.kind, "content", "only content extensions are supported");
+  assert.ok(["content", "tracker"].includes(expectedKind), `unsupported extension kind ${expectedKind}`);
+  assert.equal(metadata.kind, expectedKind);
   assert.ok(SUPPORTED_API_VERSIONS.has(metadata.apiVersion), `unsupported API version ${metadata.apiVersion}`);
   assertNonemptyString(metadata.name, "name");
   assertNonemptyString(metadata.description, "description");
@@ -105,8 +108,18 @@ export async function assertContentExtension(directory, expectedID) {
     assert.match(license, /GNU GENERAL PUBLIC LICENSE/, `${expectedID} must include its declared GPL license`);
   }
 
-  assert.match(source, /defineContentExtension\s*\(/);
-  assert.doesNotMatch(source, /define(?:Tracker|Theme)Extension\s*\(/, "tracker and theme declarations are unsupported");
+  const declaration = expectedKind === "content" ? "defineContentExtension" : "defineTrackerExtension";
+  assert.match(source, new RegExp(`${declaration}\\s*\\(`));
+  assert.doesNotMatch(source, /defineThemeExtension\s*\(/, "theme declarations are unsupported");
+  if (expectedKind === "tracker") {
+    for (const operation of ["authentication", "search", "progress", "update", "collections"]) {
+      assert.match(source, new RegExp(`\\b${operation}\\s*\\(`), `tracker is missing ${operation}`);
+    }
+    assert.ok(metadata.capabilities.includes("trackerSearch"), "trackerSearch capability is required");
+    assert.ok(metadata.capabilities.includes("progress"), "progress capability is required");
+    assert.ok(metadata.permissions.includes("secureState"), "tracker secureState permission is required");
+    assert.ok(metadata.permissions.includes("authenticationHandoff"), "tracker authenticationHandoff permission is required");
+  }
   assert.doesNotMatch(source, /\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\s*\(/, "extensions must use the brokered runtime client");
   forbiddenRuntimeFragments.forEach(fragment => assert.ok(!source.includes(fragment), `main.js contains forbidden runtime fragment ${fragment}`));
 
@@ -117,7 +130,8 @@ export async function assertContentExtension(directory, expectedID) {
   return metadata;
 }
 
+export const assertContentExtension = (directory, expectedID) => assertExtensionPackage(directory, "content", expectedID);
+export const assertTrackerExtension = (directory, expectedID) => assertExtensionPackage(directory, "tracker", expectedID);
 export const assertExtensionScaffold = (directory, expectedKind, expectedID) => {
-  assert.equal(expectedKind, "content", "only content extensions are supported");
-  return assertContentExtension(directory, expectedID);
+  return assertExtensionPackage(directory, expectedKind, expectedID);
 };

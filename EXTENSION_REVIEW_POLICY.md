@@ -1,13 +1,16 @@
 # Extension review policy
 
-Only content extensions are eligible for review. Tracker and theme extension kinds are rejected.
+Content and tracker extensions are eligible for publication. Theme extensions are rejected.
 
-Every catalog entry begins as `approvalRequired` and remains unavailable until its activation review is complete. Every activation candidate requires:
+MangaReader does not designate packages safe, approved, or verified. Publication requires enough evidence for users to audit compatibility and access:
 
 - a service specification covering documented API behavior, terms, authentication, pagination, discovery, search, details, content delivery, challenges, and error cases;
 - representative fixtures and contract tests;
 - a reviewed HTTPS host list, privacy assessment, content rating, and rights record;
 - appropriate source licensing, DCO sign-off, and documented review status; and
-- publisher signing plus package-specific offline MangaReader approval.
+- a direct source link and exact source revision for the published artifact; and
+- deterministic packaging with a catalog SHA-256 checksum.
 
-An extension requiring a runtime surface MangaReader does not expose is marked `serviceUnavailable`, with the blocker recorded in its specification and review status.
+Tracker packages must also document OAuth behavior and implement authentication, search, progress retrieval, updates, and collections. An extension requiring a runtime surface MangaReader does not expose is marked `serviceUnavailable`, with the blocker recorded in its specification and review status.
+
+These checks establish whether a package can run as declared. They do not certify that it is safe; the install decision remains with the user.

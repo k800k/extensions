@@ -1,56 +1,72 @@
 {
   "entries": [
     {
-      "id": "AllPornComic",
-      "kind": "content"
+      "kind": "content",
+      "id": "AllPornComic"
     },
     {
-      "id": "Atsumaru",
-      "kind": "content"
+      "kind": "tracker",
+      "id": "AniList"
     },
     {
-      "id": "Comix",
-      "kind": "content"
+      "kind": "content",
+      "id": "Atsumaru"
     },
     {
-      "id": "LNori",
-      "kind": "content"
+      "kind": "content",
+      "id": "Comix"
     },
     {
-      "id": "MadaraDex",
-      "kind": "content"
+      "kind": "content",
+      "id": "HitomiLA"
     },
     {
-      "id": "MangaBat",
-      "kind": "content"
+      "kind": "content",
+      "id": "LNori"
     },
     {
-      "id": "MangaDemon",
-      "kind": "content"
+      "kind": "content",
+      "id": "MadaraDex"
     },
     {
-      "id": "MangaDex",
-      "kind": "content"
+      "kind": "content",
+      "id": "MangaBat"
     },
     {
-      "id": "MangaDot",
-      "kind": "content"
+      "kind": "content",
+      "id": "MangaDemon"
     },
     {
-      "id": "MangaKakalot",
-      "kind": "content"
+      "kind": "content",
+      "id": "MangaDex"
     },
     {
-      "id": "RoyalRoad",
-      "kind": "content"
+      "kind": "content",
+      "id": "MangaDot"
     },
     {
-      "id": "Webtoon",
-      "kind": "content"
+      "kind": "content",
+      "id": "MangaKakalot"
     },
     {
-      "id": "WeebCentral",
-      "kind": "content"
+      "kind": "tracker",
+      "id": "MyAnimeList"
+    },
+    {
+      "kind": "content",
+      "id": "NHentai"
+    },
+    {
+      "kind": "content",
+      "id": "RoyalRoad"
+    },
+    {
+      "kind": "content",
+      "id": "Webtoon"
+    },
+    {
+      "kind": "content",
+      "id": "WeebCentral"
     }
   ]
 }

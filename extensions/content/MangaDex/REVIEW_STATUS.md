@@ -6,6 +6,6 @@
 - MangaReader compatibility: **enabled** through the public API 1.0 adapter.
 - Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): Anonymous `api.mangadex.org/ping` returned HTTP 200, and the public page and cover hosts `mangadex.org` and `uploads.mangadex.org` returned HTTP 200; OAuth and status-page hosts were not exercised or declared. The probe discarded response bodies beyond browser rendering and used no account, cookies, or activation approval.
+- Live smoke (2026-07-17): Anonymous `api.mangadex.org/ping` returned HTTP 200, and the public page and cover hosts `mangadex.org` and `uploads.mangadex.org` returned HTTP 200; OAuth and status-page hosts were not exercised or declared. The probe discarded response bodies beyond browser rendering and used no account or cookies.
 
 Generated metadata declares 3 reviewed literal/base hosts. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.

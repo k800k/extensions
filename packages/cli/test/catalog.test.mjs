@@ -8,31 +8,39 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const dist = join(root, "dist", "v1", "stable");
 const expectedIDs = [
-  "AllPornComic", "Atsumaru", "Comix", "LNori", "MadaraDex", "MangaBat", "MangaDemon",
-  "MangaDex", "MangaDot", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
-];
+  "AniList",
+  "AllPornComic", "Atsumaru", "Comix", "HitomiLA", "LNori", "MadaraDex", "MangaBat",
+  "MangaDemon", "MangaDex", "MangaDot", "MangaKakalot", "MyAnimeList", "NHentai", "RoyalRoad", "Webtoon",
+  "WeebCentral"
+].sort();
 
-test("the catalog contains thirteen pinned content ports", async () => {
+test("the catalog contains fifteen content and two tracker packages", async () => {
   const catalog = JSON.parse(await readFile(join(dist, "catalog.json"), "utf8"));
   const manifest = JSON.parse(await readFile(join(dist, "mangareader-repository.json"), "utf8"));
   assert.deepEqual(catalog.sources.map(source => source.id), expectedIDs);
   assert.deepEqual(manifest.sources.map(source => source.id), expectedIDs);
-  assert.ok(catalog.sources.every(source => source.kind === "content"));
-  assert.ok(catalog.sources.every(source => source.availability === "approvalRequired"));
+  assert.equal(catalog.sources.filter(source => source.kind === "content").length, 15);
+  assert.equal(catalog.sources.filter(source => source.kind === "tracker").length, 2);
+  assert.ok(catalog.sources.every(source => source.availability === "available"));
+  assert.ok(catalog.sources.every(source => source.sourceURL && source.sourceRevision));
   assert.deepEqual(
     Object.fromEntries(manifest.sources.map(source => [source.id, source.mangaReaderExtension.apiVersion])),
-    Object.fromEntries(expectedIDs.map(id => [id, ["Comix", "LNori", "RoyalRoad"].includes(id) ? "1.1" : "1.0"]))
+    Object.fromEntries(expectedIDs.map(id => [id, ["AniList", "Comix", "LNori", "MyAnimeList", "RoyalRoad"].includes(id) ? "1.1" : "1.0"]))
   );
   assert.equal(manifest.schemaVersion, 2);
-  assert.equal(manifest.mangaReaderApproval, null);
+  assert.equal("mangaReaderApproval" in manifest, false);
+  assert.equal("publicKey" in manifest.repository.publisher, false);
   assert.equal((await readdir(join(dist, "packages"))).length, expectedIDs.length);
   assert.equal((await readdir(join(dist, "icons"))).length, expectedIDs.length);
 });
 
-test("the public extension API is content-only", async () => {
+test("the public extension API supports content and tracker packages but excludes themes", async () => {
   const sdkTypes = await readFile(join(root, "packages", "sdk", "index.d.ts"), "utf8");
   const sdkRuntime = await readFile(join(root, "packages", "sdk", "index.js"), "utf8");
-  assert.match(sdkTypes, /ExtensionKind = "content"/);
-  assert.doesNotMatch(sdkTypes, /TrackerExtension|ThemeExtension|defineTrackerExtension|defineThemeExtension/);
-  assert.doesNotMatch(sdkRuntime, /defineTrackerExtension|defineThemeExtension/);
+  assert.match(sdkTypes, /ExtensionKind = "content" \| "tracker"/);
+  assert.match(sdkTypes, /TrackerExtension/);
+  assert.match(sdkTypes, /defineTrackerExtension/);
+  assert.match(sdkRuntime, /defineTrackerExtension/);
+  assert.doesNotMatch(sdkTypes, /ThemeExtension|defineThemeExtension/);
+  assert.doesNotMatch(sdkRuntime, /defineThemeExtension/);
 });

@@ -1,7 +1,7 @@
 export type JSONValue = null | boolean | number | string | JSONValue[] | { [key: string]: JSONValue };
-export type ExtensionKind = "content";
+export type ExtensionKind = "content" | "tracker";
 export type APIVersion = "1.0" | "1.1";
-export type AuthenticationMode = "none" | "basic" | "apiKey" | "oauth2PKCE" | "visibleWebSession";
+export type AuthenticationMode = "none" | "basic" | "apiKey" | "oauth2Implicit" | "oauth2PKCE" | "visibleWebSession";
 export type Rating = "SAFE" | "MATURE" | "ADULT";
 
 export interface CursorPage<T> { items: T[]; metadata?: JSONValue; }
@@ -43,7 +43,47 @@ export interface ContentExtension {
   managedCollections?(input: JSONValue): Promise<JSONValue>; synchronizeManagedCollection?(collection: JSONValue): Promise<void>;
 }
 
+export type TrackerAuthenticationMode = "none" | "credentials" | "apiKey" | "oauth2Implicit" | "oauth2PKCE" | "visibleWebSession";
+export type OAuthPKCEMethod = "plain" | "S256";
+export interface TrackerAuthenticationDescriptor {
+  mode: TrackerAuthenticationMode;
+  authorizationURL?: string;
+  tokenURL?: string;
+  callbackScheme?: string;
+  callbackURL?: string;
+  clientID?: string;
+  clientIDInfoPlistKey?: string;
+  responseType?: "code" | "token";
+  scopes?: string[];
+  pkceMethod?: OAuthPKCEMethod;
+  authorizationParameters?: Record<string, string>;
+  tokenParameters?: Record<string, string>;
+  form?: JSONValue;
+}
+export interface TrackerMatch { id: string; title: string; coverURL?: string | null; mediaKind: "manga" | "comic" | "lightNovel" | "book"; }
+export interface TrackerProgress {
+  trackerID?: string;
+  remoteWorkID: string;
+  chapter?: number | null;
+  volume?: number | null;
+  status?: string | null;
+  score?: number | null;
+  modifiedAt?: string;
+}
+export interface TrackerCollection { id: string; title: string; items: TrackerMatch[]; }
+export interface TrackerExtension {
+  id: string;
+  apiVersion: APIVersion;
+  initialize?(context: RuntimeContext): void | Promise<void>;
+  authentication(): TrackerAuthenticationDescriptor | Promise<TrackerAuthenticationDescriptor>;
+  search(input: { title: string; kind: "manga" | "comic" | "lightNovel" | "book" }): Promise<TrackerMatch[]>;
+  progress(remoteWorkID: string): Promise<TrackerProgress | null>;
+  update(progress: TrackerProgress): Promise<void>;
+  collections(input: { cursor?: JSONValue }): Promise<CursorPage<TrackerCollection>>;
+}
+
 export declare function defineContentExtension<T extends ContentExtension>(value: T): Readonly<T & { kind: "content" }>;
+export declare function defineTrackerExtension<T extends TrackerExtension>(value: T): Readonly<T & { kind: "tracker" }>;
 export declare function unavailable(message?: string): never;
 export declare const apiVersion: "1.1";
 export declare const supportedAPIVersions: readonly APIVersion[];

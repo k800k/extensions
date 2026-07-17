@@ -1,72 +1,93 @@
 {
   "counts": {
-    "content": 13
+    "content": 15,
+    "tracker": 2
   },
   "entries": [
     {
       "id": "AllPornComic",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
+    },
+    {
+      "id": "AniList",
+      "kind": "tracker",
+      "availability": "available"
     },
     {
       "id": "Atsumaru",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "Comix",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
+    },
+    {
+      "id": "HitomiLA",
+      "kind": "content",
+      "availability": "available"
     },
     {
       "id": "LNori",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "MadaraDex",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "MangaBat",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "MangaDemon",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "MangaDex",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "MangaDot",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "MangaKakalot",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
+    },
+    {
+      "id": "MyAnimeList",
+      "kind": "tracker",
+      "availability": "available"
+    },
+    {
+      "id": "NHentai",
+      "kind": "content",
+      "availability": "available"
     },
     {
       "id": "RoyalRoad",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "Webtoon",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     },
     {
       "id": "WeebCentral",
       "kind": "content",
-      "availability": "approvalRequired"
+      "availability": "available"
     }
   ]
 }
