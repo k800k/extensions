@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from atsu.moe.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.23",
+  "version": "1.0.0-alpha.24",
   "language": "en",
   "languages": [
     "en"

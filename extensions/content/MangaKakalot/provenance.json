@@ -37,11 +37,13 @@
     "sha256": "05b485f71d4e330311abaad6c6a55b2ea2e3f870598f015bf506704a6fd00fe3",
     "sourceCommitRecordedByRegistry": null
   },
+  "upstreamVersion": "1.0.0-alpha.11",
+  "releaseVersion": "1.0.0-alpha.12",
   "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
   "adapter": {
     "name": "@mangareader/paperback-compat",
     "version": "1.1.0",
     "license": "GPL-3.0-or-later"
   },
-  "generatedMainSHA256": "394d5a708e90e659361c1cb910d657904840ba5a3a32efa73e25bc9ca1afe25f"
+  "generatedMainSHA256": "170c628e7f6bccdee41c9d247e5f746689dd8496ccbe522879b849e257b9b08a"
 }

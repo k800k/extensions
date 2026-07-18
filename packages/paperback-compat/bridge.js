@@ -284,22 +284,6 @@
   };
   const rating = value => ["SAFE", "MATURE", "ADULT"].includes(value) ? value : "SAFE";
   const compact = object => Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined));
-  const mangaInfoFromWork = work => {
-    const info = work?.workInfo ?? {};
-    return {
-      thumbnailUrl: string(info.thumbnailUrl),
-      synopsis: string(info.synopsis),
-      primaryTitle: string(info.primaryTitle, string(work?.workId)),
-      secondaryTitles: Array.isArray(info.secondaryTitles) ? info.secondaryTitles.map(String) : [],
-      contentRating: rating(info.contentRating),
-      status: info.status,
-      artist: info.artist,
-      author: info.author,
-      shareUrl: info.shareUrl,
-      contentType: info.mediaKind === "lightNovel" || info.mediaKind === "book" ? "novel" : info.contentType
-    };
-  };
-  const sourceMangaFromWork = work => ({ mangaId: string(work?.workId), mangaInfo: mangaInfoFromWork(work) });
   const workFromSourceManga = (manga, fallbackMediaKind = "manga") => {
     const info = manga?.mangaInfo ?? {};
     return {
@@ -377,9 +361,44 @@
       return { id, title, fields: [] };
     }
   };
-  const resource = async url => {
-    const [response, data] = await scheduleRequest({ url, method: "GET", headers: {} });
-    return { dataBase64: encodeBase64(data), mimeType: response.mimeType ?? response.headers?.["content-type"] ?? undefined };
+  const mirroredImageHosts = new Set([
+    "img-r1.2xstorage.com",
+    "img-r2.2xstorage.com",
+    "imgs-2.2xstorage.com"
+  ]);
+  const resource = async (url, sourceID) => {
+    const requestedURL = new URL(string(url));
+    const candidates = [requestedURL];
+    if ((sourceID === "MangaBat" || sourceID === "MangaKakalot") && mirroredImageHosts.has(requestedURL.hostname.toLowerCase())) {
+      for (const host of mirroredImageHosts) {
+        if (host === requestedURL.hostname.toLowerCase()) continue;
+        const alternative = new URL(requestedURL.href);
+        alternative.hostname = host;
+        candidates.push(alternative);
+      }
+    }
+
+    let lastResponse;
+    let lastError;
+    for (const candidate of candidates) {
+      let response;
+      let data;
+      try {
+        [response, data] = await scheduleRequest({ url: candidate.href, method: "GET", headers: {} });
+      } catch (error) {
+        if (isChallengeError(error) || candidates.length === 1) throw error;
+        lastError = error;
+        continue;
+      }
+      lastResponse = response;
+      const mimeType = string(response.mimeType ?? response.headers?.["content-type"]).toLowerCase();
+      if (response.status >= 200 && response.status < 300 && !mimeType.includes("text/html")) {
+        return { dataBase64: encodeBase64(data), mimeType: mimeType || undefined };
+      }
+    }
+    const status = Number(lastResponse?.status ?? 0);
+    const suffix = lastError?.message ? `: ${lastError.message}` : "";
+    throw new Error(`Paperback image request failed with HTTP ${status || "unknown"} after ${candidates.length} approved host attempt${candidates.length === 1 ? "" : "s"}${suffix}`);
   };
 
   const sanitizedXHTML = value => {
@@ -496,15 +515,50 @@
     if (!instance) throw new Error(`Paperback bundle did not export ${id}`);
     const apiVersion = options.apiVersion === "1.1" ? "1.1" : "1.0";
     const mediaKind = options.mediaKind === "lightNovel" ? "lightNovel" : "manga";
-    const paperbackChapter = (installment, sourceWork) => compact({
-      chapterId: string(installment?.installmentId),
-      langCode: string(installment?.langCode, "unknown"),
-      chapNum: number(installment?.number),
-      title: installment?.title,
-      volume: optionalNumber(installment?.volume),
-      publishDate: installment?.publishDate ? new Date(installment.publishDate) : undefined,
-      sourceManga: sourceMangaFromWork(sourceWork)
-    });
+    const mangaCache = new Map();
+    const chapterCache = new Map();
+    const cacheManga = manga => {
+      const workID = string(manga?.mangaId);
+      if (workID) mangaCache.set(workID, manga);
+      return manga;
+    };
+    const cachedManga = async sourceWork => {
+      const workID = string(sourceWork?.workId);
+      if (!workID) throw new Error("Paperback source context cannot be restored because the work ID is missing");
+      const cached = mangaCache.get(workID);
+      if (cached) return cached;
+      const refreshed = await instance.getMangaDetails(workID);
+      if (!refreshed || string(refreshed.mangaId) !== workID) {
+        throw new Error(`Paperback source no longer returns work ${workID}; retry after refreshing the title`);
+      }
+      return cacheManga(refreshed);
+    };
+    const chapterKey = (workID, chapterID) => `${string(workID)}\u0000${string(chapterID)}`;
+    const cacheChapters = (workID, chapters) => {
+      for (const chapter of chapters ?? []) {
+        const chapterID = string(chapter?.chapterId);
+        if (chapterID) chapterCache.set(chapterKey(workID, chapterID), chapter);
+      }
+      return chapters;
+    };
+    const refreshedChapters = async sourceWork => {
+      const manga = await cachedManga(sourceWork);
+      const chapters = await instance.getChapters(manga);
+      if (!Array.isArray(chapters)) throw new TypeError("Paperback source returned an invalid chapter list");
+      return cacheChapters(manga.mangaId, chapters);
+    };
+    const resolvedChapter = async installment => {
+      const sourceWork = installment?.sourceWork ?? { workId: installment?.workId, workInfo: {} };
+      const workID = string(sourceWork?.workId);
+      const chapterID = string(installment?.installmentId);
+      if (!workID || !chapterID) throw new Error("Paperback chapter context cannot be restored because its remote ID is missing");
+      const cached = chapterCache.get(chapterKey(workID, chapterID));
+      if (cached) return cached;
+      const chapters = await refreshedChapters(sourceWork);
+      const matched = chapters.find(chapter => string(chapter?.chapterId) === chapterID);
+      if (!matched) throw new Error(`Chapter ${chapterID} is no longer available from this source. Refresh the title and retry.`);
+      return matched;
+    };
     defineContentExtension(adaptDefinition({
       id,
       apiVersion,
@@ -518,15 +572,15 @@
         const result = await instance.getDiscoverSectionItems(section, cursor ?? undefined);
         return { items: (result?.items ?? []).map(mapDiscoverItem), metadata: result?.metadata ?? null };
       },
-      searchFilters: () => formSchema(instance, "getAdvancedSearchForm", "search", "Search", { title: "", metadata: {} }),
+      searchFilters: () => formSchema(instance, "getAdvancedSearchForm", "search", "Search", { title: "" }),
       search: async ({ query, cursor }) => {
-        const searchQuery = { title: string(query), metadata: {} };
+        const searchQuery = { title: string(query) };
         const result = await instance.getSearchResults(searchQuery, cursor ?? undefined, await sortingOption(instance, searchQuery));
         return { items: (result?.items ?? []).map(item => mapSearchItem(item, mediaKind)), metadata: result?.metadata ?? null };
       },
-      details: async workID => workFromSourceManga(await instance.getMangaDetails(string(workID)), mediaKind),
+      details: async workID => workFromSourceManga(cacheManga(await instance.getMangaDetails(string(workID))), mediaKind),
       installments: async sourceWork => {
-        const chapters = await instance.getChapters(sourceMangaFromWork(sourceWork));
+        const chapters = await refreshedChapters(sourceWork);
         const format = sourceWork?.workInfo?.mediaKind === "lightNovel" || sourceWork?.workInfo?.mediaKind === "book"
           ? "xhtml"
           : "imageSequence";
@@ -543,7 +597,7 @@
       },
       imagePages: async installment => {
         const sourceWork = installment?.sourceWork ?? { workId: installment?.workId, workInfo: {} };
-        const chapter = paperbackChapter(installment, sourceWork);
+        const chapter = await resolvedChapter(installment);
         const details = await instance.getChapterDetails(chapter);
         return {
           id: string(details?.id, string(installment?.installmentId)),
@@ -551,11 +605,11 @@
           pages: (details?.pages ?? []).map(page => string(page?.url ?? page)).filter(Boolean)
         };
       },
-      imagePageContent: ({ url }) => resource(url),
+      imagePageContent: ({ url }) => resource(url, id),
       ...(apiVersion === "1.1" ? {
         publicationContent: async installment => {
           const sourceWork = installment?.sourceWork ?? { workId: installment?.workId, workInfo: {} };
-          const details = await instance.getChapterDetails(paperbackChapter(installment, sourceWork));
+          const details = await instance.getChapterDetails(await resolvedChapter(installment));
           if (details?.type !== "html" || typeof details?.html !== "string") {
             throw new Error("Paperback source did not return an XHTML chapter");
           }

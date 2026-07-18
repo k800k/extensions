@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from webtoons.com.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.18",
+  "version": "1.0.0-alpha.19",
   "language": "multi",
   "languages": [
     "multi"

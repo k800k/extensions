@@ -17,13 +17,14 @@
     "mangadex.org"
   ],
   "likelyCDNAPIHosts": [
+    "*.mangadex.network",
     "api.mangadex.org",
     "uploads.mangadex.org",
     "auth.mangadex.org",
     "status.mangadex.org"
   ],
   "dynamicHostEvidence": [
-    "at-home/image base URLs can be supplied by MangaDex responses"
+    "at-home/image base URLs can be supplied on declared `*.mangadex.network` subdomains by MangaDex responses"
   ],
   "kind": "content",
   "version": "1.0.0-alpha.27",
@@ -43,11 +44,13 @@
     "sha256": "46f1532d3ec4582f8789a8b9c41840dfbaeee933319bc462c795c4f8fbf5e716",
     "sourceCommitRecordedByRegistry": null
   },
+  "upstreamVersion": "1.0.0-alpha.27",
+  "releaseVersion": "1.0.0-alpha.28",
   "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
   "adapter": {
     "name": "@mangareader/paperback-compat",
     "version": "1.1.0",
     "license": "GPL-3.0-or-later"
   },
-  "generatedMainSHA256": "7423138ad9f08a3048b9985ee1d2689b015df1ac1f67103057fc344e31d31db9"
+  "generatedMainSHA256": "077ced64b2aee41efb21437db76101d306e3b87e975c33c1644bc4bf85135470"
 }

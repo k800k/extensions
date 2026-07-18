@@ -17,8 +17,27 @@ const API_1_1 = new Set(["Comix", "LNori", "RoyalRoad"]);
 const XHTML_SOURCES = new Set(["LNori", "RoyalRoad"]);
 const EXTRA_HOSTS = new Map([
   ["Comix", ["static.comix.to"]],
+  ["MangaBat", ["img-r1.2xstorage.com", "img-r2.2xstorage.com", "imgs-2.2xstorage.com"]],
   ["MangaDex", ["*.mangadex.network"]],
+  ["MangaKakalot", ["img-r1.2xstorage.com", "img-r2.2xstorage.com", "imgs-2.2xstorage.com"]],
   ["Webtoon", ["webtoon-phinf.pstatic.net", "swebtoon-phinf.pstatic.net"]]
+]);
+const RELEASE_VERSIONS = new Map([
+  ["AllPornComic", "1.0.0-alpha.15"],
+  ["Atsumaru", "1.0.0-alpha.24"],
+  ["Comix", "1.0.0-alpha.45"],
+  ["HitomiLA", "0.1.1"],
+  ["LNori", "1.0.0-alpha.2"],
+  ["MadaraDex", "1.0.0-alpha.16"],
+  ["MangaBat", "1.0.0-alpha.12"],
+  ["MangaDemon", "1.0.0-alpha.16"],
+  ["MangaDex", "1.0.0-alpha.28"],
+  ["MangaDot", "1.0.0-alpha.5"],
+  ["MangaKakalot", "1.0.0-alpha.12"],
+  ["NHentai", "0.1.1"],
+  ["RoyalRoad", "1.0.0-alpha.2"],
+  ["Webtoon", "1.0.0-alpha.19"],
+  ["WeebCentral", "1.0.0-alpha.24"]
 ]);
 const EXCLUDED_HOSTS = new Map([
   ["MangaDex", new Set(["auth.mangadex.org", "status.mangadex.org"])]
@@ -29,11 +48,11 @@ const LIVE_SMOKE_AUDIT = new Map([
   ["Comix", "Anonymous HTTPS landing page rendered on `comix.to`; the exact static host `static.comix.to` was reachable and denied a root request with HTTP 403"],
   ["LNori", "Anonymous HTTPS landing page rendered HTML on `lnori.com`"],
   ["MadaraDex", "Anonymous HTTPS landing page rendered HTML on `madaradex.org`"],
-  ["MangaBat", "Anonymous HTTPS landing page rendered HTML on `www.mangabats.com`"],
+  ["MangaBat", "Anonymous HTTPS landing page rendered HTML on `www.mangabats.com`; chapter images were observed on `img-r1.2xstorage.com` as WebP with a source referrer, with bounded fallback restricted to the reviewed `img-r2` and `imgs-2` mirrors"],
   ["MangaDemon", "Anonymous HTTPS landing page rendered on `demonicscans.org`; exact CDN roots on `cdn.demoniclibs.com`, `demoniclibs.com`, and `mangareadon.org` returned HTTP 200, while `librarydm.com` returned an empty root response"],
   ["MangaDex", "Anonymous search, details, installments, at-home page enumeration, and image retrieval passed; MangaDex supplied a randomized `*.mangadex.network` image host, which is explicitly declared"],
   ["MangaDot", "Anonymous HTTPS landing page rendered HTML on `mangadot.net`"],
-  ["MangaKakalot", "Anonymous HTTPS landing page rendered HTML on `www.mangakakalot.gg`"],
+  ["MangaKakalot", "Anonymous HTTPS landing page rendered HTML on `www.mangakakalot.gg`; the managed challenge path and the reviewed `img-r1`, `img-r2`, and `imgs-2` image mirrors require source referrer propagation"],
   ["RoyalRoad", "Anonymous HTTPS landing page redirected within `www.royalroad.com` to `/home` and rendered HTML"],
   ["Webtoon", "Anonymous HTTPS landing page redirected within `www.webtoons.com` to `/en/`; exact image hosts `webtoon-phinf.pstatic.net` and `swebtoon-phinf.pstatic.net` were reachable and returned HTTP 403/404 for root requests"],
   ["WeebCentral", "Anonymous HTTPS landing page rendered HTML on `weebcentral.com`"]
@@ -252,7 +271,7 @@ async function main() {
       description: source.description,
       kind: "content",
       apiVersion,
-      version: source.version,
+      version: RELEASE_VERSIONS.get(source.id) ?? source.version,
       language: source.language,
       languages: [source.language],
       contentRating: source.contentRating,
@@ -305,6 +324,8 @@ async function main() {
       writeFile(join(directory, "RIGHTS.md"), rights(source, mapping)),
       writeJSON(join(directory, "provenance.json"), {
         ...mapping,
+        upstreamVersion: source.version,
+        releaseVersion: metadata.version,
         importedFromRegistryBuild: versioning.buildTime,
         adapter: { name: "@mangareader/paperback-compat", version: "1.1.0", license: "GPL-3.0-or-later" },
         generatedMainSHA256: sha256(combined)

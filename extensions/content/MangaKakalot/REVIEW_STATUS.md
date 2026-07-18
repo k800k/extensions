@@ -6,6 +6,6 @@
 - MangaReader compatibility: **enabled** through the public API 1.0 adapter.
 - Activation review: **required**; the importer never marks a new package available.
 - Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): Anonymous HTTPS landing page rendered HTML on `www.mangakakalot.gg`. The probe discarded response bodies beyond browser rendering and used no account or cookies.
+- Live smoke (2026-07-17): Anonymous HTTPS landing page rendered HTML on `www.mangakakalot.gg`; the managed challenge path and the reviewed `img-r1`, `img-r2`, and `imgs-2` image mirrors require source referrer propagation. The probe discarded response bodies beyond browser rendering and used no account or cookies.
 
-Generated metadata declares 1 reviewed literal/base host. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.
+Generated metadata declares 4 reviewed literal/base hosts. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.

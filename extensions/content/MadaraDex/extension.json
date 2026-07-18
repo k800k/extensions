@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from madaradex.org.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.15",
+  "version": "1.0.0-alpha.16",
   "language": "en",
   "languages": [
     "en"

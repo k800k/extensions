@@ -349,11 +349,140 @@ test("a compiled MangaDex bundle maps content operations to MangaReader API v1",
 
   const calls = plain(context.__calls);
   assert.deepEqual(calls[0], ["discover", { id: "latest" }, { page: 1 }]);
-  assert.deepEqual(calls[1], ["search", { title: "Needle", metadata: {} }, { page: 3 }, { id: "relevance", label: "Relevance" }]);
+  assert.deepEqual(calls[1], ["search", { title: "Needle" }, { page: 3 }, { id: "relevance", label: "Relevance" }]);
   assert.equal(calls[2][0], "chapters");
   assert.equal(calls[2][1].mangaId, "manga-1");
   assert.equal(calls[3][0], "chapterDetails");
   assert.equal(calls[3][1].sourceManga.mangaId, "manga-1");
+});
+
+test("search omits compatibility metadata so each Paperback source can apply its own defaults", async () => {
+  const { definition, context } = await loadBundle("Atsumaru", {
+    generated: true,
+    prepare: `
+      globalThis.__searchQueries = [];
+      const instance = source.Atsumaru;
+      instance.getSortingOptions = async query => {
+        __searchQueries.push(["sorting", query]);
+        return [];
+      };
+      instance.getSearchResults = async query => {
+        __searchQueries.push(["search", query]);
+        return { items: [] };
+      };
+    `
+  });
+
+  await definition.search({ query: "Needle" });
+  assert.deepEqual(plain(context.__searchQueries), [
+    ["sorting", { title: "Needle" }],
+    ["search", { title: "Needle" }]
+  ]);
+});
+
+test("a fresh runtime rehydrates opaque manga and chapter context before opening text", async () => {
+  const { definition, context } = await loadBundle("LNori", {
+    generated: true,
+    prepare: `
+      globalThis.__rehydrationCalls = [];
+      const instance = source.LNori;
+      instance.getMangaDetails = async mangaId => {
+        __rehydrationCalls.push(["details", mangaId]);
+        return { mangaId, mangaInfo: {
+          primaryTitle: "Cold Novel", contentType: "novel", contentRating: "SAFE",
+          additionalInfo: { volumes: "fixture-volumes" }
+        }};
+      };
+      instance.getChapters = async sourceManga => {
+        __rehydrationCalls.push(["chapters", sourceManga.mangaInfo.additionalInfo.volumes]);
+        return [{
+          sourceManga, chapterId: "chapter-1", langCode: "en", chapNum: 1,
+          additionalInfo: { url: "https://lnori.com/chapter-1" }
+        }];
+      };
+      instance.getChapterDetails = async chapter => {
+        __rehydrationCalls.push(["chapter", chapter.additionalInfo.url]);
+        return { id: chapter.chapterId, mangaId: chapter.sourceManga.mangaId, type: "html", html: "<p>Cold text</p>" };
+      };
+    `
+  });
+
+  const publication = await definition.publicationContent({
+    installmentId: "chapter-1",
+    workId: "novel-1",
+    langCode: "en",
+    number: 1,
+    format: "xhtml",
+    sourceWork: { workId: "novel-1", workInfo: { mediaKind: "lightNovel" } }
+  });
+  assert.match(publication.text, /Cold text/);
+  assert.deepEqual(plain(context.__rehydrationCalls), [
+    ["details", "novel-1"],
+    ["chapters", "fixture-volumes"],
+    ["chapter", "https://lnori.com/chapter-1"]
+  ]);
+});
+
+test("fresh-runtime hydration reports a removed chapter instead of constructing incomplete context", async () => {
+  const { definition } = await loadBundle("LNori", {
+    generated: true,
+    prepare: `
+      const instance = source.LNori;
+      instance.getMangaDetails = async mangaId => ({ mangaId, mangaInfo: { primaryTitle: "Removed", contentType: "novel" } });
+      instance.getChapters = async () => [];
+      instance.getChapterDetails = async () => { throw new Error("must not be called"); };
+    `
+  });
+
+  await assert.rejects(
+    definition.publicationContent({
+      installmentId: "removed-chapter",
+      workId: "novel-1",
+      sourceWork: { workId: "novel-1", workInfo: { mediaKind: "lightNovel" } }
+    }),
+    /no longer available.*Refresh the title and retry/i
+  );
+});
+
+test("MangaBat retries only reviewed image mirrors and retains interceptor headers", async () => {
+  const runtime = await loadBundle("MangaBat", {
+    generated: true,
+    response: input => {
+      const host = new URL(input.url).hostname;
+      return host === "img-r1.2xstorage.com"
+        ? {
+            url: input.url,
+            status: 200,
+            headers: { "content-type": "image/webp" },
+            mimeType: "image/webp",
+            cookies: [],
+            dataBase64: base64("mirror-image")
+          }
+        : {
+            url: input.url,
+            status: 404,
+            headers: { "content-type": "text/html" },
+            mimeType: "text/html",
+            cookies: [],
+            dataBase64: base64("missing")
+          };
+    }
+  });
+  await runtime.definition.initialize();
+
+  const resource = await runtime.definition.imagePageContent({
+    url: "https://img-r2.2xstorage.com/chapter/page-1.webp"
+  });
+  assert.equal(resource.mimeType, "image/webp");
+  assert.equal(Buffer.from(resource.dataBase64, "base64").toString(), "mirror-image");
+  assert.deepEqual(runtime.requests.map(request => new URL(request.url).hostname), [
+    "img-r2.2xstorage.com",
+    "img-r1.2xstorage.com"
+  ]);
+  for (const request of runtime.requests) {
+    const headers = Object.fromEntries(Object.entries(request.headers ?? {}).map(([key, value]) => [key.toLowerCase(), value]));
+    assert.match(headers.referer ?? "", /^https:\/\/www\.mangabats\.com\/?/);
+  }
 });
 
 test("all fifteen generated packages execute search, details, installments, and content contracts", { skip: registrySkip }, async () => {

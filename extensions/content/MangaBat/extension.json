@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from mangabat.com.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.11",
+  "version": "1.0.0-alpha.12",
   "language": "en",
   "languages": [
     "en"
@@ -38,6 +38,9 @@
     "state"
   ],
   "allowedHTTPSHosts": [
+    "img-r1.2xstorage.com",
+    "img-r2.2xstorage.com",
+    "imgs-2.2xstorage.com",
     "www.mangabats.com"
   ],
   "authenticationModes": [

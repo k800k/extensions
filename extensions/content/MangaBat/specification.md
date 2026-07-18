@@ -7,7 +7,7 @@ This package adapts the GPL-3.0-or-later Paperback registry artifact for MangaBa
 - MangaReader API: `1.0`
 - Language: `en`
 - Rating: `SAFE`
-- HTTPS hosts: `www.mangabats.com`
+- HTTPS hosts: `img-r1.2xstorage.com`, `img-r2.2xstorage.com`, `imgs-2.2xstorage.com`, `www.mangabats.com`
 - Compatibility: **supported**
 
 Core discovery, title search, details, chapters, content delivery, request interception, and state are translated at the public content-extension boundary. API 1.1 provides constrained web execution for Comix and XHTML publication delivery for RoyalRoad and LNori. Paperback settings/search forms can be described, but MangaReader does not send form actions or selected advanced-filter values back into an extension. Live sites can change independently, and response-provided image CDNs require exact-host review.
