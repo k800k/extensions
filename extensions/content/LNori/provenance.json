@@ -37,12 +37,19 @@
     "sourceCommitRecordedByRegistry": null
   },
   "upstreamVersion": "1.0.0-alpha.1",
-  "releaseVersion": "1.0.0-alpha.2",
+  "releaseVersion": "1.0.0-alpha.3",
   "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
   "adapter": {
     "name": "@mangareader/paperback-compat",
     "version": "1.1.0",
     "license": "GPL-3.0-or-later"
   },
-  "generatedMainSHA256": "0d3d8410585d6821ff82db7de70eab435f162c61f8c93cb6675694ee01398bc4"
+  "compatibilityPatches": [
+    {
+      "id": "lnori-live-catalog-selectors-v1",
+      "beforeSHA256": "cb18ab61cbe6829337ac00a3e2fc591dba9628139aa42f42ef00f4749e834a1a",
+      "afterSHA256": "12b8dde69c8a2ebb633abf40c3937e3cc2ab211c92c4beb059bcbe18015447e2"
+    }
+  ],
+  "generatedMainSHA256": "9feee22e8a09b557aa58f9a61f3d7fa2becbabb986412981e4afcbf2eda98bfa"
 }

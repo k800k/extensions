@@ -15,13 +15,13 @@ hero:
 
 features:
   - icon: 🧭
-    title: Review before installing
-    details: Inspect source revisions, permissions, allowed hosts, features, and package integrity before deciding what to install.
+    title: Browse the catalog
+    details: Compare versions, languages, content ratings, features, contributors, and source links.
     link: /extension-list
     linkText: Open the catalog
   - icon: 📖
     title: Practical guides
-    details: Learn how repositories work, what extension metadata means, and how to make deliberate choices.
+    details: Learn how repositories, installation links, custom catalogs, and content ratings work.
     link: /guides/
     linkText: Read the guides
   - icon: 🛡️
@@ -40,4 +40,4 @@ features:
 <!-- Copyright © 2025 Inkdex -->
 <!-- Copyright © 2026 MangaReader Extension Contributors -->
 
-The catalog contains 15 content packages plus AniList and MyAnimeList tracker extensions. Packages are open source and auditable, but MangaReader does not review or certify them as safe. Users remain responsible for deciding what to install.
+The catalog contains 17 content packages plus AniList and MyAnimeList tracker extensions. Add the repository once, then get or update extensions individually in MangaReader.

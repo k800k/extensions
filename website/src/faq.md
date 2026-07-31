@@ -7,7 +7,7 @@
 ## General
 
 ::: details Are any extensions published right now?
-Yes. The catalog lists 15 content packages and two tracker packages: AniList and MyAnimeList.
+Yes. The catalog lists 17 content packages and two tracker packages: AniList and MyAnimeList.
 :::
 
 ::: details What extension types are supported?
@@ -36,11 +36,7 @@ Only in local storage for the current browser profile. There is no website accou
 Common causes are a missing `catalog.json`, invalid JSON, duplicate source IDs, an unsupported extension kind, an HTTP error, or a server that does not allow cross-origin browser access.
 :::
 
-## Safety and support
-
-::: details Are external catalogs reviewed by MangaReader?
-No safety certification is made. MangaReader validates package integrity, compatibility, and declared runtime access, then leaves the install decision to you. Review the linked open-source revision independently.
-:::
+## Support
 
 ::: details Where should I report a security vulnerability?
 Do not open a public issue containing sensitive details. Follow the repository's [Security Policy](https://github.com/k800k/extensions/blob/main/SECURITY.md).

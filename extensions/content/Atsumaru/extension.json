@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from atsu.moe.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.24",
+  "version": "1.0.0-alpha.25",
   "language": "en",
   "languages": [
     "en"
@@ -39,7 +39,8 @@
     "state"
   ],
   "allowedHTTPSHosts": [
-    "atsu.moe"
+    "atsu.moe",
+    "cdn.atsu.moe"
   ],
   "authenticationModes": [
     "none"

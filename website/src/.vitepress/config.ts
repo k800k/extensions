@@ -9,7 +9,7 @@ const base = process.env.MANGAREADER_SITE_BASE || "/extensions/";
 export default defineConfig({
   title: "MangaReader Extensions",
   titleTemplate: ":title | MangaReader Extensions",
-  description: "Browse, review, and install community extensions for MangaReader.",
+  description: "Browse and install community extensions for MangaReader.",
   base,
   outDir: "../../site",
   cleanUrls: true,
@@ -49,7 +49,7 @@ export default defineConfig({
         link: "/guides/",
         collapsed: false,
         items: [
-          { text: "Review an Extension", link: "/guides/#review-an-extension" },
+          { text: "Browse Extensions", link: "/guides/#browse-extensions" },
           { text: "Custom Catalogs", link: "/guides/#custom-catalogs" },
           { text: "Content Ratings", link: "/guides/#content-ratings" },
         ],

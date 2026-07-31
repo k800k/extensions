@@ -4,16 +4,34 @@
   "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "0.1.1",
+  "version": "0.3.1",
   "language": "multi",
   "languages": ["multi", "en", "ja", "zh", "es", "fr", "de", "ko", "ru"],
   "contentRating": "ADULT",
   "availability": "approvalRequired",
   "capabilities": ["browse", "discover", "search", "details", "installments", "acquisition", "imageSequence", "cookies", "challengeHandoff"],
   "permissions": ["network", "cookies", "rateLimiting", "redactedLogging", "challengeHandoff"],
-  "allowedHTTPSHosts": ["nhentai.net", "t.nhentai.net", "i.nhentai.net"],
+  "allowedHTTPSHosts": [
+    "nhentai.net",
+    "i.nhentai.net",
+    "t.nhentai.net"
+  ],
   "authenticationModes": ["none"],
   "developers": [{ "name": "MangaReader Extension Contributors" }],
   "iconFile": "icon.svg",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "compatibility": {
+    "adapter": "source-owned-js",
+    "status": "supported",
+    "scope": "core",
+    "note": null,
+    "limitations": []
+  },
+  "upstream": {
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "branch": "main",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "sourcePath": "sources/multi.nhentai",
+    "relationship": "algorithmReference"
+  }
 }

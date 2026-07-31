@@ -29,12 +29,9 @@ export interface CatalogSource {
   availability: string;
   capabilities: string[];
   developers: Developer[];
-  permissions: string[];
   universalLink?: string;
-  rightsDeclaration?: string;
   rightsURL?: string;
   reportURL?: string;
-  packageSHA256?: string;
   sourceURL?: string;
   sourceRevision?: string;
   license?: string;
@@ -58,11 +55,8 @@ export interface CatalogSource {
   extension: {
     apiVersion?: string;
     packageURL?: string;
-    sha256?: string;
     compressedSize?: number;
     uncompressedSize?: number;
-    allowedHTTPSHosts: string[];
-    authenticationModes: string[];
   } | null;
 }
 
@@ -218,19 +212,9 @@ export function normalizeCatalog(
       availability: stringValue(raw.availability, "unknown"),
       capabilities: stringList(raw.capabilities),
       developers,
-      permissions:
-        raw.permissions && typeof raw.permissions === "object"
-          ? stringList((raw.permissions as Record<string, unknown>).values)
-          : [],
       ...(httpURL(raw.universalLink) ? { universalLink: httpURL(raw.universalLink)! } : {}),
-      ...(stringValue(raw.rightsDeclaration)
-        ? { rightsDeclaration: stringValue(raw.rightsDeclaration) }
-        : {}),
       ...(httpURL(raw.rightsURL) ? { rightsURL: httpURL(raw.rightsURL)! } : {}),
       ...(httpURL(raw.reportURL) ? { reportURL: httpURL(raw.reportURL)! } : {}),
-      ...(stringValue(raw.packageSHA256 ?? raw.sha256)
-        ? { packageSHA256: stringValue(raw.packageSHA256 ?? raw.sha256) }
-        : {}),
       ...(httpURL(raw.sourceURL) ? { sourceURL: httpURL(raw.sourceURL)! } : {}),
       ...(stringValue(raw.sourceRevision) ? { sourceRevision: stringValue(raw.sourceRevision) } : {}),
       ...(stringValue(raw.license) ? { license: stringValue(raw.license) } : {}),
@@ -259,7 +243,6 @@ export function normalizeCatalog(
         ? {
             apiVersion: stringValue(extensionRaw.apiVersion) || undefined,
             packageURL: httpURL(extensionRaw.packageURL, repositoryURL) || undefined,
-            sha256: stringValue(extensionRaw.sha256) || undefined,
             compressedSize:
               typeof extensionRaw.compressedSize === "number"
                 ? extensionRaw.compressedSize
@@ -268,8 +251,6 @@ export function normalizeCatalog(
               typeof extensionRaw.uncompressedSize === "number"
                 ? extensionRaw.uncompressedSize
                 : undefined,
-            allowedHTTPSHosts: stringList(extensionRaw.allowedHTTPSHosts),
-            authenticationModes: stringList(extensionRaw.authenticationModes),
           }
         : null,
     };
@@ -297,7 +278,6 @@ export function buildInstallLink(repositoryURL: string, sourceIDs: Iterable<stri
 }
 
 export function formatLabel(value: string): string {
-  if (value === "approvalRequired") return "Approval required";
   if (value === "multi") return "Multiple languages";
   return value
     .replace(/([a-z])([A-Z])/g, "$1 $2")

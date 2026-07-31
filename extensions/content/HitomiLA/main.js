@@ -1,14 +1,30 @@
+/*!
+ * Hitomi.la for MangaReader
+ * SPDX-License-Identifier: Apache-2.0
+ * Source-owned JavaScript port; generated from extensions/content/HitomiLA/src.
+ * Algorithm reference: https://github.com/Aidoku-Community/sources
+ * Reference commit: 1faa9c5cfbf67af7cd18a302045a8d093e35867f
+ * Reference paths: sources/multi.hitomi/src/lib.rs, sources/multi.hitomi/src/gg.rs, sources/multi.hitomi/src/models.rs, sources/multi.hitomi/src/search.rs
+ */
+
 /* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 const HIT_STATIC = "https://ltn.gold-usergeneratedcontent.net";
 const HIT_SITE = "https://hitomi.la";
-const HIT_HOSTS = new Set([
-  "hitomi.la",
-  "ltn.gold-usergeneratedcontent.net",
-  "w1.gold-usergeneratedcontent.net",
-  "w2.gold-usergeneratedcontent.net"
-]);
-const HIT_IMAGE_HOSTS = new Set(["w1.gold-usergeneratedcontent.net", "w2.gold-usergeneratedcontent.net"]);
+const HIT_MAX_ROUTE_OFFSET = 999;
+const HIT_MAX_DYNAMIC_IMAGE_ORIGINS = 16;
+const HIT_PAGE_HOST = /^a(?:[1-9][0-9]{0,2}|1000)\.gold-usergeneratedcontent\.net$/;
+const hitDynamicImageOrigins = new Set();
+const HIT_IMAGE_HOSTS = {
+  has(host, origin) { return host === "atn.gold-usergeneratedcontent.net" || hitDynamicImageOrigins.has(origin); }
+};
+const HIT_HOSTS = {
+  has(host, origin) {
+    return host === "hitomi.la"
+      || host === "ltn.gold-usergeneratedcontent.net"
+      || HIT_IMAGE_HOSTS.has(host, origin);
+  }
+};
 const HIT_LANGUAGES = new Set([
   "english", "japanese", "chinese", "spanish", "french", "german", "korean", "russian",
   "italian", "portuguese", "polish", "dutch", "vietnamese", "indonesian", "thai", "czech",
@@ -56,17 +72,47 @@ function hitText(response) {
   return new TextDecoder("utf-8", { fatal: false }).decode(hitBytes(response.dataBase64));
 }
 
-function hitURL(value, hosts = HIT_HOSTS) {
+function hitParsedURL(value) {
   let url;
   try {
     url = new URL(value, HIT_SITE);
   } catch {
     throw hitError("InvalidResponseError", "Hitomi.la supplied an invalid URL", "invalidResponse");
   }
-  if (url.protocol !== "https:" || !hosts.has(url.hostname) || url.username || url.password) {
+  if (url.protocol !== "https:" || url.username || url.password || !url.hostname) {
+    throw hitError("InvalidResponseError", "Hitomi.la supplied an invalid HTTPS URL", "invalidResponse");
+  }
+  return url;
+}
+
+function hitURL(value, hosts = HIT_HOSTS) {
+  const url = hitParsedURL(value);
+  if (!hosts.has(url.hostname, url.origin)) {
     throw hitError("HostNotAllowedError", `Host is not declared for HitomiLA: ${url.hostname || "unknown"}`, "hostNotAllowed");
   }
   return url;
+}
+
+function hitPageOrigin(route) {
+  if (!Number.isInteger(route) || route < 0 || route > HIT_MAX_ROUTE_OFFSET) {
+    throw hitError("InvalidResponseError", "Hitomi.la routing result is out of range", "invalidResponse");
+  }
+  const origin = `https://a${route + 1}.gold-usergeneratedcontent.net`;
+  if (!HIT_PAGE_HOST.test(new URL(origin).hostname)) {
+    throw hitError("InvalidResponseError", "Hitomi.la routing destination is malformed", "invalidResponse");
+  }
+  return origin;
+}
+
+function hitRegisterPageOrigin(route) {
+  const origin = hitPageOrigin(route);
+  if (!hitDynamicImageOrigins.has(origin)) {
+    if (hitDynamicImageOrigins.size >= HIT_MAX_DYNAMIC_IMAGE_ORIGINS) {
+      throw hitError("InvalidResponseError", "Hitomi.la supplied too many image destinations", "invalidResponse");
+    }
+    hitDynamicImageOrigins.add(origin);
+  }
+  return origin;
 }
 
 async function hitRequest(url, options = {}) {
@@ -76,7 +122,11 @@ async function hitRequest(url, options = {}) {
     method: "GET",
     headers: {
       Accept: options.accept || (options.binary ? "application/octet-stream" : "text/plain,application/javascript;q=0.9"),
-      ...(options.range ? { Range: `bytes=${options.range[0]}-${options.range[1]}` } : {})
+      Referer: `${HIT_SITE}/`,
+      ...(options.range ? {
+        Range: `bytes=${options.range[0]}-${options.range[1]}`,
+        "Accept-Encoding": "identity"
+      } : {})
     }
   });
   if (response.status === 404 && options.missingOK) return null;
@@ -150,12 +200,48 @@ async function hitNozomiRange(state, page) {
   const end = start + HIT_PAGE_SIZE * 4 - 1;
   const response = await hitRequest(hitNozomiURL(state), { binary: true, range: [start, end], missingOK: true });
   if (!response) return { ids: [], hasNext: false };
-  let bytes = hitBytes(response.dataBase64);
-  if (response.status === 200) bytes = bytes.slice(start, end + 1);
+  const mimeType = String(response.mimeType || hitHeader(response.headers, "content-type"))
+    .split(";", 1)[0]
+    .trim()
+    .toLowerCase();
+  if (mimeType && mimeType !== "application/x-nozomi" && mimeType !== "application/octet-stream") {
+    throw hitError("InvalidResponseError", "Hitomi.la returned an invalid Nozomi media type", "invalidResponse");
+  }
+  const contentEncoding = hitHeader(response.headers, "content-encoding").trim().toLowerCase();
+  if (contentEncoding && contentEncoding !== "identity") {
+    throw hitError("InvalidResponseError", "Hitomi.la returned a compressed Nozomi byte range", "invalidResponse");
+  }
+  const received = hitBytes(response.dataBase64);
+  if (response.status === 200) {
+    if (received.byteLength % 4 !== 0 || start > received.byteLength) {
+      throw hitError("InvalidResponseError", "Hitomi.la returned an invalid complete Nozomi representation", "invalidResponse");
+    }
+    const bytes = received.slice(start, end + 1);
+    return {
+      ids: hitDecodeNozomi(bytes),
+      hasNext: end + 1 < received.byteLength
+    };
+  }
+  const range = hitHeader(response.headers, "content-range").match(/^bytes\s+(\d+)-(\d+)\/(\d+)$/i);
+  if (!range) throw hitError("InvalidResponseError", "Hitomi.la returned an invalid Nozomi content range", "invalidResponse");
+  const rangeStart = Number(range[1]);
+  const rangeEnd = Number(range[2]);
+  const total = Number(range[3]);
+  if (!Number.isSafeInteger(rangeStart)
+    || !Number.isSafeInteger(rangeEnd)
+    || !Number.isSafeInteger(total)
+    || rangeStart !== start
+    || rangeEnd < rangeStart
+    || rangeEnd > end
+    || total <= rangeEnd
+    || total % 4 !== 0
+    || received.byteLength !== rangeEnd - rangeStart + 1
+    || received.byteLength % 4 !== 0) {
+    throw hitError("InvalidResponseError", "Hitomi.la returned an inconsistent Nozomi content range", "invalidResponse");
+  }
+  const bytes = received;
   const ids = hitDecodeNozomi(bytes);
-  const range = hitHeader(response.headers, "content-range").match(/bytes\s+\d+-\d+\/(\d+)/i);
-  const hasNext = range ? end + 1 < Number(range[1]) : ids.length === HIT_PAGE_SIZE;
-  return { ids, hasNext };
+  return { ids, hasNext: rangeEnd + 1 < total };
 }
 
 async function hitNozomiAll(state) {
@@ -383,14 +469,23 @@ async function hitGallery(id) {
 function hitRoutingAssignment(source) {
   const text = String(source || "");
   if (!/\bgg\s*=\s*\{/.test(text)) throw hitError("InvalidResponseError", "Hitomi.la routing configuration assignment is missing", "invalidResponse");
-  const path = text.match(/\bb\s*:\s*["']([0-9]+\/)["']/)?.[1];
-  const defaultRoute = Number(text.match(/\bvar\s+o\s*=\s*([01])\s*;/)?.[1]);
-  if (!path || !Number.isInteger(defaultRoute)) throw hitError("InvalidResponseError", "Hitomi.la routing configuration is malformed", "invalidResponse");
+  const path = text.match(/\bb\s*:\s*["']([A-Za-z0-9._/-]+)["']/)?.[1];
+  const defaultRoute = Number(text.match(/\bvar\s+o\s*=\s*([0-9]{1,3})\s*;/)?.[1]);
+  if (!path || path.length > 256 || path.includes("..") || path.includes("//") || !Number.isInteger(defaultRoute) || defaultRoute < 0 || defaultRoute > HIT_MAX_ROUTE_OFFSET) {
+    throw hitError("InvalidResponseError", "Hitomi.la routing configuration is malformed", "invalidResponse");
+  }
   const overrides = new Map();
   const switchBody = text.match(/\bswitch\s*\(\s*g\s*\)\s*\{([\s\S]*?)\}\s*return\s+o\s*;/)?.[1] || "";
-  const groups = switchBody.matchAll(/((?:\s*case\s+[0-9]+\s*:\s*)+)\s*o\s*=\s*([01])\s*;\s*break\s*;/g);
+  for (const assignment of switchBody.matchAll(/\bo\s*=\s*([0-9]+)\s*;\s*break\s*;/g)) {
+    const route = assignment[1].length <= 10 ? Number(assignment[1]) : NaN;
+    if (!Number.isInteger(route) || route < 0 || route > HIT_MAX_ROUTE_OFFSET) {
+      throw hitError("InvalidResponseError", "Hitomi.la routing result is out of range", "invalidResponse");
+    }
+  }
+  const groups = switchBody.matchAll(/((?:\s*case\s+[0-9]+\s*:\s*)+)\s*o\s*=\s*([0-9]{1,10})\s*;\s*break\s*;/g);
   for (const group of groups) {
     const route = Number(group[2]);
+    if (!Number.isInteger(route) || route < 0 || route > HIT_MAX_ROUTE_OFFSET) throw hitError("InvalidResponseError", "Hitomi.la routing result is out of range", "invalidResponse");
     for (const match of group[1].matchAll(/case\s+([0-9]+)\s*:/g)) {
       const key = Number(match[1]);
       if (!Number.isInteger(key) || key < 0 || key > 4095) throw hitError("InvalidResponseError", "Hitomi.la routing key is out of range", "invalidResponse");
@@ -402,11 +497,12 @@ function hitRoutingAssignment(source) {
 
 async function hitRouting() {
   const now = hitNow();
-  if (hitRoutingCache && now - hitRoutingCache.loadedAt < 1800000) return hitRoutingCache.value;
+  if (hitRoutingCache && now - hitRoutingCache.loadedAt < 60000) return hitRoutingCache.value;
   if (!hitRoutingPromise) {
     hitRoutingPromise = hitRequest(`${HIT_STATIC}/gg.js`)
       .then(hitRoutingAssignment)
       .then(value => {
+        hitDynamicImageOrigins.clear();
         hitRoutingCache = { value, loadedAt: hitNow() };
         return value;
       })
@@ -415,13 +511,55 @@ async function hitRouting() {
   return hitRoutingPromise;
 }
 
-function hitWebPURL(hash, routing) {
+function hitPageURL(file, routing) {
+  const hash = file?.hash;
   if (typeof hash !== "string" || !/^[0-9a-f]{64}$/.test(hash)) throw hitError("InvalidResponseError", "Hitomi.la file hash is invalid", "invalidResponse");
   const number = Number.parseInt(hash.slice(-1) + hash.slice(-3, -1), 16);
   const route = routing.overrides.has(number) ? routing.overrides.get(number) : routing.defaultRoute;
-  if (route !== 0 && route !== 1) throw hitError("InvalidResponseError", "Hitomi.la routing result is invalid", "invalidResponse");
-  const url = `https://w${route + 1}.gold-usergeneratedcontent.net/${routing.path}${number}/${hash}.webp`;
+  if (!Number.isInteger(route) || route < 0 || route > HIT_MAX_ROUTE_OFFSET) throw hitError("InvalidResponseError", "Hitomi.la routing result is invalid", "invalidResponse");
+  let extension;
+  if (Number(file?.hasavif) === 1) extension = "avif";
+  else if (/\.gif$/i.test(String(file?.name || ""))) extension = "gif";
+  else if (Number(file?.haswebp) === 1) extension = "webp";
+  else {
+    const original = String(file?.name || "").match(/\.((?:jpe?g|png|gif))$/i)?.[1]?.toLowerCase();
+    if (!original) throw hitError("InvalidResponseError", "Hitomi.la file has no supported image representation", "invalidResponse");
+    extension = original;
+  }
+  const path = routing.path.replace(/^\/+|\/+$/g, "");
+  const url = `${hitRegisterPageOrigin(route)}/${path}/${number}/${hash}.${extension}`;
   return hitURL(url, HIT_IMAGE_HOSTS).href;
+}
+
+async function hitAuthorizedPageURL(value) {
+  const url = hitParsedURL(value);
+  const match = /^\/([A-Za-z0-9._/-]+)\/([0-9]+)\/([0-9a-f]{64})\.(avif|webp|gif|jpe?g|png)$/.exec(url.pathname);
+  if (!match || !HIT_PAGE_HOST.test(url.hostname)) {
+    throw hitError("InvalidIdentifierError", "Invalid Hitomi.la image URL", "invalidIdentifier");
+  }
+  const hash = match[3];
+  const number = Number.parseInt(hash.slice(-1) + hash.slice(-3, -1), 16);
+  if (match[2] !== String(number)) {
+    throw hitError("InvalidIdentifierError", "Invalid Hitomi.la image URL", "invalidIdentifier");
+  }
+  if (hitDynamicImageOrigins.has(url.origin)) return url;
+
+  const routing = await hitRouting();
+  const route = routing.overrides.has(number) ? routing.overrides.get(number) : routing.defaultRoute;
+  const expectedOrigin = hitPageOrigin(route);
+  const expectedPath = routing.path.replace(/^\/+|\/+$/g, "");
+  if (url.origin !== expectedOrigin || match[1] !== expectedPath) {
+    throw hitError("InvalidIdentifierError", "Invalid Hitomi.la image URL", "invalidIdentifier");
+  }
+  hitRegisterPageOrigin(route);
+  return hitURL(url.href, HIT_IMAGE_HOSTS);
+}
+
+function hitCoverURL(hash) {
+  if (typeof hash !== "string" || !/^[0-9a-f]{64}$/.test(hash)) throw hitError("InvalidResponseError", "Hitomi.la file hash is invalid", "invalidResponse");
+  const last = hash.slice(-1);
+  const previous = hash.slice(-3, -1);
+  return hitURL(`https://atn.gold-usergeneratedcontent.net/avifbigtn/${last}/${previous}/${hash}.avif`, HIT_IMAGE_HOSTS).href;
 }
 
 function hitValues(value, key) {
@@ -441,8 +579,7 @@ function hitTagGroups(gallery) {
 
 async function hitWork(gallery) {
   const id = hitPositiveInteger(gallery.id);
-  const routing = await hitRouting();
-  const cover = hitWebPURL(gallery.files[0].hash, routing);
+  const cover = hitCoverURL(gallery.files[0].hash);
   const artists = hitValues(gallery.artists, "artist");
   const groups = hitValues(gallery.groups, "group");
   const tags = hitTagGroups(gallery);
@@ -459,7 +596,14 @@ async function hitWork(gallery) {
     contentRating: "ADULT",
     mediaKind: "manga",
     language: gallery.language || "unknown",
-    files: gallery.files.map(file => ({ hash: file.hash, name: typeof file.name === "string" ? file.name : "", width: Number(file.width) || 0, height: Number(file.height) || 0 })),
+    files: gallery.files.map(file => ({
+      hash: file.hash,
+      name: typeof file.name === "string" ? file.name : "",
+      width: Number(file.width) || 0,
+      height: Number(file.height) || 0,
+      haswebp: Number(file.haswebp) || 0,
+      hasavif: Number(file.hasavif) || 0
+    })),
     tags,
     publishedAt: typeof gallery.date === "string" ? gallery.date : null,
     workInfo: {
@@ -469,8 +613,8 @@ async function hitWork(gallery) {
       secondaryTitles: alternate,
       contentRating: "ADULT",
       status: "completed",
-      artist: artists,
-      author: [...artists, ...groups],
+      artist: artists.join(", ") || undefined,
+      author: [...artists, ...groups].join(", ") || undefined,
       shareUrl
     }
   };
@@ -493,6 +637,7 @@ async function hitMapLimit(values, limit, operation) {
 async function hitCards(ids) {
   const works = await hitMapLimit(ids, 4, async id => hitWork(await hitGallery(id)));
   return works.map(work => ({
+    type: "work",
     id: work.id,
     workId: work.workId,
     title: work.title,
@@ -578,15 +723,17 @@ defineContentExtension({
     const id = hitPositiveInteger(installment?.workId ?? String(installment?.installmentId || "").replace(/^gallery:/, ""));
     const files = Array.isArray(installment?.files) ? installment.files : (await hitWork(await hitGallery(id))).files;
     const routing = await hitRouting();
-    return { id: `gallery:${id}`, workId: id, pages: files.map(file => hitWebPURL(file.hash, routing)) };
+    return { id: `gallery:${id}`, workId: id, pages: files.map(file => hitPageURL(file, routing)) };
   },
 
   async imagePageContent(input) {
-    const url = hitURL(String(input?.url || input?.pageURL || ""), HIT_IMAGE_HOSTS);
-    if (!/\/[0-9]+\/[0-9]+\/[0-9a-f]{64}\.webp$/.test(url.pathname)) throw hitError("InvalidIdentifierError", "Invalid Hitomi.la page URL", "invalidIdentifier");
-    const response = await hitRequest(url.href, { binary: true, accept: "image/webp" });
-    const mimeType = response.mimeType || hitHeader(response.headers, "content-type").split(";", 1)[0];
-    if (mimeType !== "image/webp") throw hitError("InvalidResponseError", "Hitomi.la page response is not WebP", "invalidResponse", url.href);
+    const supplied = hitParsedURL(String(input?.url || input?.pageURL || ""));
+    const coverPath = /^\/avifbigtn\/[0-9a-f]\/[0-9a-f]{2}\/[0-9a-f]{64}\.avif$/;
+    const validCover = supplied.hostname === "atn.gold-usergeneratedcontent.net" && coverPath.test(supplied.pathname);
+    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href);
+    const response = await hitRequest(url.href, { binary: true, accept: "image/avif,image/webp,image/gif,image/jpeg,image/png" });
+    const mimeType = String(response.mimeType || hitHeader(response.headers, "content-type")).split(";", 1)[0].trim().toLowerCase();
+    if (!/^image\/(?:avif|webp|gif|jpeg|png)$/.test(mimeType)) throw hitError("InvalidResponseError", "Hitomi.la image response has an unsupported MIME type", "invalidResponse", url.href);
     return { dataBase64: response.dataBase64, mimeType };
   },
 

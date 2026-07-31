@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from demonicscans.org.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.16",
+  "version": "1.0.0-alpha.18",
   "language": "en",
   "languages": [
     "en"
@@ -42,7 +42,8 @@
     "demoniclibs.com",
     "demonicscans.org",
     "librarydm.com",
-    "mangareadon.org"
+    "mangareadon.org",
+    "readermc.org"
   ],
   "authenticationModes": [
     "none"
@@ -54,26 +55,20 @@
       "github": "https://github.com/samipmainali"
     }
   ],
-  "license": "GPL-3.0-or-later",
+  "license": "Apache-2.0",
   "iconFile": "icon.png",
   "compatibility": {
-    "adapter": "paperback-0.9",
+    "adapter": "source-owned-js",
     "status": "supported",
     "scope": "core",
     "note": null,
-    "limitations": [
-      "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
-      "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
-    ]
+    "limitations": []
   },
   "upstream": {
-    "repository": "https://github.com/inkdex/general-extensions",
-    "branch": "0.9/stable",
-    "commit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
-    "sourcePath": "src/MangaDemon",
-    "sourceObjectSHA": "c4f5cbd6602cfb750c4c321d12ca466660bb6fab",
-    "relationship": "auditedSnapshotNotRecordedBuildInput",
-    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
-    "registryArtifactSHA256": "dd5ea16770df3b75a4e06350f72201afdaf57dca0eb1b764638722d0cae992fe"
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "branch": "main",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "sourcePath": "sources/en.mangademon",
+    "relationship": "algorithmReference"
   }
 }

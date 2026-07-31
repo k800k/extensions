@@ -4,7 +4,7 @@
   "description": "Extension that pulls web novels from royalroad.com and renders their chapters as readable pages.",
   "kind": "content",
   "apiVersion": "1.1",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "language": "en",
   "languages": [
     "en"
@@ -39,7 +39,8 @@
     "state"
   ],
   "allowedHTTPSHosts": [
-    "www.royalroad.com"
+    "www.royalroad.com",
+    "www.royalroadcdn.com"
   ],
   "authenticationModes": [
     "none"

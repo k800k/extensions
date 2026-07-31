@@ -21,7 +21,7 @@ Choose the support path that matches the problem. MangaReader application issues
   </a>
   <a class="docs-link-card" href="https://github.com/k800k/extensions" target="_blank" rel="noopener noreferrer">
     <strong>Inspect the source</strong>
-    <span>Review packages, policies, tests, and published catalog data.</span>
+    <span>Browse package source, licenses, tests, and published catalog data.</span>
   </a>
 </div>
 
@@ -40,4 +40,3 @@ An extension cannot repair an external service that is offline, blocking your ne
 ## Security reports
 
 Never put access tokens, publisher keys, exploitable package details, or personal data in a public issue. Follow the [Security Policy](https://github.com/k800k/extensions/blob/main/SECURITY.md) for private disclosure.
-

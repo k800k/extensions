@@ -17,6 +17,8 @@ export interface WebExecutionRequest {
   loadCSS?: boolean;
   loadImages?: boolean;
   cookies?: JSONValue[];
+  payloadBase64?: string;
+  payloadMimeType?: string;
 }
 export interface WebExecutionResult { result: JSONValue; cookies?: JSONValue[]; }
 export interface RuntimeContext {
