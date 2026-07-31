@@ -1,19 +1,33 @@
 {
   "id": "HitomiLA",
   "name": "Hitomi.la",
-  "description": "Anonymous multi-language discovery, search, gallery details, and WebP page reading for hitomi.la.",
+  "description": "Anonymous multi-language discovery, search, gallery details, and AVIF/WebP page reading for hitomi.la.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "0.1.1",
+  "version": "0.2.2",
   "language": "en",
   "languages": ["en", "ja", "zh", "es", "fr", "de", "ko", "ru", "it", "pt", "pl", "nl", "vi", "id", "th", "cs", "hu", "ar", "tr", "uk"],
   "contentRating": "ADULT",
   "availability": "approvalRequired",
   "capabilities": ["browse", "discover", "search", "details", "installments", "acquisition", "imageSequence"],
   "permissions": ["network", "rateLimiting", "redactedLogging"],
-  "allowedHTTPSHosts": ["hitomi.la", "ltn.gold-usergeneratedcontent.net", "w1.gold-usergeneratedcontent.net", "w2.gold-usergeneratedcontent.net"],
+  "allowedHTTPSHosts": ["hitomi.la", "ltn.gold-usergeneratedcontent.net", "atn.gold-usergeneratedcontent.net", "a1.gold-usergeneratedcontent.net", "a2.gold-usergeneratedcontent.net"],
   "authenticationModes": ["none"],
   "developers": [{ "name": "MangaReader Extension Contributors" }],
   "iconFile": "icon.svg",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "compatibility": {
+    "adapter": "source-owned-js",
+    "status": "supported",
+    "scope": "core",
+    "note": null,
+    "limitations": []
+  },
+  "upstream": {
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "branch": "main",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "sourcePath": "sources/multi.hitomi",
+    "relationship": "algorithmReference"
+  }
 }

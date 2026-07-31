@@ -10,62 +10,53 @@ import { createHash } from "node:crypto";
 import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { applyCompatibilityPatches } from "./compatibility-patches.mjs";
+import { assertGeneratedImportRequest, assertNoHandAuthoredMappings } from "./inkdex-import-policy.mjs";
+import { sourceOwnedContentIDs } from "./source-owned.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const EXPECTED_COUNT = 66;
 const API_1_1 = new Set(["Comix", "LNori", "RoyalRoad"]);
 const XHTML_SOURCES = new Set(["LNori", "RoyalRoad"]);
 const EXTRA_HOSTS = new Map([
-  ["Comix", ["static.comix.to"]],
+  ["Comix", ["static.comix.to", "*.wowpic1.store", "*.wowpic2.store", "*.wowpic3.store", "*.wowpic4.store", "*.wowpic5.store", "*.wowpic6.store", "*.wowpic7.store", "*.wowpic8.store", "*.wowpic9.store"]],
+  ["Atsumaru", ["cdn.atsu.moe"]],
+  ["LNori", ["cdn.lnori.com"]],
   ["MangaBat", ["img-r1.2xstorage.com", "img-r2.2xstorage.com", "imgs-2.2xstorage.com"]],
+  ["MangaDemon", ["readermc.org"]],
   ["MangaDex", ["*.mangadex.network"]],
   ["MangaKakalot", ["img-r1.2xstorage.com", "img-r2.2xstorage.com", "imgs-2.2xstorage.com"]],
+  ["RoyalRoad", ["www.royalroadcdn.com"]],
+  ["WeebCentral", ["temp.compsci88.com"]],
   ["Webtoon", ["webtoon-phinf.pstatic.net", "swebtoon-phinf.pstatic.net"]]
 ]);
 const RELEASE_VERSIONS = new Map([
   ["AllPornComic", "1.0.0-alpha.15"],
-  ["Atsumaru", "1.0.0-alpha.24"],
-  ["Comix", "1.0.0-alpha.45"],
-  ["HitomiLA", "0.1.1"],
-  ["LNori", "1.0.0-alpha.2"],
+  ["Atsumaru", "1.0.0-alpha.25"],
+  ["Comix", "1.0.0-alpha.52"],
+  ["HitomiLA", "0.2.2"],
+  ["LNori", "1.0.0-alpha.3"],
   ["MadaraDex", "1.0.0-alpha.16"],
-  ["MangaBat", "1.0.0-alpha.12"],
-  ["MangaDemon", "1.0.0-alpha.16"],
+  ["MangaBat", "1.0.0-alpha.13"],
+  ["MangaDemon", "1.0.0-alpha.18"],
   ["MangaDex", "1.0.0-alpha.28"],
   ["MangaDot", "1.0.0-alpha.5"],
-  ["MangaKakalot", "1.0.0-alpha.12"],
-  ["NHentai", "0.1.1"],
-  ["RoyalRoad", "1.0.0-alpha.2"],
+  ["MangaFox", "1.0.0-alpha.13"],
+  ["Mangago", "1.0.0-alpha.1"],
+  ["MangaKakalot", "1.0.0-alpha.13"],
+  ["NHentai", "0.3.1"],
+  ["RoyalRoad", "1.0.0-alpha.3"],
   ["Webtoon", "1.0.0-alpha.19"],
-  ["WeebCentral", "1.0.0-alpha.24"]
+  ["WeebCentral", "1.0.0-alpha.26"]
 ]);
 const EXCLUDED_HOSTS = new Map([
   ["MangaDex", new Set(["auth.mangadex.org", "status.mangadex.org"])]
 ]);
-const LIVE_SMOKE_AUDIT = new Map([
-  ["AllPornComic", "Anonymous HTTPS landing page rendered HTML on `allporncomic.com`; protected follow-up requests remain covered by challenge handoff"],
-  ["Atsumaru", "Anonymous HTTPS landing page returned HTML on `atsu.moe`"],
-  ["Comix", "Anonymous HTTPS landing page rendered on `comix.to`; the exact static host `static.comix.to` was reachable and denied a root request with HTTP 403"],
-  ["LNori", "Anonymous HTTPS landing page rendered HTML on `lnori.com`"],
-  ["MadaraDex", "Anonymous HTTPS landing page rendered HTML on `madaradex.org`"],
-  ["MangaBat", "Anonymous HTTPS landing page rendered HTML on `www.mangabats.com`; chapter images were observed on `img-r1.2xstorage.com` as WebP with a source referrer, with bounded fallback restricted to the reviewed `img-r2` and `imgs-2` mirrors"],
-  ["MangaDemon", "Anonymous HTTPS landing page rendered on `demonicscans.org`; exact CDN roots on `cdn.demoniclibs.com`, `demoniclibs.com`, and `mangareadon.org` returned HTTP 200, while `librarydm.com` returned an empty root response"],
-  ["MangaDex", "Anonymous search, details, installments, at-home page enumeration, and image retrieval passed; MangaDex supplied a randomized `*.mangadex.network` image host, which is explicitly declared"],
-  ["MangaDot", "Anonymous HTTPS landing page rendered HTML on `mangadot.net`"],
-  ["MangaKakalot", "Anonymous HTTPS landing page rendered HTML on `www.mangakakalot.gg`; the managed challenge path and the reviewed `img-r1`, `img-r2`, and `imgs-2` image mirrors require source referrer propagation"],
-  ["RoyalRoad", "Anonymous HTTPS landing page redirected within `www.royalroad.com` to `/home` and rendered HTML"],
-  ["Webtoon", "Anonymous HTTPS landing page redirected within `www.webtoons.com` to `/en/`; exact image hosts `webtoon-phinf.pstatic.net` and `swebtoon-phinf.pstatic.net` were reachable and returned HTTP 403/404 for root requests"],
-  ["WeebCentral", "Anonymous HTTPS landing page rendered HTML on `weebcentral.com`"]
-]);
 const UNSUPPORTED = new Map([
-  ["AllManga", "Uses Paperback executeInWebView to resolve protected chapter pages."],
-  ["MangaFox", "Uses dynamic eval during service-response parsing; MangaReader blocks dynamic code."],
-  ["Mangago", "Uses a dynamic Function constructor during service-response parsing; MangaReader blocks dynamic code."]
+  ["AllManga", "Uses Paperback executeInWebView to resolve protected chapter pages."]
 ]);
 const UNSUPPORTED_STATUS = new Map([
-  ["AllManga", "requiresWebView"],
-  ["MangaFox", "blockedDynamicCode"],
-  ["Mangago", "blockedDynamicCode"]
+  ["AllManga", "requiresWebView"]
 ]);
 
 const argv = process.argv.slice(2);
@@ -118,7 +109,7 @@ function authModes() {
   return ["none"];
 }
 
-function sourceHeader(source, mapping) {
+function sourceHeader(source, mapping, patchRecords) {
   return `/*!
  * ${source.name} for MangaReader
  * SPDX-License-Identifier: GPL-3.0-or-later
@@ -127,6 +118,7 @@ function sourceHeader(source, mapping) {
  * Audited snapshot path: ${mapping.sourcePath}
  * Snapshot relationship: not recorded by the registry as this artifact's build input
  * Registry artifact: ${mapping.registryArtifact.registryCommit}/${source.id}/index.js
+ * Compatibility patches: ${patchRecords.length ? patchRecords.map(record => record.id).join(", ") : "none"}
  * Adapter: MangaReader Paperback compatibility bridge v1.1
  */`;
 }
@@ -146,58 +138,6 @@ test(${JSON.stringify(`${id} is a provenance-pinned Paperback compatibility port
   const license = await readFile(join(directory, "LICENSE"), "utf8");
   if (!license.includes("GNU GENERAL PUBLIC LICENSE")) throw new Error("GPL package license is missing");
 });
-`;
-}
-
-function specification(source, mapping, metadata) {
-  const incompatibility = UNSUPPORTED.get(source.id);
-  return `# ${source.name} extension specification
-
-This package adapts the GPL-3.0-or-later Paperback registry artifact for ${source.name} to MangaReader Extension API v1. The compiled registry bundle is preserved inside \`main.js\`; the MangaReader compatibility bridge supplies Paperback's state, request, selector, interceptor, encoding, and form surfaces. [${mapping.upstreamRepository} at ${mapping.upstreamCommit.slice(0, 12)}](${mapping.upstreamCommitURL}), path \`${mapping.sourcePath}\`, is a later audited source snapshot: the registry did not record this artifact's source commit, so the snapshot is not claimed as its exact build input.
-
-- Kind: \`${metadata.kind}\`
-- Upstream version: \`${source.version}\`
-- MangaReader API: \`${metadata.apiVersion}\`
-- Language: \`${source.language}\`
-- Rating: \`${source.contentRating}\`
-- HTTPS hosts: ${metadata.allowedHTTPSHosts.map(host => `\`${host}\``).join(", ")}
-- Compatibility: **${incompatibility ? "unavailable" : "supported"}**${incompatibility ? ` — ${incompatibility}` : ""}
-
-Core discovery, title search, details, chapters, content delivery, request interception, and state are translated at the public content-extension boundary. API 1.1 provides constrained web execution for Comix and XHTML publication delivery for RoyalRoad and LNori. Paperback settings/search forms can be described, but MangaReader does not send form actions or selected advanced-filter values back into an extension. Live sites can change independently, and response-provided image CDNs require exact-host review.
-`;
-}
-
-function reviewStatus(source, mapping, metadata) {
-  const incompatibility = UNSUPPORTED.get(source.id);
-  return `# Review status for ${source.id}
-
-- Import integrity: **verified** against InkDex registry artifact SHA-256 \`${mapping.registryArtifact.sha256}\`.
-- Source reference: **audited snapshot** [${mapping.upstreamCommit.slice(0, 12)}](${mapping.upstreamCommitURL}), path \`${mapping.sourcePath}\`; the registry did not record the artifact's exact source commit/lockfile.
-- License: **GPL-3.0-or-later**; package license and source attribution included.
-- MangaReader compatibility: **${incompatibility ? "blocked" : "enabled"}**${incompatibility ? ` — ${incompatibility}` : ` through the public API ${metadata.apiVersion} adapter.`}
-- Activation review: **required**; the importer never marks a new package available.
-- Service status: not guaranteed; the upstream service and any response-provided CDN remain external dependencies.
-- Live smoke (2026-07-17): ${LIVE_SMOKE_AUDIT.get(source.id) ?? "not performed"}. The probe discarded response bodies beyond browser rendering and used no account or cookies.
-
-Generated metadata declares ${metadata.allowedHTTPSHosts.length} reviewed literal/base host${metadata.allowedHTTPSHosts.length === 1 ? "" : "s"}. Re-run the import audit when upstream code, service domains, permissions, or package hashes change.
-`;
-}
-
-function privacy(source, metadata, mapping) {
-  return `# Privacy assessment for ${source.id}
-
-The extension sends user-initiated browse, search, details, chapter, or image requests only through MangaReader's brokered HTTPS client. Declared hosts: ${metadata.allowedHTTPSHosts.map(host => `\`${host}\``).join(", ")}.
-
-MangaReader isolates ordinary and secure state by extension namespace. Depending on upstream behavior, this source may store preferences, cookies, login state, or rate-limit state. The package has no direct filesystem, sensor, clipboard, native-network, or arbitrary-code access. External service privacy terms remain those of the target service described by [the audited upstream snapshot](${mapping.upstreamCommitURL}).
-`;
-}
-
-function rights(source, mapping) {
-  return `# Rights record for ${source.id}
-
-The compatibility adapter and combined executable package are distributed under **GPL-3.0-or-later**. The authoritative imported bytes are the compiled InkDex registry artifact pinned by commit and SHA-256; it is retained without source-level feature changes and combined with the GPL compatibility bridge. [${mapping.upstreamURL} at ${mapping.upstreamCommit.slice(0, 12)}](${mapping.upstreamCommitURL}), path \`${mapping.sourcePath}\`, is a later audited source snapshot. InkDex's combined registry did not record the artifact's exact source commit or lockfile, so this snapshot is not represented as the artifact's exact build input; recovering that linkage requires upstream build provenance.
-
-The service name and icon identify the interoperated service; no affiliation or endorsement is claimed. Website content remains subject to its respective owner and service terms. Report removal, trademark, security, or rights concerns through the repository issue tracker.
 `;
 }
 
@@ -228,15 +168,21 @@ async function main() {
     readJSON(mappingPath),
     readFile(join(ROOT, "packages", "paperback-compat", "bridge.js"), "utf8")
   ]);
-  const mappingByID = new Map(mappingDocument.sources.filter(source => source.kind === "content").map(source => [source.id, source]));
+  const allContentMappings = mappingDocument.sources.filter(source => source.kind === "content");
+  const contentMappings = allContentMappings.filter(source => !sourceOwnedContentIDs.has(source.id));
+  assertNoHandAuthoredMappings(contentMappings);
+  const mappingByID = new Map(contentMappings.map(source => [source.id, source]));
   const versionedSources = versioning.sources.filter(source => mappingByID.has(source.id));
-  if (versionedSources.length !== EXPECTED_COUNT || mappingByID.size !== EXPECTED_COUNT) {
-    throw new Error(`Expected ${EXPECTED_COUNT} versioned and mapped content extensions`);
+  const expectedImportedCount = EXPECTED_COUNT
+    - allContentMappings.filter(source => sourceOwnedContentIDs.has(source.id)).length;
+  if (versionedSources.length !== expectedImportedCount || mappingByID.size !== expectedImportedCount) {
+    throw new Error(`Expected ${expectedImportedCount} import-owned versioned and mapped content extensions`);
   }
   const licensePath = join(ROOT, "licenses", "GPL-3.0-or-later.txt");
   await access(licensePath);
   const licenseBytes = await readFile(licensePath);
   const requestedIDs = option("--ids")?.split(",").map(value => value.trim()).filter(Boolean);
+  assertGeneratedImportRequest(requestedIDs);
   const requested = requestedIDs ? new Set(requestedIDs) : null;
   if (requested && requested.size !== requestedIDs.length) throw new Error("--ids must not contain duplicates");
   const selectedSources = requested ? versionedSources.filter(source => requested.has(source.id)) : versionedSources;
@@ -256,6 +202,8 @@ async function main() {
     if (sha256(upstreamBundle) !== mapping.registryArtifact.sha256) {
       throw new Error(`Registry artifact hash changed for ${source.id}`);
     }
+    const patchResult = applyCompatibilityPatches(source.id, upstreamBundle);
+    const importedBundle = patchResult.bundle;
     const excludedHosts = EXCLUDED_HOSTS.get(source.id) ?? new Set();
     const allowedHTTPSHosts = unique([
       ...(mapping.baseHosts ?? []),
@@ -276,9 +224,9 @@ async function main() {
       languages: [source.language],
       contentRating: source.contentRating,
       availability,
-      capabilities: capabilities(source, upstreamBundle),
+      capabilities: capabilities(source, importedBundle),
       inventoryCapabilities: source.capabilities ?? [],
-      permissions: permissions(source, upstreamBundle),
+      permissions: permissions(source, importedBundle),
       allowedHTTPSHosts,
       authenticationModes: authModes(),
       developers: source.developers ?? [],
@@ -312,22 +260,22 @@ async function main() {
       ...(XHTML_SOURCES.has(source.id) ? { mediaKind: "lightNovel" } : {})
     };
     const footer = `PaperbackCompat.registerContent(${JSON.stringify(source.id)}, source[${JSON.stringify(source.id)}], ${JSON.stringify(registrationOptions)});`;
-    const combined = `${sourceHeader(source, mapping)}\n${bridge.trim()}\n\n/* Unmodified compiled InkDex/Paperback bundle follows. */\n${upstreamBundle.trim()}\n\n/* MangaReader registration footer. */\n${footer}\n`;
+    const bundleNote = patchResult.records.length
+      ? "Hash-guarded compatibility-patched compiled InkDex/Paperback bundle follows."
+      : "Unmodified compiled InkDex/Paperback bundle follows.";
+    const combined = `${sourceHeader(source, mapping, patchResult.records)}\n${bridge.trim()}\n\n/* ${bundleNote} */\n${importedBundle.trim()}\n\n/* MangaReader registration footer. */\n${footer}\n`;
     await Promise.all([
       writeJSON(join(directory, "extension.json"), metadata),
       writeFile(join(directory, "main.js"), combined),
       writeFile(join(directory, metadata.iconFile), iconBytes),
       writeFile(join(directory, "LICENSE"), licenseBytes),
-      writeFile(join(directory, "specification.md"), specification(source, mapping, metadata)),
-      writeFile(join(directory, "REVIEW_STATUS.md"), reviewStatus(source, mapping, metadata)),
-      writeFile(join(directory, "PRIVACY.md"), privacy(source, metadata, mapping)),
-      writeFile(join(directory, "RIGHTS.md"), rights(source, mapping)),
       writeJSON(join(directory, "provenance.json"), {
         ...mapping,
         upstreamVersion: source.version,
         releaseVersion: metadata.version,
         importedFromRegistryBuild: versioning.buildTime,
         adapter: { name: "@mangareader/paperback-compat", version: "1.1.0", license: "GPL-3.0-or-later" },
+        compatibilityPatches: patchResult.records,
         generatedMainSHA256: sha256(combined)
       }),
       writeFile(join(directory, "tests", "contract.test.mjs"), contractTest(source.id, apiVersion))

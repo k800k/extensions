@@ -10,7 +10,7 @@ pageClass: catalog-doc
 
 # Extension List
 
-This catalog contains 15 content packages plus AniList and MyAnimeList tracker packages. Use this page to search by kind, inspect declared access and supported features, and open the exact source revision before installing. Custom catalogs may contain content or tracker entries and are stored only in this browser.
+This catalog contains 17 content packages plus AniList and MyAnimeList tracker packages. Search by kind, language, content rating, repository, or contributor and open package source and provenance links from the details view. Custom catalogs may contain content or tracker entries and are stored only in this browser.
 
 <ClientOnly>
   <CatalogBrowser />

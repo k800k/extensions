@@ -4,21 +4,19 @@
 
 # Guides
 
-MangaReader content and tracker extensions are small, separately reviewed integrations. The repository does not host comics, and an extension does not become trusted merely because it appears in a catalog. Theme extension packages are not supported.
+MangaReader content and tracker extensions connect the app to external services. The repository does not host comics. Theme extension packages are not supported.
 
-## Review an extension
+## Browse extensions
 
-Before opening an install link, check these fields in the [Extension List](/extension-list):
+The [Extension List](/extension-list) presents:
 
-1. **Availability** — `Service unavailable` identifies a known runtime blocker. `Approval required` is retained legacy metadata and does not replace MangaReader's package validation, declared-access review, or explicit user install disclosure.
-2. **Permissions** — compare requested access with the extension's stated purpose.
-3. **Allowed HTTPS hosts** — network access should be narrow and recognizable.
-4. **Rights and provenance** — inspect the source license, package notice, and service-rights record.
-5. **Package hash** — MangaReader uses the published SHA-256 value to detect changed artifacts.
-6. **Repository** — custom catalogs have different maintainers and review processes.
+1. **Package identity** — name, version, kind, language, and content rating.
+2. **Compatibility** — supported MangaReader API version, features, and known limitations.
+3. **Package information** — compressed size, contributors, and repository.
+4. **Source and provenance** — package source, upstream snapshot, license, and revision links.
 
-::: tip Start small
-Install only the integrations you intend to use. A smaller extension set is easier to review, troubleshoot, and keep current.
+::: tip Keep packages current
+Refresh a repository to check for newer manifest versions, then use Update for the extensions you want to replace.
 :::
 
 ## Custom catalogs
@@ -40,10 +38,10 @@ To remove a custom catalog, open **Repositories** on the Extension List and sele
 
 | Rating | Intended use |
 | --- | --- |
-| Safe | General-audience catalog metadata. |
+| Safe | General-audience material. |
 | Mature | Material that may include stronger themes or imagery. |
 | Adult | Explicit material intended only for adults where lawful. |
-| Unknown | The publisher did not provide a recognized rating. Treat it cautiously. |
+| Unknown | The publisher did not provide a recognized rating. |
 
 The Extension List begins with **Safe** included when opened without a shared state. Click a filter once to include it, twice to exclude it, and a third time to clear it. Clearing all rating filters shows every rating.
 

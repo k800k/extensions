@@ -21,7 +21,7 @@ test("historical import mapping pins the selected ports and remains separate fro
   const mappedIDs = contentSources.map(source => source.id);
   const importedIDs = [
     "AllPornComic", "Atsumaru", "Comix", "LNori", "MadaraDex", "MangaBat", "MangaDemon",
-    "MangaDex", "MangaDot", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
+    "MangaDex", "MangaDot", "MangaFox", "Mangago", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
   ];
 
   assert.equal(mappedIDs.length, 66);

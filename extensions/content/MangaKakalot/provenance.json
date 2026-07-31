@@ -1,49 +1,38 @@
 {
+  "schemaVersion": 1,
+  "sourceOwned": true,
   "id": "MangaKakalot",
-  "upstreamRepository": "mangabox-extensions",
-  "upstreamURL": "https://github.com/inkdex/mangabox-extensions",
-  "upstreamBranch": "0.9/stable",
-  "upstreamCommit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
-  "upstreamCommitURL": "https://github.com/inkdex/mangabox-extensions/commit/8c426aff4eff7ae719c00ddf22c9181d21f3c712",
-  "sourcePath": "src/MangaKakalot",
-  "sourceObjectSHA": "89604480d0caf5b4ff9ca130286a81d8e308a687",
-  "sourceRelationship": "auditedSnapshotNotRecordedBuildInput",
-  "license": {
-    "spdx": "GPL-3.0-or-later",
-    "path": "LICENSE",
-    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  "releaseVersion": "1.0.0-alpha.13",
+  "generator": "scripts/build-source-owned.mjs",
+  "upstream": {
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "paths": [
+      "sources/en.mangakakalot/src/lib.rs",
+      "templates/mangabox/src/lib.rs",
+      "templates/mangabox/src/imp.rs",
+      "templates/mangabox/src/helpers.rs",
+      "templates/mangabox/src/models.rs"
+    ],
+    "licenseChoice": "Apache-2.0"
   },
-  "baseHosts": [
-    "www.mangakakalot.gg"
+  "modules": [
+    {
+      "file": "scripts/source-owned-runtime/00-runtime.js",
+      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+    },
+    {
+      "file": "scripts/source-owned-runtime/10-html.js",
+      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+    },
+    {
+      "file": "scripts/source-owned-runtime/20-mangabox.js",
+      "sha256": "ec438dda7516cfef23e38363c9ed9a8a95040b5a7bc81c7cdbe5d0ac11d47f7e"
+    },
+    {
+      "file": "extensions/content/MangaKakalot/src/20-extension.js",
+      "sha256": "b77ae2f75c6b971d41dbb9764fbf7f0e7dc3fb2b2c5b2c78e9ad2de35eecadf2"
+    }
   ],
-  "likelyCDNAPIHosts": [],
-  "dynamicHostEvidence": [
-    "artwork/chapter URLs are parsed from live HTML and may use site-specific CDNs"
-  ],
-  "kind": "content",
-  "version": "1.0.0-alpha.11",
-  "language": "en",
-  "rating": "SAFE",
-  "capabilities": [
-    1,
-    4,
-    64,
-    16
-  ],
-  "description": "Extension that pulls content from mangakakalot.gg.",
-  "registryArtifact": {
-    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
-    "buildTime": "2026-06-16T12:25:31.942Z",
-    "sha256": "05b485f71d4e330311abaad6c6a55b2ea2e3f870598f015bf506704a6fd00fe3",
-    "sourceCommitRecordedByRegistry": null
-  },
-  "upstreamVersion": "1.0.0-alpha.11",
-  "releaseVersion": "1.0.0-alpha.12",
-  "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
-  "adapter": {
-    "name": "@mangareader/paperback-compat",
-    "version": "1.1.0",
-    "license": "GPL-3.0-or-later"
-  },
-  "generatedMainSHA256": "170c628e7f6bccdee41c9d247e5f746689dd8496ccbe522879b849e257b9b08a"
+  "generatedMainSHA256": "48cd35fd2ac8b31e9acc95bf0428e54c387b84b742d78b4b2ece69f10c5b4cb4"
 }

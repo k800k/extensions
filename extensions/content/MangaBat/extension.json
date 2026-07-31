@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from mangabat.com.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.12",
+  "version": "1.0.0-alpha.13",
   "language": "en",
   "languages": [
     "en"
@@ -53,26 +53,20 @@
       "github": null
     }
   ],
-  "license": "GPL-3.0-or-later",
+  "license": "Apache-2.0",
   "iconFile": "icon.png",
   "compatibility": {
-    "adapter": "paperback-0.9",
+    "adapter": "source-owned-js",
     "status": "supported",
     "scope": "core",
     "note": null,
-    "limitations": [
-      "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
-      "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
-    ]
+    "limitations": []
   },
   "upstream": {
-    "repository": "https://github.com/inkdex/mangabox-extensions",
-    "branch": "0.9/stable",
-    "commit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
-    "sourcePath": "src/MangaBat",
-    "sourceObjectSHA": "d0c6d9d8c5f2ed507af61ee84e11b77c9c87e49b",
-    "relationship": "auditedSnapshotNotRecordedBuildInput",
-    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
-    "registryArtifactSHA256": "ec9a212b2ebc2354619bc30ef24836e838eebc51a50a42eccd9e733211d3d08f"
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "branch": "main",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "sourcePath": "sources/en.mangabat",
+    "relationship": "algorithmReference"
   }
 }

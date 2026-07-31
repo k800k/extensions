@@ -1,50 +1,33 @@
 {
+  "schemaVersion": 1,
+  "sourceOwned": true,
   "id": "WeebCentral",
-  "upstreamRepository": "general-extensions",
-  "upstreamURL": "https://github.com/inkdex/general-extensions",
-  "upstreamBranch": "0.9/stable",
-  "upstreamCommit": "b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
-  "upstreamCommitURL": "https://github.com/inkdex/general-extensions/commit/b03d78c35dfb0ad305660dd3aa8618a006cbd73f",
-  "sourcePath": "src/WeebCentral",
-  "sourceObjectSHA": "edf93b97fdcb7c282c52ad8cd3b968d6e19b465f",
-  "sourceRelationship": "auditedSnapshotNotRecordedBuildInput",
-  "license": {
-    "spdx": "GPL-3.0-or-later",
-    "path": "LICENSE",
-    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  "releaseVersion": "1.0.0-alpha.26",
+  "generator": "scripts/build-source-owned.mjs",
+  "upstream": {
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "paths": [
+      "sources/en.weebcentral/src/lib.rs",
+      "sources/en.weebcentral/src/filter.rs",
+      "sources/en.weebcentral/src/helper.rs",
+      "sources/en.weebcentral/src/model.rs"
+    ],
+    "licenseChoice": "Apache-2.0"
   },
-  "baseHosts": [
-    "weebcentral.com"
+  "modules": [
+    {
+      "file": "scripts/source-owned-runtime/00-runtime.js",
+      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+    },
+    {
+      "file": "scripts/source-owned-runtime/10-html.js",
+      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+    },
+    {
+      "file": "extensions/content/WeebCentral/src/20-extension.js",
+      "sha256": "565d8b8fb67d830c2e7ea161e280f57fccf96f03980f2f8361b6a8e8667d9356"
+    }
   ],
-  "likelyCDNAPIHosts": [],
-  "dynamicHostEvidence": [
-    "HTML/API-derived artwork and chapter URLs require runtime host observation unless explicitly listed"
-  ],
-  "kind": "content",
-  "version": "1.0.0-alpha.23",
-  "language": "en",
-  "rating": "SAFE",
-  "capabilities": [
-    1,
-    16,
-    4,
-    64,
-    32
-  ],
-  "description": "Extension that pulls content from weebcentral.com.",
-  "registryArtifact": {
-    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
-    "buildTime": "2026-07-09T07:19:57.592Z",
-    "sha256": "498deeb0c1fc94b6ffd21d27759c0c534fdea79330cb1ed5c8d9c358bf8e5030",
-    "sourceCommitRecordedByRegistry": null
-  },
-  "upstreamVersion": "1.0.0-alpha.23",
-  "releaseVersion": "1.0.0-alpha.24",
-  "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
-  "adapter": {
-    "name": "@mangareader/paperback-compat",
-    "version": "1.1.0",
-    "license": "GPL-3.0-or-later"
-  },
-  "generatedMainSHA256": "a8bd624f229eb9b3de95c99f470847a891e1f37fa4bbab8b94c3c9254f90a970"
+  "generatedMainSHA256": "640bf0c6a0e5ec427dd4fdd641c576fe64c1442d6e0c76aa31c2c3add79ace54"
 }

@@ -581,7 +581,6 @@ input:focus-visible {
 .rating-badge,
 .version-badge,
 .language-badge,
-.status-badge,
 .repository-badge {
   display: inline-flex;
   align-items: center;
@@ -612,24 +611,6 @@ input:focus-visible {
   border-color: var(--vp-c-red-1);
   color: var(--vp-c-red-1);
   background: var(--vp-c-red-soft);
-}
-
-.status-badge.approvalRequired {
-  border-color: var(--vp-c-yellow-1);
-  color: var(--vp-c-yellow-1);
-  background: var(--vp-c-yellow-soft);
-}
-
-.status-badge.available {
-  border-color: var(--vp-c-green-1);
-  color: var(--vp-c-green-1);
-  background: var(--vp-c-green-soft);
-}
-
-.status-badge.serviceUnavailable {
-  border-color: var(--vp-c-yellow-1);
-  color: var(--vp-c-yellow-1);
-  background: var(--vp-c-yellow-soft);
 }
 
 .extension-description {
@@ -940,13 +921,6 @@ input:focus-visible {
   background: var(--vp-c-bg-soft);
 }
 
-.rights-callout {
-  padding: 0.85rem;
-  border: 1px solid var(--vp-c-yellow-1);
-  border-radius: 9px;
-  background: var(--vp-c-yellow-soft);
-}
-
 .compatibility-callout {
   padding: 0.85rem;
   border: 1px solid var(--vp-c-brand-1);
@@ -966,21 +940,10 @@ input:focus-visible {
   font-size: 0.82rem;
 }
 
-.host-list,
 .developer-list {
   margin: 0.4rem 0 0;
   padding: 0;
   list-style: none;
-}
-
-.host-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.host-list code {
-  font-size: 0.75rem;
 }
 
 .developer-list li {
@@ -1000,14 +963,6 @@ input:focus-visible {
   margin-right: auto;
   color: var(--vp-c-text-1);
   font-weight: 600;
-}
-
-.checksum {
-  display: block;
-  padding: 0.65rem;
-  overflow-wrap: anywhere;
-  font-size: 0.7rem;
-  line-height: 1.4;
 }
 
 .details-actions {

@@ -2,11 +2,11 @@
 import test from "node:test";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assertContentExtension } from "../../../../packages/cli/lib/contracts.mjs";
+import { assertSourceOwnedContent } from "../../source-owned-assertions.mjs";
 
 const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-test("NHentai is a valid content extension package", async () => {
-  const metadata = await assertContentExtension(directory, "NHentai");
+test("NHentai is a deterministic Aidoku-referenced source-owned package", async () => {
+  const metadata = await assertSourceOwnedContent(directory, "NHentai");
   if (metadata.availability !== "approvalRequired" || metadata.contentRating !== "ADULT") throw new Error("unexpected NHentai catalog metadata");
 });

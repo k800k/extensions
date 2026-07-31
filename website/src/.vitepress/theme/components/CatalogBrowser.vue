@@ -16,7 +16,7 @@ import {
   type Repository,
 } from "../lib/catalog";
 
-type FilterDimension = "kinds" | "ratings" | "languages" | "statuses" | "repositories";
+type FilterDimension = "kinds" | "ratings" | "languages" | "repositories";
 type FilterState = Record<FilterDimension, { include: Set<string>; exclude: Set<string> }>;
 
 interface FilterOption {
@@ -41,7 +41,6 @@ const FILTER_QUERY: Record<FilterDimension, { include: string; exclude: string }
   kinds: { include: "type", exclude: "excludeType" },
   ratings: { include: "rating", exclude: "excludeRating" },
   languages: { include: "language", exclude: "excludeLanguage" },
-  statuses: { include: "status", exclude: "excludeStatus" },
   repositories: { include: "repository", exclude: "excludeRepository" },
 };
 const KNOWN_STATE_PARAMS = [
@@ -61,7 +60,6 @@ function createFilters(useSafeDefault = false): FilterState {
       exclude: new Set(),
     },
     languages: { include: new Set(), exclude: new Set() },
-    statuses: { include: new Set(), exclude: new Set() },
     repositories: { include: new Set(), exclude: new Set() },
   };
 }
@@ -128,11 +126,6 @@ const filterGroups = computed<FilterGroup[]>(() => {
       title: "Languages",
       options: uniqueOptions(sources.value.flatMap((source) => source.languages)),
     },
-    {
-      dimension: "statuses",
-      title: "Availability",
-      options: uniqueOptions(sources.value.map((source) => source.availability)),
-    },
   ];
 });
 
@@ -144,8 +137,6 @@ function sourceValues(source: CatalogSource, dimension: FilterDimension): string
       return [normalizedValue(source.contentRating)];
     case "languages":
       return source.languages.map(normalizedValue);
-    case "statuses":
-      return [normalizedValue(source.availability)];
     case "repositories":
       return [source.repository.url];
   }
@@ -158,14 +149,12 @@ function matchesFilters(source: CatalogSource): boolean {
       source.name,
       source.id,
       source.description,
-      source.availability,
       source.contentRating,
       source.kind,
       source.repository.label,
       ...source.languages,
-      ...source.permissions,
+      ...source.capabilities,
       ...source.developers.map((developer) => developer.name),
-      ...(source.extension?.allowedHTTPSHosts || []),
     ]
       .join(" ")
       .toLowerCase();
@@ -292,7 +281,8 @@ function installLinkFor(source: CatalogSource): string {
 }
 
 function isInstallable(source: CatalogSource): boolean {
-  return source.availability === "available" || source.availability === "approvalRequired";
+  const availability = normalizedValue(source.availability);
+  return availability !== "serviceunavailable" && availability !== "retired";
 }
 
 const installCandidates = computed(() =>
@@ -551,7 +541,7 @@ onUnmounted(() => {
           ref="searchInput"
           v-model="searchQuery"
           type="search"
-          placeholder="Search names, descriptions, hosts, or contributors"
+          placeholder="Search names, descriptions, languages, or contributors"
           autocomplete="off"
         />
         <kbd>/</kbd>
@@ -733,7 +723,6 @@ onUnmounted(() => {
           </span>
         </div>
         <div class="extension-card-meta">
-          <span class="status-badge" :class="source.availability">{{ formatLabel(source.availability) }}</span>
           <span class="repository-badge">{{ source.repository.label }}</span>
         </div>
         <footer class="extension-card-footer">
@@ -749,7 +738,7 @@ onUnmounted(() => {
       <span aria-hidden="true">⌕</span>
       <template v-if="sources.length === 0">
         <h3>No content extensions published yet</h3>
-        <p>This repository is ready for reviewed content extensions, but its built-in catalog is currently empty.</p>
+        <p>This repository does not currently publish any content extensions.</p>
       </template>
       <template v-else>
         <h3>No extensions match</h3>
@@ -827,9 +816,6 @@ onUnmounted(() => {
                   {{ formatLabel(detailsSource.contentRating) }}
                 </span>
                 <span class="version-badge">v{{ detailsSource.version }}</span>
-                <span class="status-badge" :class="detailsSource.availability">
-                  {{ formatLabel(detailsSource.availability) }}
-                </span>
               </div>
             </div>
           </header>
@@ -837,10 +823,6 @@ onUnmounted(() => {
             <section>
               <h3>Description</h3>
               <p>{{ detailsSource.description || "No description provided." }}</p>
-            </section>
-            <section v-if="detailsSource.rightsDeclaration" class="rights-callout">
-              <h3>Audit information</h3>
-              <p>{{ detailsSource.rightsDeclaration }}</p>
             </section>
             <section v-if="detailsSource.compatibility" class="compatibility-callout">
               <h3>Compatibility</h3>
@@ -857,14 +839,14 @@ onUnmounted(() => {
                 </li>
               </ul>
             </section>
+            <section v-if="detailsSource.capabilities.length">
+              <h3>Features</h3>
+              <p>{{ detailsSource.capabilities.map(formatLabel).join(", ") }}</p>
+            </section>
             <div class="details-grid">
               <section>
                 <h3>Languages</h3>
                 <p>{{ detailsSource.languages.map(formatLabel).join(", ") || "Not declared" }}</p>
-              </section>
-              <section>
-                <h3>Permissions</h3>
-                <p>{{ detailsSource.permissions.map(formatLabel).join(", ") || "None declared" }}</p>
               </section>
               <section>
                 <h3>API version</h3>
@@ -875,12 +857,6 @@ onUnmounted(() => {
                 <p>{{ formatBytes(detailsSource.extension?.compressedSize) }}</p>
               </section>
             </div>
-            <section v-if="detailsSource.extension?.allowedHTTPSHosts.length">
-              <h3>Allowed HTTPS hosts</h3>
-              <ul class="host-list">
-                <li v-for="host in detailsSource.extension.allowedHTTPSHosts" :key="host"><code>{{ host }}</code></li>
-              </ul>
-            </section>
             <section v-if="detailsSource.developers.length">
               <h3>Contributors</h3>
               <ul class="developer-list">
@@ -891,18 +867,13 @@ onUnmounted(() => {
                 </li>
               </ul>
             </section>
-            <section v-if="detailsSource.packageSHA256">
-              <h3>Package SHA-256</h3>
-              <code class="checksum">{{ detailsSource.packageSHA256 }}</code>
-              <p>This confirms the downloaded bytes match this catalog entry. It is not a safety review.</p>
-            </section>
             <section v-if="detailsSource.sourceURL">
               <h3>Package source</h3>
-              <a :href="detailsSource.sourceURL" target="_blank" rel="noopener noreferrer">Review the open-source package</a>
+              <a :href="detailsSource.sourceURL" target="_blank" rel="noopener noreferrer">Open the package source</a>
               <p v-if="detailsSource.sourceRevision">Revision <code>{{ detailsSource.sourceRevision }}</code></p>
             </section>
             <section v-if="detailsSource.upstream?.repository">
-              <h3>Audited source snapshot</h3>
+              <h3>Upstream source snapshot</h3>
               <a
                 :href="detailsSource.upstream.repository"
                 target="_blank"
@@ -917,7 +888,7 @@ onUnmounted(() => {
                 </span>
               </p>
               <p v-if="detailsSource.upstream.relationship === 'auditedSnapshotNotRecordedBuildInput'">
-                InkDex did not record the registry artifact's exact source commit or lockfile. This snapshot is for review and is not claimed as the artifact's build input.
+                InkDex did not record the registry artifact's exact source commit or lockfile. This snapshot is not claimed as the artifact's build input.
               </p>
               <p v-if="detailsSource.license">License: {{ detailsSource.license }}</p>
             </section>
@@ -936,7 +907,7 @@ onUnmounted(() => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Rights record
+              License
             </a>
             <a
               v-if="detailsSource.reportURL"
@@ -952,7 +923,7 @@ onUnmounted(() => {
               class="brand-button"
               :href="installLinkFor(detailsSource)"
             >
-              Review in MangaReader
+              Open in MangaReader
             </a>
             <span v-else class="unavailable-action" role="status">Not installable in this build</span>
           </footer>

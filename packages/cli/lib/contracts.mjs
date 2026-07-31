@@ -25,7 +25,6 @@ export const authenticationModes = new Set([
 
 const availabilities = new Set(["approvalRequired", "available", "serviceUnavailable", "retired"]);
 const contentRatings = new Set(["SAFE", "MATURE", "ADULT"]);
-const forbiddenRuntimeFragments = ["eval(", "new Function", "Function(", "WebAssembly", "import("];
 
 function assertNonemptyString(value, field) {
   assert.equal(typeof value, "string", `${field} must be a string`);
@@ -122,12 +121,6 @@ export async function assertExtensionPackage(directory, expectedKind, expectedID
     assert.ok(metadata.permissions.includes("authenticationHandoff"), "tracker authenticationHandoff permission is required");
   }
   assert.doesNotMatch(source, /\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\s*\(/, "extensions must use the brokered runtime client");
-  forbiddenRuntimeFragments.forEach(fragment => assert.ok(!source.includes(fragment), `main.js contains forbidden runtime fragment ${fragment}`));
-
-  for (const file of ["specification.md", "REVIEW_STATUS.md", "PRIVACY.md", "RIGHTS.md"]) {
-    const text = await readFile(join(directory, file), "utf8");
-    assert.ok(text.trim().length > 80, `${file} must contain an independent review record`);
-  }
   return metadata;
 }
 

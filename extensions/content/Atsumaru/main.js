@@ -6,6 +6,7 @@
  * Audited snapshot path: src/Atsumaru
  * Snapshot relationship: not recorded by the registry as this artifact's build input
  * Registry artifact: 5514d0bc58cb8edcee06c1c01458c51a7fd43e43/Atsumaru/index.js
+ * Compatibility patches: none
  * Adapter: MangaReader Paperback compatibility bridge v1.1
  */
 /* SPDX-License-Identifier: GPL-3.0-or-later */

@@ -56,7 +56,7 @@ async function createScaffold(entry) {
   const metadata = {
     id: entry.id,
     name: entry.name || entry.id,
-    description: `Open-source MangaReader ${kind} extension scaffold. Review its source before installing.`,
+    description: `Open-source MangaReader ${kind} extension scaffold.`,
     kind,
     apiVersion: API_VERSION,
     version: "0.1.0",
@@ -75,10 +75,6 @@ async function createScaffold(entry) {
   await writeJSON(join(directory, "extension.json"), metadata);
   await writeFile(join(directory, "main.js"), scaffoldSource(entry.id, kind));
   await writeFile(join(directory, "icon.svg"), neutralSVG(entry.id, metadata.contentRating));
-  await writeFile(join(directory, "specification.md"), `# ${metadata.name} extension specification\n\nStatus: **implementation incomplete**.\n\nDocument the target service API, terms, authentication, pagination, supported operations, error cases, and representative fixtures. This record helps users audit behavior; it is not a safety certification.\n`);
-  await writeFile(join(directory, "REVIEW_STATUS.md"), `# Review status for ${entry.id}\n\nThis open-source package has not been certified safe by MangaReader. Validate the manifest, package contract, declared hosts, permissions, and source behavior before publishing it as available.\n`);
-  await writeFile(join(directory, "PRIVACY.md"), `# Privacy assessment for ${entry.id}\n\nDocument every transmitted data category, credential or cookie use, retention behavior, authentication handoff, user control, and target-service privacy policy. Users should review this alongside the source.\n`);
-  await writeFile(join(directory, "RIGHTS.md"), `# Rights record for ${entry.id}\n\nRecord the service terms, API authorization, content-access rights, trademark decision, report contact, reviewer, and review date. This record supplies audit context and is not an endorsement.\n`);
   const relativeHelper = "../../../../packages/cli/lib/contracts.mjs";
   await writeFile(join(directory, "tests", "contract.test.mjs"), `${APACHE_HEADER}\nimport test from "node:test";\nimport { dirname, resolve } from "node:path";\nimport { fileURLToPath } from "node:url";\nimport { assertExtensionPackage } from ${JSON.stringify(relativeHelper)};\nconst directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");\ntest(${JSON.stringify(`${entry.id} is a valid ${kind} extension package`)}, async () => {\n  await assertExtensionPackage(directory, ${JSON.stringify(kind)}, ${JSON.stringify(entry.id)});\n});\n`);
 }
@@ -159,7 +155,7 @@ function crc32(data) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-function zip(entries) {
+export function zip(entries) {
   const local = [];
   const central = [];
   let offset = 0;
@@ -185,6 +181,32 @@ function zip(entries) {
   end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(0, 4); end.writeUInt16LE(0, 6); end.writeUInt16LE(count, 8); end.writeUInt16LE(count, 10);
   end.writeUInt32LE(directoryBytes.length, 12); end.writeUInt32LE(offset, 16); end.writeUInt16LE(0, 20);
   return Buffer.concat([...local, directoryBytes, end]);
+}
+
+async function optionalFile(path) {
+  try {
+    return await readFile(path);
+  } catch (error) {
+    if (error.code === "ENOENT") return undefined;
+    throw error;
+  }
+}
+
+export async function createExtensionArchive(directory, repositoryLicense) {
+  const metadataBytes = await readFile(join(directory, "extension.json"));
+  const main = await readFile(join(directory, "main.js"));
+  const license = await optionalFile(join(directory, "LICENSE")) || repositoryLicense;
+  const notice = await optionalFile(join(directory, "NOTICE"));
+  const entries = { "LICENSE": license, "extension.json": metadataBytes, "main.js": main };
+  if (notice) entries.NOTICE = notice;
+  return {
+    archive: zip(entries),
+    metadataBytes,
+    main,
+    license,
+    notice,
+    uncompressedSize: Object.values(entries).reduce((total, bytes) => total + bytes.length, 0)
+  };
 }
 
 async function pruneGeneratedFiles(directory, expected, matchesGeneratedName) {
@@ -216,16 +238,7 @@ async function buildArtifacts() {
   for (const { kind, id } of entries) {
     const directory = extensionDirectory(kind, id);
     const metadata = await assertExtensionPackage(directory, kind, id);
-    const metadataBytes = await readFile(join(directory, "extension.json"));
-    const main = await readFile(join(directory, "main.js"));
-    let license;
-    try {
-      license = await readFile(join(directory, "LICENSE"));
-    } catch (error) {
-      if (error.code !== "ENOENT") throw error;
-      license = repositoryLicense;
-    }
-    const archive = zip({ "LICENSE": license, "extension.json": metadataBytes, "main.js": main });
+    const { archive, uncompressedSize } = await createExtensionArchive(directory, repositoryLicense);
     const packageName = `${id}-${metadata.version}.mrx`;
     packageNames.add(packageName);
     await writeFile(join(packagesDirectory, packageName), archive);
@@ -245,8 +258,8 @@ async function buildArtifacts() {
       capabilities: metadata.capabilities,
       developers: metadata.developers.map(developer => ({ name: developer.name })),
       universalLink: `https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=${encodeURIComponent(id)}`,
-      rightsDeclaration: "Open-source extension; review its code and records before installing.",
-      rightsURL: `https://github.com/k800k/extensions/blob/${sourceRevision}/extensions/${kind}/${id}/RIGHTS.md`,
+      rightsDeclaration: `Licensed under ${metadata.license || "Apache-2.0"}.`,
+      rightsURL: `https://github.com/k800k/extensions/blob/${sourceRevision}/extensions/${kind}/${id}/LICENSE`,
       reportURL: "https://github.com/k800k/extensions/issues/new/choose",
       sourceURL: `https://github.com/k800k/extensions/tree/${sourceRevision}/extensions/${kind}/${id}`,
       sourceRevision,
@@ -260,7 +273,7 @@ async function buildArtifacts() {
         packageURL: `packages/${packageName}`,
         sha256: sha256(archive),
         compressedSize: archive.length,
-        uncompressedSize: license.length + metadataBytes.length + main.length,
+        uncompressedSize,
         allowedHTTPSHosts: metadata.allowedHTTPSHosts,
         authenticationModes: metadata.authenticationModes
       }
@@ -354,20 +367,22 @@ async function serve() {
   server.listen(port, "127.0.0.1", () => console.log(`MangaReader catalog: http://127.0.0.1:${port}`));
 }
 
-try {
-  switch (command) {
-  case "seed-catalog": await seedCatalog(); break;
-  case "new": await createNew(); break;
-  case "check": await check(); break;
-  case "test": await check(); break;
-  case "bundle": await buildArtifacts(); break;
-  case "publish": await publish(); break;
-  case "serve": await serve(); break;
-  default:
-    console.log("mr-ext new|seed-catalog|check|test|bundle|serve|publish");
-    process.exitCode = command ? 1 : 0;
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try {
+    switch (command) {
+    case "seed-catalog": await seedCatalog(); break;
+    case "new": await createNew(); break;
+    case "check": await check(); break;
+    case "test": await check(); break;
+    case "bundle": await buildArtifacts(); break;
+    case "publish": await publish(); break;
+    case "serve": await serve(); break;
+    default:
+      console.log("mr-ext new|seed-catalog|check|test|bundle|serve|publish");
+      process.exitCode = command ? 1 : 0;
+    }
+  } catch (error) {
+    console.error(error.stack || error.message);
+    process.exitCode = 1;
   }
-} catch (error) {
-  console.error(error.stack || error.message);
-  process.exitCode = 1;
 }

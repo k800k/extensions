@@ -2,6 +2,7 @@
 /* Copyright © 2026 MangaReader Extension Contributors */
 
 import assert from "node:assert/strict";
+import { createCipheriv } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
@@ -19,6 +20,21 @@ const registrySkip = existsSync(registryRoot)
 
 const plain = value => JSON.parse(JSON.stringify(value));
 const base64 = value => Buffer.from(value).toString("base64");
+
+function encryptZeroPaddedAES(text, keyHex, ivHex) {
+  const input = Buffer.from(text, "utf8");
+  const padded = Buffer.alloc(Math.ceil(input.length / 16) * 16);
+  input.copy(padded);
+  const cipher = createCipheriv("aes-128-cbc", Buffer.from(keyHex, "hex"), Buffer.from(ivHex, "hex"));
+  cipher.setAutoPadding(false);
+  return Buffer.concat([cipher.update(padded), cipher.final()]).toString("base64");
+}
+
+function encodeSojsonV4Fixture(source) {
+  const prefix = "['sojson.v4']".padEnd(240, "_");
+  const encoded = [...source].map(character => character.charCodeAt(0)).join("x");
+  return `${prefix}${encoded}${"z".repeat(59)}`;
+}
 
 function makeTextarea() {
   return {
@@ -485,10 +501,10 @@ test("MangaBat retries only reviewed image mirrors and retains interceptor heade
   }
 });
 
-test("all fifteen generated packages execute search, details, installments, and content contracts", { skip: registrySkip }, async () => {
+test("all imported generated Paperback packages execute search, details, installments, and content contracts", { skip: registrySkip }, async () => {
   const ids = [
-    "AllPornComic", "Atsumaru", "Comix", "LNori", "MadaraDex", "MangaBat", "MangaDemon",
-    "MangaDex", "MangaDot", "MangaKakalot", "RoyalRoad", "Webtoon", "WeebCentral"
+    "AllPornComic", "Atsumaru", "LNori", "MadaraDex",
+    "MangaDex", "MangaDot", "MangaFox", "Mangago", "RoyalRoad", "Webtoon"
   ];
   const novels = new Set(["LNori", "RoyalRoad"]);
 
@@ -520,7 +536,7 @@ test("all fifteen generated packages execute search, details, installments, and 
       `
     });
     const { definition, context } = runtime;
-    assert.equal(definition.apiVersion, id === "Comix" || novels.has(id) ? "1.1" : "1.0", id);
+    assert.equal(definition.apiVersion, novels.has(id) ? "1.1" : "1.0", id);
     await definition.initialize();
     const first = await definition.search({ query: "Needle", cursor: undefined });
     const second = await definition.search({ query: "Needle", cursor: first.metadata });
@@ -550,6 +566,108 @@ test("all fifteen generated packages execute search, details, installments, and 
   }
 });
 
+test("MangaFox and Mangago traverse catalog covers through first-page bytes in the packaged compatibility runtime", async () => {
+  const catalog = JSON.parse(await readFile(join(monorepoRoot, "dist", "v1", "stable", "catalog.json"), "utf8"));
+  const imageBytes = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
+  const fixtures = [
+    {
+      id: "MangaFox",
+      version: "1.0.0-alpha.13",
+      rating: "MATURE",
+      coverURL: "https://fanfox.net/fixtures/cover.png",
+      pageURL: "https://fanfox.net/fixtures/page-1.png"
+    },
+    {
+      id: "Mangago",
+      version: "1.0.0-alpha.1",
+      rating: "ADULT",
+      coverURL: "https://www.mangago.me/fixtures/cover.png",
+      pageURL: "https://www.youhim.me/cspiclink/fixtures/page-1.png"
+    }
+  ];
+
+  for (const fixture of fixtures) {
+    const catalogEntry = catalog.sources.find(source => source.id === fixture.id);
+    assert.ok(catalogEntry, `${fixture.id} is missing from the catalog`);
+    assert.equal(catalogEntry.version, fixture.version);
+    assert.equal(catalogEntry.contentRating, fixture.rating);
+    assert.equal(catalogEntry.compatibility?.status, "supported");
+    assert.equal(catalogEntry.mangaReaderExtension.apiVersion, "1.0");
+
+    const runtime = await loadBundle(fixture.id, {
+      generated: true,
+      prepare: `
+        const instance = source[${JSON.stringify(fixture.id)}];
+        instance.getSortingOptions = async () => [{ id: "fixture", label: "Fixture" }];
+        instance.getSearchResults = async query => ({
+          items: [{
+            mangaId: "fixture-work",
+            title: query.title,
+            imageUrl: ${JSON.stringify(fixture.coverURL)},
+            contentRating: ${JSON.stringify(fixture.rating)}
+          }],
+          metadata: undefined
+        });
+        instance.getMangaDetails = async mangaId => ({
+          mangaId,
+          mangaInfo: {
+            primaryTitle: "Fixture ${fixture.id}",
+            thumbnailUrl: ${JSON.stringify(fixture.coverURL)},
+            contentRating: ${JSON.stringify(fixture.rating)}
+          }
+        });
+        instance.getChapters = async sourceManga => [{
+          sourceManga,
+          chapterId: "fixture-chapter",
+          langCode: "en",
+          chapNum: 1,
+          title: "Chapter 1"
+        }];
+        instance.getChapterDetails = async chapter => ({
+          id: chapter.chapterId,
+          mangaId: chapter.sourceManga.mangaId,
+          pages: [${JSON.stringify(fixture.pageURL)}]
+        });
+      `,
+      response: input => {
+        assert.ok(
+          input.url === fixture.coverURL || input.url === fixture.pageURL,
+          `${fixture.id} requested unexpected fixture URL ${input.url}`
+        );
+        return {
+          url: input.url,
+          status: 200,
+          headers: { "content-type": "image/png" },
+          mimeType: "image/png",
+          cookies: [],
+          dataBase64: imageBytes.toString("base64")
+        };
+      }
+    });
+
+    await runtime.definition.initialize();
+    const catalogPage = await runtime.definition.search({ query: "Fixture" });
+    assert.equal(catalogPage.items.length, 1, `${fixture.id} catalog result count`);
+    assert.equal(catalogPage.items[0].coverURL, fixture.coverURL, `${fixture.id} catalog cover`);
+
+    const cover = await runtime.definition.imagePageContent({ url: catalogPage.items[0].coverURL });
+    assert.equal(cover.mimeType, "image/png", `${fixture.id} cover MIME`);
+    assert.deepEqual(Buffer.from(cover.dataBase64, "base64"), imageBytes, `${fixture.id} cover bytes`);
+
+    const work = await runtime.definition.details(catalogPage.items[0].workId);
+    assert.equal(work.workInfo.primaryTitle, `Fixture ${fixture.id}`, `${fixture.id} details`);
+    const installments = await runtime.definition.installments(work);
+    assert.equal(installments.length, 1, `${fixture.id} installments`);
+    const pages = await runtime.definition.imagePages({ ...installments[0], sourceWork: work });
+    assert.deepEqual(plain(pages.pages), [fixture.pageURL], `${fixture.id} page list`);
+
+    const firstPage = await runtime.definition.imagePageContent({ url: pages.pages[0] });
+    assert.equal(firstPage.mimeType, "image/png", `${fixture.id} first-page MIME`);
+    assert.deepEqual(Buffer.from(firstPage.dataBase64, "base64"), imageBytes, `${fixture.id} first-page bytes`);
+    assert.deepEqual(runtime.requests.map(request => request.url), [fixture.coverURL, fixture.pageURL]);
+  }
+});
+
 test("API 1.1 maps Paperback web execution through the broker", { skip: registrySkip }, async () => {
   const calls = [];
   const { context, definition } = await loadBundle("Comix", {
@@ -576,118 +694,117 @@ test("API 1.1 maps Paperback web execution through the broker", { skip: registry
   }]);
 });
 
-test("Comix deterministically descrambles a known tiled image fixture", { skip: registrySkip }, async () => {
-  const width = 4;
-  const height = 4;
-  const cols = 2;
-  const rows = 2;
-  const seed = 7;
-  const expected = new Uint8ClampedArray(width * height * 4);
-  for (let pixel = 0; pixel < width * height; pixel++) {
-    expected.set([pixel + 1, 100 + pixel, 200 - pixel, 255], pixel * 4);
-  }
-
-  const flipRows = pixels => {
-    const output = new Uint8ClampedArray(pixels.length);
-    const stride = width * 4;
-    for (let row = 0; row < height; row++) {
-      output.set(pixels.subarray(row * stride, (row + 1) * stride), (height - 1 - row) * stride);
-    }
-    return output;
-  };
-  const shuffled = Array.from({ length: cols * rows }, (_, index) => index);
-  let state = seed >>> 0;
-  for (let index = shuffled.length - 1; index > 0; index--) {
-    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
-    const target = state % (index + 1);
-    [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
-  }
-  const sourceForDestination = Array(shuffled.length);
-  for (let index = 0; index < shuffled.length; index++) sourceForDestination[shuffled[index]] = index;
-
-  const restoredBeforeFinalFlip = flipRows(expected);
-  const scrambledBeforeInitialFlip = new Uint8ClampedArray(expected.length);
-  const tileWidth = width / cols;
-  const tileHeight = height / rows;
-  for (let destination = 0; destination < sourceForDestination.length; destination++) {
-    const destinationRow = Math.floor(destination / cols);
-    const destinationColumn = destination % cols;
-    const source = sourceForDestination[destination];
-    const sourceRow = Math.floor(source / cols);
-    const sourceColumn = source % cols;
-    for (let row = 0; row < tileHeight; row++) {
-      const destinationOffset = ((destinationRow * tileHeight + row) * width + destinationColumn * tileWidth) * 4;
-      const sourceOffset = ((sourceRow * tileHeight + row) * width + sourceColumn * tileWidth) * 4;
-      scrambledBeforeInitialFlip.set(
-        restoredBeforeFinalFlip.subarray(destinationOffset, destinationOffset + tileWidth * 4),
-        sourceOffset
-      );
-    }
-  }
-  const scrambled = flipRows(scrambledBeforeInitialFlip);
-
-  class FixtureImage {
-    complete = false;
-    naturalWidth = 0;
-    naturalHeight = 0;
-    set src(value) {
-      this.pixels = new Uint8ClampedArray(Buffer.from(String(value).split(",")[1], "base64"));
-      this.naturalWidth = width;
-      this.naturalHeight = height;
-      this.width = width;
-      this.height = height;
-      this.complete = true;
-      this.onload?.();
-    }
-  }
-  class FixtureImageData {
-    constructor(data, imageWidth, imageHeight) {
-      this.data = data;
-      this.width = imageWidth;
-      this.height = imageHeight;
-    }
-  }
-  const pixelDocument = {
-    createElement(tag) {
-      if (String(tag).toLowerCase() !== "canvas") return makeTextarea();
-      const state = { source: new Uint8ClampedArray(), output: new Uint8ClampedArray() };
-      return {
-        getContext() {
-          return {
-            drawImage(image) { state.source = new Uint8ClampedArray(image.pixels); },
-            getImageData() { return { data: new Uint8ClampedArray(state.source) }; },
-            putImageData(imageData) { state.output = new Uint8ClampedArray(imageData.data); }
-          };
-        },
-        toDataURL(mimeType) {
-          return `data:${mimeType};base64,${Buffer.from(state.output).toString("base64")}`;
-        }
-      };
-    }
-  };
-
-  const runtime = await loadBundle("Comix", {
-    apiVersion: "1.1",
-    globals: { document: pixelDocument, Image: FixtureImage, ImageData: FixtureImageData },
+test("MangaFox executes its indirect eval chapter parser through the compatibility runtime", { skip: registrySkip }, async () => {
+  const packedChapterScript = "(function(p,a,c,k,e,d){var newImgs=['//fanfox.net/images/fixture-1.jpg','//fanfox.net/images/fixture-2.jpg']})";
+  const chapterHTML = `<!doctype html><html><body>
+    <script src="/scripts/chapter_bar.js"></script>
+    <script>${packedChapterScript}</script>
+  </body></html>`;
+  const runtime = await loadBundle("MangaFox", {
+    prepare: `
+      const instance = source.MangaFox;
+      instance.getMangaDetails = async mangaId => ({
+        mangaId,
+        mangaInfo: { primaryTitle: "Fixture MangaFox", contentRating: "MATURE" }
+      });
+      instance.getChapters = async sourceManga => [{
+        sourceManga,
+        chapterId: "c001",
+        langCode: "en",
+        chapNum: 1
+      }];
+    `,
     response: input => ({
       url: input.url,
       status: 200,
-      headers: {
-        "content-type": "application/octet-stream",
-        "x-scramble-seed": String(seed),
-        "x-scramble-grid": `${cols}x${rows}`,
-        "x-scramble-algo": "2"
-      },
-      mimeType: "application/octet-stream",
+      headers: { "content-type": "text/html" },
+      mimeType: "text/html",
       cookies: [],
-      dataBase64: Buffer.from(scrambled).toString("base64")
+      dataBase64: base64(chapterHTML)
     })
   });
+
   await runtime.definition.initialize();
-  const first = await runtime.definition.imagePageContent({ url: "https://comix.to/tile.bin" });
-  const second = await runtime.definition.imagePageContent({ url: "https://comix.to/tile.bin" });
-  assert.deepEqual([...Buffer.from(first.dataBase64, "base64")], [...expected]);
-  assert.equal(first.dataBase64, second.dataBase64);
+  const work = await runtime.definition.details("fixture-manga");
+  const [installment] = await runtime.definition.installments(work);
+  const pages = await runtime.definition.imagePages({ ...installment, sourceWork: work });
+
+  assert.deepEqual(plain(pages.pages), [
+    "https://fanfox.net/images/fixture-1.jpg",
+    "https://fanfox.net/images/fixture-2.jpg"
+  ]);
+  assert.deepEqual(runtime.requests.map(request => request.url), [
+    "https://fanfox.net/manga/fixture-manga/c001"
+  ]);
+});
+
+test("Mangago executes aliased Function image-key processing through the compatibility runtime", { skip: registrySkip }, async () => {
+  const keyHex = "00112233445566778899aabbccddeeff";
+  const ivHex = "ffeeddccbbaa99887766554433221100";
+  const descrambleKey = "0a1a2a3";
+  const deobfuscatedChapterJS = [
+    `var key = CryptoJS.enc.Hex.parse("${keyHex}");`,
+    `var iv = CryptoJS.enc.Hex.parse("${ivHex}");`,
+    "var widthnum = heightnum = 2;",
+    `/* ${"fixture-padding-".repeat(90)} */`,
+    "var renImg = function(img,width,height,id){",
+    `var key = "${descrambleKey}";`,
+    "key = key.split('a');",
+    "};"
+  ].join("\n");
+  const chapterJS = encodeSojsonV4Fixture(deobfuscatedChapterJS);
+  const imageURL = "https://www.youhim.me/cspiclink/fixture.jpg";
+  const imgsrcs = encryptZeroPaddedAES(imageURL, keyHex, ivHex);
+  const readerHTML = `<!doctype html><html><body>
+    <script>var imgsrcs = "${imgsrcs}";</script>
+    <script src="/assets/chapter.js?v=fixture"></script>
+  </body></html>`;
+  let functionConstructorCalls = 0;
+  const trackedFunction = (...args) => {
+    functionConstructorCalls += 1;
+    return Function(...args);
+  };
+  const runtime = await loadBundle("Mangago", {
+    globals: { crypto: globalThis.crypto, Function: trackedFunction },
+    prepare: `
+      const instance = source.Mangago;
+      instance.getMangaDetails = async mangaId => ({
+        mangaId,
+        mangaInfo: { primaryTitle: "Fixture Mangago", contentRating: "ADULT" }
+      });
+      instance.getChapters = async sourceManga => [{
+        sourceManga,
+        chapterId: "/read-manga/fixture/chapter-1/",
+        langCode: "en",
+        chapNum: 1
+      }];
+    `,
+    response: input => {
+      const body = input.url.includes("chapter.js") ? chapterJS : readerHTML;
+      return {
+        url: input.url,
+        status: 200,
+        headers: { "content-type": "text/html" },
+        mimeType: "text/html",
+        cookies: [],
+        dataBase64: base64(body)
+      };
+    }
+  });
+
+  await runtime.definition.initialize();
+  const work = await runtime.definition.details("/manga/fixture");
+  const [installment] = await runtime.definition.installments(work);
+  const pages = await runtime.definition.imagePages({ ...installment, sourceWork: work });
+
+  assert.deepEqual(plain(pages.pages), [
+    `${imageURL}#desckey=${encodeURIComponent(descrambleKey)}&cols=2`
+  ]);
+  assert.equal(functionConstructorCalls, 1);
+  assert.deepEqual(runtime.requests.map(request => new URL(request.url).pathname), [
+    "/read-manga/fixture/chapter-1/",
+    "/assets/chapter.js"
+  ]);
 });
 
 test("API 1.1 maps novel chapters to sanitized XHTML publication content", { skip: registrySkip }, async () => {

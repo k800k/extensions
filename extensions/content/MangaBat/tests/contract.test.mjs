@@ -1,14 +1,9 @@
 /* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 import test from "node:test";
-import { dirname, join, resolve } from "node:path";
+import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readFile } from "node:fs/promises";
-import { assertContentExtension } from "../../../../packages/cli/lib/contracts.mjs";
+import { assertSourceOwnedContent } from "../../source-owned-assertions.mjs";
 const directory = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-test("MangaBat is a provenance-pinned Paperback compatibility port", async () => {
-  const metadata = await assertContentExtension(directory, "MangaBat");
-  if (metadata.apiVersion !== "1.0") throw new Error("unexpected API version");
-  if (metadata.availability !== "approvalRequired") throw new Error("imported package did not retain approvalRequired metadata");
-  const license = await readFile(join(directory, "LICENSE"), "utf8");
-  if (!license.includes("GNU GENERAL PUBLIC LICENSE")) throw new Error("GPL package license is missing");
+test("MangaBat is a deterministic Aidoku-referenced source-owned package", async () => {
+  await assertSourceOwnedContent(directory, "MangaBat");
 });

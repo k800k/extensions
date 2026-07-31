@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "sourceOwned": true,
+  "id": "HitomiLA",
+  "releaseVersion": "0.2.2",
+  "generator": "scripts/build-source-owned.mjs",
+  "upstream": {
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "paths": [
+      "sources/multi.hitomi/src/lib.rs",
+      "sources/multi.hitomi/src/gg.rs",
+      "sources/multi.hitomi/src/models.rs",
+      "sources/multi.hitomi/src/search.rs"
+    ],
+    "licenseChoice": "Apache-2.0"
+  },
+  "modules": [
+    {
+      "file": "extensions/content/HitomiLA/src/10-core.js",
+      "sha256": "489695996e2b07109cc2b97ce3d6ab9a261f09f3d7a2f2252fd13a7c62bb06c5"
+    },
+    {
+      "file": "extensions/content/HitomiLA/src/20-extension.js",
+      "sha256": "203676699027fb1771ba3db1f719f9067a20785b45673f26b376acb8c23a8dca"
+    }
+  ],
+  "generatedMainSHA256": "02384f8637662d706f948efafe8b9e29cbb89ba06e4c70a7b7b4aef5a3f94a4f"
+}

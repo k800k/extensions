@@ -1,6 +1,6 @@
 {
   "counts": {
-    "content": 15,
+    "content": 17,
     "tracker": 2
   },
   "entries": [
@@ -56,6 +56,16 @@
     },
     {
       "id": "MangaDot",
+      "kind": "content",
+      "availability": "approvalRequired"
+    },
+    {
+      "id": "MangaFox",
+      "kind": "content",
+      "availability": "approvalRequired"
+    },
+    {
+      "id": "Mangago",
       "kind": "content",
       "availability": "approvalRequired"
     },

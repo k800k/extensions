@@ -1,15 +1,11 @@
 # Content extensions
 
-The catalog contains two adult-rated content packages:
+The catalog contains 17 content packages. Each package includes a manifest, implementation, icon, license, source provenance where applicable, and contract and behavior tests.
 
-- `NHentai` — available; review the adult-content and rights records before installing
-- `HitomiLA` — available; review the adult-content and rights records before installing
-Each package has an independent specification, privacy assessment, rights record, review status, neutral icon, and sanitized contract and behavior tests. A catalog entry does not bypass MangaReader's activation review.
-
-Create a new reviewed scaffold from the repository root with:
+Create a new scaffold from the repository root with:
 
 ```sh
 node packages/cli/bin/mr-ext.mjs new --id ExampleSource --name "Example Source"
 ```
 
-Only content extensions are supported. Tracker and theme extension kinds are intentionally rejected by the SDK, CLI, catalog, and website.
+Tracker packages live under `extensions/tracker`. Theme extension packages are unsupported.

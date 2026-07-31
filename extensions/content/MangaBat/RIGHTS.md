@@ -1,5 +1,0 @@
-# Rights record for MangaBat
-
-The compatibility adapter and combined executable package are distributed under **GPL-3.0-or-later**. The authoritative imported bytes are the compiled InkDex registry artifact pinned by commit and SHA-256; it is retained without source-level feature changes and combined with the GPL compatibility bridge. [https://github.com/inkdex/mangabox-extensions at 8c426aff4eff](https://github.com/inkdex/mangabox-extensions/commit/8c426aff4eff7ae719c00ddf22c9181d21f3c712), path `src/MangaBat`, is a later audited source snapshot. InkDex's combined registry did not record the artifact's exact source commit or lockfile, so this snapshot is not represented as the artifact's exact build input; recovering that linkage requires upstream build provenance.
-
-The service name and icon identify the interoperated service; no affiliation or endorsement is claimed. Website content remains subject to its respective owner and service terms. Report removal, trademark, security, or rights concerns through the repository issue tracker.

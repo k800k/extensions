@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sourceOwned": true,
+  "id": "NHentai",
+  "releaseVersion": "0.3.1",
+  "generator": "scripts/build-source-owned.mjs",
+  "upstream": {
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "paths": [
+      "sources/multi.nhentai/src/lib.rs",
+      "sources/multi.nhentai/src/models.rs",
+      "sources/multi.nhentai/src/home.rs"
+    ],
+    "licenseChoice": "Apache-2.0"
+  },
+  "modules": [
+    {
+      "file": "extensions/content/NHentai/src/10-core.js",
+      "sha256": "13d5361e1e1f2d67451cedfb66f9edd535b47ac1df3881860a7d51cc5c2234d6"
+    },
+    {
+      "file": "extensions/content/NHentai/src/20-extension.js",
+      "sha256": "e28426920d205563c85df8f30ff10ac502590927d65a4f4fbccc8b5cf7620d15"
+    }
+  ],
+  "generatedMainSHA256": "51b45b6d4ab2c47cb9ce218bcfa31166877b9a3446eda6aaf2344f0f207baa4a"
+}

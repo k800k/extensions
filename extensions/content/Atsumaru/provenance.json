@@ -39,12 +39,13 @@
     "sourceCommitRecordedByRegistry": null
   },
   "upstreamVersion": "1.0.0-alpha.23",
-  "releaseVersion": "1.0.0-alpha.24",
+  "releaseVersion": "1.0.0-alpha.25",
   "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
   "adapter": {
     "name": "@mangareader/paperback-compat",
     "version": "1.1.0",
     "license": "GPL-3.0-or-later"
   },
-  "generatedMainSHA256": "0534018ed10144a6d162d70b16c32a93f783eee9c16d74c40156fdbb13906ae6"
+  "compatibilityPatches": [],
+  "generatedMainSHA256": "3a6a507b6d168990f6881fe824c5b578fa396d3b323546c36ead4e36b4cfbc01"
 }

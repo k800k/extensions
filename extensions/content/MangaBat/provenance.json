@@ -1,49 +1,38 @@
 {
+  "schemaVersion": 1,
+  "sourceOwned": true,
   "id": "MangaBat",
-  "upstreamRepository": "mangabox-extensions",
-  "upstreamURL": "https://github.com/inkdex/mangabox-extensions",
-  "upstreamBranch": "0.9/stable",
-  "upstreamCommit": "8c426aff4eff7ae719c00ddf22c9181d21f3c712",
-  "upstreamCommitURL": "https://github.com/inkdex/mangabox-extensions/commit/8c426aff4eff7ae719c00ddf22c9181d21f3c712",
-  "sourcePath": "src/MangaBat",
-  "sourceObjectSHA": "d0c6d9d8c5f2ed507af61ee84e11b77c9c87e49b",
-  "sourceRelationship": "auditedSnapshotNotRecordedBuildInput",
-  "license": {
-    "spdx": "GPL-3.0-or-later",
-    "path": "LICENSE",
-    "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  "releaseVersion": "1.0.0-alpha.13",
+  "generator": "scripts/build-source-owned.mjs",
+  "upstream": {
+    "repository": "https://github.com/Aidoku-Community/sources",
+    "commit": "1faa9c5cfbf67af7cd18a302045a8d093e35867f",
+    "paths": [
+      "sources/en.mangabat/src/lib.rs",
+      "templates/mangabox/src/lib.rs",
+      "templates/mangabox/src/imp.rs",
+      "templates/mangabox/src/helpers.rs",
+      "templates/mangabox/src/models.rs"
+    ],
+    "licenseChoice": "Apache-2.0"
   },
-  "baseHosts": [
-    "www.mangabats.com"
+  "modules": [
+    {
+      "file": "scripts/source-owned-runtime/00-runtime.js",
+      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+    },
+    {
+      "file": "scripts/source-owned-runtime/10-html.js",
+      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+    },
+    {
+      "file": "scripts/source-owned-runtime/20-mangabox.js",
+      "sha256": "ec438dda7516cfef23e38363c9ed9a8a95040b5a7bc81c7cdbe5d0ac11d47f7e"
+    },
+    {
+      "file": "extensions/content/MangaBat/src/20-extension.js",
+      "sha256": "43ee4483b616eaf805e4f85a552c3d7db1644348c955334d65edfec481e9c9f7"
+    }
   ],
-  "likelyCDNAPIHosts": [],
-  "dynamicHostEvidence": [
-    "artwork/chapter URLs are parsed from live HTML and may use site-specific CDNs"
-  ],
-  "kind": "content",
-  "version": "1.0.0-alpha.11",
-  "language": "en",
-  "rating": "SAFE",
-  "capabilities": [
-    1,
-    4,
-    64,
-    16
-  ],
-  "description": "Extension that pulls content from mangabat.com.",
-  "registryArtifact": {
-    "registryCommit": "5514d0bc58cb8edcee06c1c01458c51a7fd43e43",
-    "buildTime": "2026-06-16T12:25:31.942Z",
-    "sha256": "ec9a212b2ebc2354619bc30ef24836e838eebc51a50a42eccd9e733211d3d08f",
-    "sourceCommitRecordedByRegistry": null
-  },
-  "upstreamVersion": "1.0.0-alpha.11",
-  "releaseVersion": "1.0.0-alpha.12",
-  "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
-  "adapter": {
-    "name": "@mangareader/paperback-compat",
-    "version": "1.1.0",
-    "license": "GPL-3.0-or-later"
-  },
-  "generatedMainSHA256": "f29f610d92a134df68d086116a79677269728394c778de30d97721e0c3608721"
+  "generatedMainSHA256": "5d231b93b2f6e7fc0b7d4a00864b78c9abc349a90a6224d00371f5bdea7589d6"
 }
