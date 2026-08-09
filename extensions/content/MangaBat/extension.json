@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from mangabat.com.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.13",
+  "version": "1.0.0-alpha.14",
   "language": "en",
   "languages": [
     "en"

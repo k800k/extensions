@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 MangaReader Extension Contributors
+ * Copyright 2026 manko Extension Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -10,7 +10,7 @@ function definition(kind, value) {
   if (!value || typeof value !== "object") throw new TypeError("An extension declaration is required");
   if (!/^[A-Za-z0-9._-]{1,128}$/.test(value.id ?? "")) throw new TypeError("Invalid extension id");
   if (!supportedAPIVersions.includes(value.apiVersion)) {
-    throw new TypeError(`Expected a supported MangaReader API version (${supportedAPIVersions.join(", ")})`);
+    throw new TypeError(`Expected a supported manko API version (${supportedAPIVersions.join(", ")})`);
   }
   return Object.freeze({ ...value, kind });
 }

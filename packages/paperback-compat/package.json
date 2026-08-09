@@ -1,6 +1,6 @@
 {
-  "name": "@mangareader/paperback-compat",
-  "version": "1.0.0",
+  "name": "@manko/paperback-compat",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "license": "GPL-3.0-or-later"

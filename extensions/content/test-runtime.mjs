@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
@@ -100,7 +100,7 @@ async function loadExtension(mainPath, responder, kind, options = {}) {
   };
   let extension;
   const sandbox = {
-    MangaReader: { context },
+    manko: { context },
     defineContentExtension(value) { if (kind === "content") extension = value; return value; },
     defineTrackerExtension(value) { if (kind === "tracker") extension = value; return value; },
     URL,

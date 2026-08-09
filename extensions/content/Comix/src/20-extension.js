@@ -1,10 +1,10 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 const COMIX_BASE = "https://comix.to";
 const COMIX_API = `${COMIX_BASE}/api/v1`;
 const COMIX_MAX_IMAGE_BASE64_LENGTH = Math.ceil((16 * 1024 * 1024) / 3) * 4;
 const COMIX_MAX_PROTECTED_JSON_BYTES = 256 * 1024;
-const COMIX_USER_AGENT = "MangaReader Comix/1.0.0-alpha.52";
+const COMIX_USER_AGENT = "manko Comix/1.0.0-alpha.52";
 const comixRuntime = mrCreateRuntime({
   name: "Comix",
   baseURL: COMIX_BASE,
@@ -290,7 +290,7 @@ async function comixProtectedJSON(value) {
   const bootstrap = await comixBootstrap();
   const web = comixRuntime.context().web;
   if (!web?.execute) {
-    throw comixRuntime.operationError("WebExecutionRequiredError", "Comix requires MangaReader API 1.1 web execution", "serviceError", url.href);
+    throw comixRuntime.operationError("WebExecutionRequiredError", "Comix requires manko API 1.1 web execution", "serviceError", url.href);
   }
   // API 1.1 web executions are isolated one-shot WKWebViews. Cache only the
   // validated secure-module identity; each signer/decoder session imports that
@@ -621,7 +621,7 @@ try {
 async function comixSiteImage(url, descriptor, response) {
   const bootstrap = await comixBootstrap();
   const web = comixRuntime.context().web;
-  if (!web?.execute) throw comixRuntime.operationError("WebExecutionRequiredError", "Comix protected images require MangaReader API 1.1 web execution", "serviceError", url.href);
+  if (!web?.execute) throw comixRuntime.operationError("WebExecutionRequiredError", "Comix protected images require manko API 1.1 web execution", "serviceError", url.href);
   const result = await web.execute({
     html: "<!doctype html><html><head></head><body></body></html>",
     baseURL: `${COMIX_BASE}/`,

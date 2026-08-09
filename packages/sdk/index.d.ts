@@ -5,6 +5,17 @@ export type AuthenticationMode = "none" | "basic" | "apiKey" | "oauth2Implicit" 
 export type Rating = "SAFE" | "MATURE" | "ADULT";
 
 export interface CursorPage<T> { items: T[]; metadata?: JSONValue; }
+export type SearchPolarity = "include" | "exclude";
+export interface SearchSelection { fieldID: string; value: string; title?: string; polarity: SearchPolarity; }
+export interface SearchField { id: string; title: string; queryPrefix: string; placeholder?: string; supportsExclusion?: boolean; options?: { id: string; title: string; subtitle?: string }[]; }
+export interface SearchSortOption { id: string; title: string; }
+export interface SearchConfiguration { id: string; title: string; fields: SearchField[]; sortOptions?: SearchSortOption[]; defaultSortID?: string; }
+export interface SearchSuggestionRequest { fieldID: string; query: string; selections?: SearchSelection[]; limit?: number; }
+export interface SearchSuggestion { fieldID: string; value: string; title?: string; subtitle?: string; }
+export interface ContentSearchInput { query: string; selections?: SearchSelection[]; filters?: Record<string, string>; sort?: string | null; cursor?: JSONValue; }
+export interface ContentDiscoverInput { section: JSONValue; selections?: SearchSelection[]; filters?: Record<string, string>; sort?: string | null; cursor?: JSONValue; }
+export type SearchFacetPresentation = "creator" | "tag" | "metadata";
+export interface SearchFacet { fieldID: string; value: string; title: string; groupTitle?: string; presentation: SearchFacetPresentation; }
 export interface HTTPRequest { url: string; method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD"; headers?: Record<string, string>; cookies?: Record<string, string>; body?: JSONValue | string | ArrayBuffer; }
 export interface HTTPResponse { url: string; status: number; headers: Record<string, string>; mimeType?: string; cookies: unknown[]; dataBase64: string; }
 export interface HTTPInterceptor { request?(request: HTTPRequest): HTTPRequest | Promise<HTTPRequest>; response?(request: HTTPRequest, response: HTTPResponse): void | Promise<void>; }
@@ -37,8 +48,9 @@ export interface RuntimeContext {
 
 export interface ContentExtension {
   id: string; apiVersion: APIVersion; initialize?(context: RuntimeContext): void | Promise<void>;
-  settings?(): JSONValue; discoverSections?(): JSONValue[]; discover?(input: JSONValue): Promise<CursorPage<JSONValue>>;
-  searchFilters?(): JSONValue; search(input: JSONValue): Promise<CursorPage<JSONValue>>; details(id: string): Promise<JSONValue>;
+  settings?(): JSONValue; discoverSections?(): JSONValue[]; discover?(input: ContentDiscoverInput): Promise<CursorPage<JSONValue>>;
+  searchFilters?(): SearchConfiguration | JSONValue; searchSuggestions?(input: SearchSuggestionRequest): Promise<SearchSuggestion[]>;
+  search(input: ContentSearchInput): Promise<CursorPage<JSONValue>>; details(id: string): Promise<JSONValue>;
   installments(work: JSONValue): Promise<JSONValue[]>; imagePages(installment: JSONValue): Promise<JSONValue>;
   imagePageContent?(input: JSONValue): Promise<JSONValue>; updates?(input: JSONValue): Promise<JSONValue>;
   publicationContent?(installment: JSONValue): Promise<JSONValue>;

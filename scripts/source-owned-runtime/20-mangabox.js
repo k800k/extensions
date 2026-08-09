@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 function mrDefineMangaBoxSource(configuration) {
   const runtime = mrCreateRuntime({
@@ -119,7 +119,15 @@ function mrDefineMangaBoxSource(configuration) {
     return result;
   }
 
-  function listURL(section, page, query) {
+  function selectedGenre(input) {
+    const selection = (Array.isArray(input?.selections) ? input.selections : [])
+      .find(item => item?.fieldID === "genre" && item?.polarity !== "exclude");
+    const value = String(selection?.value || "").trim();
+    return /^[A-Za-z0-9%._~-]{1,200}$/.test(value) ? value : "";
+  }
+
+  function listURL(section, page, query, genre) {
+    if (genre) return `${configuration.baseURL}/genre/${genre}?page=${page}`;
     if (query) {
       const slug = query.toLowerCase().trim().replace(/[^\p{L}\p{N}]+/gu, "_").replace(/^_+|_+$/g, "");
       return `${configuration.baseURL}/search/story/${encodeURIComponent(slug)}?page=${page}`;
@@ -129,8 +137,8 @@ function mrDefineMangaBoxSource(configuration) {
     return `${configuration.baseURL}/genre/all?filter=${filter + status}&page=${page}`;
   }
 
-  async function list(section, page, query) {
-    const html = await runtime.request(listURL(section, page, query));
+  async function list(section, page, query, genre = "") {
+    const html = await runtime.request(listURL(section, page, query, genre));
     const items = cards(html);
     const lastPage = mrNumber(html.match(/class\s*=\s*["'][^"']*page_last[^"']*["'][^>]*>[\s\S]{0,80}?Last\s*\((\d+)\)/i)?.[1]);
     const hasNext = lastPage ? page < lastPage : items.length > 0;
@@ -144,6 +152,28 @@ function mrDefineMangaBoxSource(configuration) {
       || mrTags(html, "img").find(item => /cover|manga/i.test(item.tag))?.tag || "";
     const imageUrl = mrAbsoluteURL(mrAttribute(coverRegion, "src") || mrAttribute(coverRegion, "data-src"), configuration.baseURL);
     const description = mrTextContent(html.match(/<div\b[^>]*id\s*=\s*["']contentBox["'][^>]*>([\s\S]*?)<\/div>/i)?.[1] || "");
+    const searchFacets = [];
+    const seenGenres = new Set();
+    for (const { html: anchor } of mrElements(html, "a")) {
+      const href = mrAttribute(anchor, "href");
+      let pathname;
+      try {
+        pathname = runtime.url(mrAbsoluteURL(href, configuration.baseURL)).pathname;
+      } catch {
+        continue;
+      }
+      const genre = pathname.match(/^\/genre\/([A-Za-z0-9%._~-]+)\/?$/)?.[1];
+      const title = mrTextContent(anchor);
+      if (!genre || !title || seenGenres.has(genre)) continue;
+      seenGenres.add(genre);
+      searchFacets.push({
+        fieldID: "genre",
+        value: genre,
+        title,
+        groupTitle: "Genres",
+        presentation: "tag"
+      });
+    }
     return {
       workId: id,
       imageUrl,
@@ -156,6 +186,7 @@ function mrDefineMangaBoxSource(configuration) {
         synopsis: description,
         primaryTitle: title,
         secondaryTitles: [],
+        searchFacets,
         status: /\bcompleted\b/i.test(html) ? "completed" : /\bongoing\b/i.test(html) ? "ongoing" : "unknown",
         shareUrl: `${configuration.baseURL}${id}`,
         mediaKind: "manga"
@@ -273,8 +304,25 @@ function mrDefineMangaBoxSource(configuration) {
       { id: "completed", title: "Completed", type: 0 }
     ],
     discover: input => list(input?.sectionId || input?.section?.id || "new", runtime.page(input), ""),
-    searchFilters: () => ({ id: "search", title: "Search", fields: [] }),
-    search: input => list("new", runtime.page(input), String(input?.query ?? input?.text ?? "").trim()),
+    searchFilters: () => ({
+      id: "search",
+      title: "Search",
+      fields: [{
+        id: "genre",
+        title: "Genre",
+        queryPrefix: "genre:",
+        placeholder: "Filter by genre",
+        supportsExclusion: false,
+        options: []
+      }],
+      sortOptions: []
+    }),
+    search: input => list(
+      "new",
+      runtime.page(input),
+      String(input?.query ?? input?.text ?? "").trim(),
+      selectedGenre(input)
+    ),
     async details(value) {
       const id = workID(value);
       return detailsFromHTML(id, await runtime.request(`${configuration.baseURL}${id}`));

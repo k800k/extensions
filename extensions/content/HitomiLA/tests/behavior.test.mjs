@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -33,11 +33,18 @@ function gallery(id) {
     japanese_title: `Alternate ${id}`,
     language: "english",
     language_localname: "English",
+    type: "manga",
     date: "2026-01-01 00:00:00+00",
     galleryurl: `/manga/sanitized-gallery-${id}.html`,
     artists: [{ artist: "Sample Creator" }],
     groups: [{ group: "Sample Group" }],
-    tags: [{ tag: "landscape" }, { tag: "blue sky", female: "1" }],
+    parodys: [{ parody: "Sample Series" }],
+    characters: [{ character: "Sample Character" }],
+    tags: [
+      { tag: "landscape" },
+      { tag: "blue sky", female: "1" },
+      { tag: "glasses", male: "1" }
+    ],
     files: [{ hash, name: "001.png", hasavif: 1, haswebp: 1, width: 800, height: 1200 }]
   };
 }
@@ -119,6 +126,13 @@ test("HitomiLA decodes ranged Nozomi IDs, limits metadata concurrency, and cache
   const work = await loaded.extension.details("2");
   assert.equal(work.workInfo.artist, "Sample Creator");
   assert.equal(work.workInfo.author, "Sample Creator, Sample Group");
+  assert.ok(work.workInfo.searchFacets.some(facet => facet.fieldID === "artist" && facet.presentation === "creator"));
+  assert.ok(work.workInfo.searchFacets.some(facet => facet.fieldID === "female" && facet.presentation === "tag"));
+  assert.ok(work.workInfo.searchFacets.some(facet => facet.fieldID === "male" && facet.presentation === "tag"));
+  assert.deepEqual(
+    Array.from(new Set(work.workInfo.searchFacets.map(facet => facet.groupTitle))),
+    ["Artists", "Groups", "Series", "Characters", "Female", "Male", "Tags", "Language", "Type"]
+  );
   const [installment] = await loaded.extension.installments(work);
   const sequence = await loaded.extension.imagePages(installment);
   assert.equal(sequence.pages[0], `https://a2.gold-usergeneratedcontent.net/123/512/${gallery(2).files[0].hash}.avif`);
@@ -129,6 +143,28 @@ test("HitomiLA decodes ranged Nozomi IDs, limits metadata concurrency, and cache
   const overriddenSequence = await loaded.extension.imagePages(overriddenInstallment);
   assert.equal(overriddenSequence.pages[0], `https://a1.gold-usergeneratedcontent.net/123/256/${gallery(1).files[0].hash}.avif`);
   assert.equal(routingRequests, 1, "routing configuration remains cached for the bounded refresh window");
+});
+
+test("HitomiLA declares searchable fields and provides bounded tag suggestions", async () => {
+  const loaded = await loadContentExtension(mainPath, request => {
+    const url = new URL(request.url);
+    if (url.pathname === "/tags.json") {
+      return runtimeResponse({
+        url: request.url,
+        text: JSON.stringify({
+          tags: [{ tag: "blue sky", count: 42 }, { tag: "landscape", count: 10 }],
+          artists: [{ name: "Sample Creator", count: 7 }]
+        })
+      });
+    }
+    throw new Error(`Unexpected request ${request.url}`);
+  });
+  const configuration = loaded.extension.searchFilters();
+  assert.equal(configuration.defaultSortID, "newest");
+  assert.ok(configuration.fields.some(field => field.id === "artist" && field.supportsExclusion));
+  const suggestions = await loaded.extension.searchSuggestions({ fieldID: "tag", query: "blue", limit: 3 });
+  assert.deepEqual(Array.from(suggestions, suggestion => suggestion.value), ["blue sky"]);
+  assert.equal(loaded.calls.filter(call => new URL(call.url).pathname === "/tags.json").length, 1);
 });
 
 test("HitomiLA applies language overrides, namespaces, intersections, and negative terms", async () => {

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /*
- * Copyright 2026 MangaReader Extension Contributors
+ * Copyright 2026 manko Extension Contributors
  * SPDX-License-Identifier: Apache-2.0
  *
- * Imports GPL-3.0-or-later InkDex Paperback bundles into MangaReader API v1
+ * Imports GPL-3.0-or-later InkDex Paperback bundles into manko API v1
  * packages. Generated extension code remains GPL-3.0-or-later.
  */
 import { createHash } from "node:crypto";
@@ -31,22 +31,22 @@ const EXTRA_HOSTS = new Map([
   ["Webtoon", ["webtoon-phinf.pstatic.net", "swebtoon-phinf.pstatic.net"]]
 ]);
 const RELEASE_VERSIONS = new Map([
-  ["AllPornComic", "1.0.0-alpha.15"],
-  ["Atsumaru", "1.0.0-alpha.25"],
+  ["AllPornComic", "1.0.0-alpha.16"],
+  ["Atsumaru", "1.0.0-alpha.26"],
   ["Comix", "1.0.0-alpha.52"],
   ["HitomiLA", "0.2.2"],
-  ["LNori", "1.0.0-alpha.3"],
-  ["MadaraDex", "1.0.0-alpha.16"],
+  ["LNori", "1.0.0-alpha.4"],
+  ["MadaraDex", "1.0.0-alpha.17"],
   ["MangaBat", "1.0.0-alpha.13"],
   ["MangaDemon", "1.0.0-alpha.18"],
-  ["MangaDex", "1.0.0-alpha.28"],
-  ["MangaDot", "1.0.0-alpha.5"],
-  ["MangaFox", "1.0.0-alpha.13"],
-  ["Mangago", "1.0.0-alpha.1"],
+  ["MangaDex", "1.0.0-alpha.29"],
+  ["MangaDot", "1.0.0-alpha.6"],
+  ["MangaFox", "1.0.0-alpha.14"],
+  ["Mangago", "1.0.0-alpha.2"],
   ["MangaKakalot", "1.0.0-alpha.13"],
   ["NHentai", "0.3.1"],
-  ["RoyalRoad", "1.0.0-alpha.3"],
-  ["Webtoon", "1.0.0-alpha.19"],
+  ["RoyalRoad", "1.0.0-alpha.4"],
+  ["Webtoon", "1.0.0-alpha.20"],
   ["WeebCentral", "1.0.0-alpha.26"]
 ]);
 const EXCLUDED_HOSTS = new Map([
@@ -111,7 +111,7 @@ function authModes() {
 
 function sourceHeader(source, mapping, patchRecords) {
   return `/*!
- * ${source.name} for MangaReader
+ * ${source.name} for manko
  * SPDX-License-Identifier: GPL-3.0-or-later
  * Audited upstream snapshot: ${mapping.upstreamURL}
  * Audited snapshot commit: ${mapping.upstreamCommit}
@@ -119,12 +119,12 @@ function sourceHeader(source, mapping, patchRecords) {
  * Snapshot relationship: not recorded by the registry as this artifact's build input
  * Registry artifact: ${mapping.registryArtifact.registryCommit}/${source.id}/index.js
  * Compatibility patches: ${patchRecords.length ? patchRecords.map(record => record.id).join(", ") : "none"}
- * Adapter: MangaReader Paperback compatibility bridge v1.1
+ * Adapter: manko Paperback compatibility bridge v1.1
  */`;
 }
 
 function contractTest(id, apiVersion) {
-  return `/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+  return `/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 import test from "node:test";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -238,8 +238,8 @@ async function main() {
         scope: "core",
         note: UNSUPPORTED.get(source.id) ?? null,
         limitations: [
-          "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
-          "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+          "Structured metadata search is limited to fields verified against this pinned provider snapshot.",
+          "Paperback genre-query discover cards have no equivalent manko API v1 discover-item representation."
         ]
       },
       upstream: {
@@ -263,7 +263,7 @@ async function main() {
     const bundleNote = patchResult.records.length
       ? "Hash-guarded compatibility-patched compiled InkDex/Paperback bundle follows."
       : "Unmodified compiled InkDex/Paperback bundle follows.";
-    const combined = `${sourceHeader(source, mapping, patchResult.records)}\n${bridge.trim()}\n\n/* ${bundleNote} */\n${importedBundle.trim()}\n\n/* MangaReader registration footer. */\n${footer}\n`;
+    const combined = `${sourceHeader(source, mapping, patchResult.records)}\n${bridge.trim()}\n\n/* ${bundleNote} */\n${importedBundle.trim()}\n\n/* manko registration footer. */\n${footer}\n`;
     await Promise.all([
       writeJSON(join(directory, "extension.json"), metadata),
       writeFile(join(directory, "main.js"), combined),
@@ -274,7 +274,7 @@ async function main() {
         upstreamVersion: source.version,
         releaseVersion: metadata.version,
         importedFromRegistryBuild: versioning.buildTime,
-        adapter: { name: "@mangareader/paperback-compat", version: "1.1.0", license: "GPL-3.0-or-later" },
+        adapter: { name: "@manko/paperback-compat", version: "1.2.0", license: "GPL-3.0-or-later" },
         compatibilityPatches: patchResult.records,
         generatedMainSHA256: sha256(combined)
       }),
@@ -285,7 +285,7 @@ async function main() {
       id: source.id,
       kind: "content",
       availability,
-      reason: UNSUPPORTED.get(source.id) ?? `Imported from a pinned GPL registry artifact and adapted to MangaReader Extension API ${apiVersion}; activation review is pending.`
+      reason: UNSUPPORTED.get(source.id) ?? `Imported from a pinned GPL registry artifact and adapted to manko Extension API ${apiVersion}; activation review is pending.`
     });
   }
 

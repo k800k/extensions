@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-/* Copyright © 2026 MangaReader Extension Contributors */
+/* Copyright © 2026 manko Extension Contributors */
 
 import assert from "node:assert/strict";
 import { createCipheriv } from "node:crypto";
@@ -62,7 +62,7 @@ function loadBridge() {
   const state = new Map();
   const secureState = new Map();
   const sandbox = {
-    MangaReader: {
+    manko: {
       context: {
         state: {
           get: key => state.get(key),
@@ -97,9 +97,35 @@ function loadBridge() {
   return context;
 }
 
+function loadSyntheticPaperback(id, mangaInfo = {}) {
+  const context = loadBridge();
+  let definition;
+  context.defineContentExtension = candidate => {
+    definition = candidate;
+  };
+  context.__mangaInfo = plain(mangaInfo);
+  vm.runInContext(`
+    globalThis.__searchCalls = [];
+    globalThis.__synthetic = {
+      getSortingOptions: async () => [
+        { id: "default", label: "Default" },
+        { id: "requested", label: "Requested" }
+      ],
+      getSearchResults: async (query, cursor, sorting) => {
+        __searchCalls.push([query, cursor, sorting]);
+        return { items: [], metadata: undefined };
+      },
+      getMangaDetails: async mangaId => ({ mangaId, mangaInfo: __mangaInfo })
+    };
+    PaperbackCompat.registerContent(${JSON.stringify(id)}, __synthetic);
+  `, context);
+  assert.ok(definition, `${id} synthetic source did not register`);
+  return { context, definition };
+}
+
 test("Paperback base64 decoding returns valid UTF-8 text", () => {
   const context = loadBridge();
-  const expected = "MangaReader • 漫画";
+  const expected = "manko • 漫画";
   context.__encoded = Buffer.from(expected, "utf8").toString("base64");
   assert.equal(vm.runInContext("Application.base64Decode(__encoded)", context), expected);
 });
@@ -144,7 +170,7 @@ async function loadBundle(id, { prepare, response, web, globals = {}, apiVersion
   let definition;
 
   const sandbox = {
-    MangaReader: {
+    manko: {
       context: {
         http: {
           async request(input) {
@@ -226,7 +252,7 @@ test("the bridge registers every pinned Paperback content singleton", { skip: re
   }
 });
 
-test("a compiled MangaDex bundle maps content operations to MangaReader API v1", { skip: registrySkip }, async () => {
+test("a compiled MangaDex bundle maps content operations to manko API v1", { skip: registrySkip }, async () => {
   const prepare = `
     globalThis.__calls = [];
     const instance = source.MangaDex;
@@ -394,6 +420,97 @@ test("search omits compatibility metadata so each Paperback source can apply its
     ["sorting", { title: "Needle" }],
     ["search", { title: "Needle" }]
   ]);
+});
+
+test("Paperback metadata facets preserve website groups and exact source values", async () => {
+  const mangaDex = loadSyntheticPaperback("MangaDex", {
+    primaryTitle: "Grouped",
+    tagGroups: [
+      { id: "content", title: "Content", tags: [{ id: "safe-id", title: "Safe" }] },
+      { id: "genre", title: "Genre", tags: [{ id: "action-id", title: "Action" }] },
+      { id: "format", title: "Format", tags: [{ id: "oneshot-id", title: "Oneshot" }] }
+    ]
+  });
+  const grouped = await mangaDex.definition.details("fixture");
+  assert.deepEqual(
+    plain(grouped.workInfo.searchFacets),
+    [
+      { fieldID: "format", value: "oneshot-id", title: "Oneshot", groupTitle: "Format", presentation: "tag" },
+      { fieldID: "genre", value: "action-id", title: "Action", groupTitle: "Genre", presentation: "tag" },
+      { fieldID: "content", value: "safe-id", title: "Safe", groupTitle: "Content", presentation: "tag" }
+    ]
+  );
+
+  const mangaDot = loadSyntheticPaperback("MangaDot", {
+    primaryTitle: "Creators",
+    author: "First Author, Second Author",
+    artist: "First Author",
+    tagGroups: [{ id: "genres", title: "Genres", tags: [{ id: "blue_sky", title: "Blue Sky" }] }]
+  });
+  const creators = await mangaDot.definition.details("fixture");
+  assert.deepEqual(
+    plain(creators.workInfo.searchFacets),
+    [
+      { fieldID: "genres", value: "blue_sky", title: "Blue Sky", groupTitle: "Genres", presentation: "tag" },
+      { fieldID: "author", value: "First Author", title: "First Author", groupTitle: "Authors", presentation: "creator" },
+      { fieldID: "author", value: "Second Author", title: "Second Author", groupTitle: "Authors", presentation: "creator" },
+      { fieldID: "artist", value: "First Author", title: "First Author", groupTitle: "Artists", presentation: "creator" }
+    ]
+  );
+});
+
+test("Paperback structured selections use each pinned source metadata shape", async () => {
+  const cases = [
+    {
+      id: "Atsumaru",
+      selections: [
+        { fieldID: "tags", value: "action-id", polarity: "include" },
+        { fieldID: "tags", value: "blocked-id", polarity: "exclude" }
+      ],
+      expected: [{ id: "tags", value: { "action-id": "included", "blocked-id": "excluded" } }]
+    },
+    {
+      id: "MangaDex",
+      selections: [{ fieldID: "genre", value: "action-id", polarity: "include" }],
+      expected: { tagsByGroup: { genre: { "action-id": "included" } } }
+    },
+    {
+      id: "Webtoon",
+      selections: [{ fieldID: "genres", value: "DRAMA", polarity: "include" }],
+      expected: { genres: ["DRAMA"] }
+    },
+    {
+      id: "RoyalRoad",
+      selections: [
+        { fieldID: "genres", value: "fantasy", polarity: "exclude" },
+        { fieldID: "author", value: "Sample Author", polarity: "include" }
+      ],
+      expected: { genres: { fantasy: "excluded" }, author: "Sample Author" }
+    },
+    {
+      id: "MangaFox",
+      selections: [
+        { fieldID: "genres", value: "action", polarity: "include" },
+        { fieldID: "genres", value: "blocked", polarity: "exclude" }
+      ],
+      expected: [{ id: "genres", value: { action: "included" } }]
+    }
+  ];
+
+  for (const fixture of cases) {
+    const runtime = loadSyntheticPaperback(fixture.id);
+    await runtime.definition.search({
+      query: "needle",
+      selections: fixture.selections,
+      sort: "requested",
+      cursor: { page: 2 }
+    });
+    const [[query, cursor, sorting]] = plain(runtime.context.__searchCalls);
+    assert.equal(query.title, "needle", fixture.id);
+    assert.deepEqual(query.metadata, fixture.expected, fixture.id);
+    assert.deepEqual(cursor, { page: 2 }, fixture.id);
+    assert.equal(sorting.id, "requested", fixture.id);
+  }
 });
 
 test("a fresh runtime rehydrates opaque manga and chapter context before opening text", async () => {
@@ -572,14 +689,14 @@ test("MangaFox and Mangago traverse catalog covers through first-page bytes in t
   const fixtures = [
     {
       id: "MangaFox",
-      version: "1.0.0-alpha.13",
+      version: "1.0.0-alpha.14",
       rating: "MATURE",
       coverURL: "https://fanfox.net/fixtures/cover.png",
       pageURL: "https://fanfox.net/fixtures/page-1.png"
     },
     {
       id: "Mangago",
-      version: "1.0.0-alpha.1",
+      version: "1.0.0-alpha.2",
       rating: "ADULT",
       coverURL: "https://www.mangago.me/fixtures/cover.png",
       pageURL: "https://www.youhim.me/cspiclink/fixtures/page-1.png"
@@ -592,7 +709,7 @@ test("MangaFox and Mangago traverse catalog covers through first-page bytes in t
     assert.equal(catalogEntry.version, fixture.version);
     assert.equal(catalogEntry.contentRating, fixture.rating);
     assert.equal(catalogEntry.compatibility?.status, "supported");
-    assert.equal(catalogEntry.mangaReaderExtension.apiVersion, "1.0");
+    assert.equal(catalogEntry.extension.apiVersion, "1.0");
 
     const runtime = await loadBundle(fixture.id, {
       generated: true,
@@ -837,7 +954,7 @@ test("API 1.1 maps novel chapters to sanitized XHTML publication content", { ski
   assert.doesNotMatch(publication.text, /script|iframe|onclick|evil\.invalid/i);
 });
 
-test("Paperback Cloudflare errors become MangaReader challenge errors exactly once", { skip: registrySkip }, async () => {
+test("Paperback Cloudflare errors become manko challenge errors exactly once", { skip: registrySkip }, async () => {
   const allPornComic = await loadBundle("AllPornComic", {
     response: input => ({
       url: input.url,

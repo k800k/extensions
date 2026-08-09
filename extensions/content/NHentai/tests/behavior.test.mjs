@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -9,7 +9,7 @@ import { MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse } from "../..
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 const manifest = JSON.parse(await readFile(resolve(dirname(mainPath), "extension.json"), "utf8"));
-const expectedUserAgent = "MangaReader NHentai Extension/0.3.1 (+https://github.com/k800k/extensions)";
+const expectedUserAgent = "manko NHentai Extension/0.3.2 (+https://github.com/k800k/extensions)";
 const listGallery = {
   id: 101,
   media_id: "9001",
@@ -36,7 +36,11 @@ const detailGallery = {
   tags: [
     { type: "language", name: "english" },
     { type: "artist", name: "Sample Creator" },
-    { type: "tag", name: "landscape" }
+    { type: "tag", name: "landscape" },
+    { type: "parody", name: "Sample Parody" },
+    { type: "character", name: "Sample Character" },
+    { type: "group", name: "Sample Group" },
+    { type: "category", name: "doujinshi" }
   ],
   num_pages: 3,
   num_favorites: 12,
@@ -85,7 +89,13 @@ test("NHentai maps v2 returned paths directly and brokers both covers and pages"
   assert.equal(work.imageUrl, "https://t.nhentai.net/galleries/9001/cover.webp.webp");
   assert.equal(work.workInfo.shareUrl, "https://nhentai.net/g/101/");
   assert.equal(work.workInfo.artist, "Sample Creator");
-  assert.equal(work.workInfo.author, "Sample Creator");
+  assert.equal(work.workInfo.author, "Sample Creator, Sample Group");
+  assert.ok(work.workInfo.searchFacets.some(facet => facet.fieldID === "artist" && facet.presentation === "creator"));
+  assert.ok(work.workInfo.searchFacets.some(facet => facet.fieldID === "tag" && facet.presentation === "tag"));
+  assert.deepEqual(
+    Array.from(new Set(work.workInfo.searchFacets.map(facet => facet.groupTitle))),
+    ["Parodies", "Characters", "Tags", "Artists", "Groups", "Languages", "Categories"]
+  );
   const [installment] = await loaded.extension.installments(work);
   const sequence = await loaded.extension.imagePages(installment);
   assert.deepEqual(Array.from(sequence.pages), [
@@ -96,6 +106,33 @@ test("NHentai maps v2 returned paths directly and brokers both covers and pages"
   const image = await loaded.extension.imagePageContent({ url: sequence.pages[2] });
   assert.equal(image.mimeType, "image/webp");
   assert.equal(image.dataBase64, Buffer.from(MINIMAL_WEBP_BYTES).toString("base64"));
+});
+
+test("NHentai composes structured selections, forwards sort, and reuses observed facets for suggestions", async () => {
+  const loaded = await loadContentExtension(mainPath, request => {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/v2/galleries/101") return jsonResponse(request, detailGallery);
+    if (url.pathname === "/api/v2/search") {
+      assert.equal(url.searchParams.get("query"), 'sample artist:"Sample Creator" -tag:blocked');
+      assert.equal(url.searchParams.get("sort"), "popular-week");
+      return jsonResponse(request, { result: [], num_pages: 1, per_page: 25, total: 0 });
+    }
+    throw new Error(`Unexpected request ${request.url}`);
+  });
+  const configuration = loaded.extension.searchFilters();
+  assert.ok(configuration.fields.some(field => field.id === "parody" && field.supportsExclusion));
+  assert.ok(configuration.fields.some(field => field.id === "uploaded" && !field.supportsExclusion));
+  await loaded.extension.details("101");
+  const suggestions = await loaded.extension.searchSuggestions({ fieldID: "artist", query: "sample", limit: 5 });
+  assert.deepEqual(Array.from(suggestions, suggestion => suggestion.value), ["Sample Creator"]);
+  await loaded.extension.search({
+    query: "sample",
+    sort: "popular-week",
+    selections: [
+      { fieldID: "artist", value: "Sample Creator", title: "Sample Creator", polarity: "include" },
+      { fieldID: "tag", value: "blocked", title: "blocked", polarity: "exclude" }
+    ]
+  });
 });
 
 test("NHentai uses the unpaged v2 popular endpoint", async () => {
@@ -115,7 +152,7 @@ test("NHentai uses the unpaged v2 popular endpoint", async () => {
   assert.equal(loaded.calls.length, callsBefore);
 });
 
-test("NHentai hands only definitive Cloudflare challenges to MangaReader", async () => {
+test("NHentai hands only definitive Cloudflare challenges to manko", async () => {
   const challenged = await loadContentExtension(mainPath, request => runtimeResponse({
     url: request.url,
     status: 403,

@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Copyright © 2025 Inkdex -->
-<!-- Copyright © 2026 MangaReader Extension Contributors -->
+<!-- Copyright © 2026 manko Extension Contributors -->
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
@@ -36,7 +36,7 @@ interface InstallGroup {
   href: string;
 }
 
-const STORAGE_KEY = "mangareader-custom-catalogs-v1";
+const STORAGE_KEY = "manko-custom-catalogs-v1";
 const FILTER_QUERY: Record<FilterDimension, { include: string; exclude: string }> = {
   kinds: { include: "type", exclude: "excludeType" },
   ratings: { include: "rating", exclude: "excludeRating" },
@@ -476,7 +476,7 @@ async function shareCatalog() {
     showNotification("success", "Link copied", "The current filters and selection are in the URL.");
   } catch {
     if (navigator.share) {
-      await navigator.share({ title: "MangaReader Extensions", url });
+      await navigator.share({ title: "manko Extensions", url });
     } else {
       window.prompt("Copy this catalog link:", url);
     }
@@ -853,8 +853,8 @@ onUnmounted(() => {
                 <p>{{ detailsSource.extension?.apiVersion || "Not declared" }}</p>
               </section>
               <section>
-                <h3>Package size</h3>
-                <p>{{ formatBytes(detailsSource.extension?.compressedSize) }}</p>
+                <h3>Script size</h3>
+                <p>{{ formatBytes(detailsSource.extension?.size) }}</p>
               </section>
             </div>
             <section v-if="detailsSource.developers.length">
@@ -868,8 +868,8 @@ onUnmounted(() => {
               </ul>
             </section>
             <section v-if="detailsSource.sourceURL">
-              <h3>Package source</h3>
-              <a :href="detailsSource.sourceURL" target="_blank" rel="noopener noreferrer">Open the package source</a>
+              <h3>Extension source</h3>
+              <a :href="detailsSource.sourceURL" target="_blank" rel="noopener noreferrer">Open the extension source</a>
               <p v-if="detailsSource.sourceRevision">Revision <code>{{ detailsSource.sourceRevision }}</code></p>
             </section>
             <section v-if="detailsSource.upstream?.repository">
@@ -923,7 +923,7 @@ onUnmounted(() => {
               class="brand-button"
               :href="installLinkFor(detailsSource)"
             >
-              Open in MangaReader
+              Open in manko
             </a>
             <span v-else class="unavailable-action" role="status">Not installable in this build</span>
           </footer>

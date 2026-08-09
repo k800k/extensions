@@ -21,7 +21,7 @@ jobs:
       - run: npm test
       - run: npm run bundle
         env:
-          MR_SOURCE_REVISION: main
+          MANKO_SOURCE_REVISION: main
       - run: npm run docs:check
       - run: npm run docs:build
       - run: npm run publish:dry-run

@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 export const SOURCE_OWNED_CONTENT_IDS = Object.freeze([
   "Comix",

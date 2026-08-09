@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 import { createHash } from "node:crypto";
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
@@ -43,7 +43,7 @@ async function expectedOutputs(id) {
   }
 
   const header = `/*!
- * ${metadata.name} for MangaReader
+ * ${metadata.name} for manko
  * SPDX-License-Identifier: Apache-2.0
  * Source-owned JavaScript port; generated from extensions/content/${id}/src.
  * Algorithm reference: ${AIDOKU_REPOSITORY}
@@ -56,7 +56,7 @@ async function expectedOutputs(id) {
   const notice = `${metadata.name} source adapter\n\n`
     + `Copyright 2025 Aidoku community source contributors\n\n`
     + `MODIFIED ADAPTATION NOTICE: This JavaScript adapter is an independently modified\n`
-    + `adaptation for MangaReader; it is not a verbatim Aidoku package build.\n\n`
+    + `adaptation for manko; it is not a verbatim Aidoku package build.\n\n`
     + `Portions of the service algorithms were adapted from Aidoku Community Sources\n`
     + `(${AIDOKU_REPOSITORY}) at commit ${AIDOKU_COMMIT}:\n`
     + configuration.upstreamPaths.map(path => `- ${path}`).join("\n")

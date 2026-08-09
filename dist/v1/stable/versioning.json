@@ -1,0 +1,1177 @@
+{
+  "schemaVersion": 2,
+  "repository": {
+    "id": "k800k.extensions",
+    "name": "manko Extensions",
+    "description": "External manko Extension API v1 catalog.",
+    "homepage": "https://k800k.github.io/extensions/",
+    "privacyURL": "https://github.com/k800k/extensions/blob/main/PRIVACY.md",
+    "publisher": {
+      "name": "manko Extension Contributors"
+    }
+  },
+  "sources": [
+    {
+      "id": "AllPornComic",
+      "name": "AllPornComic",
+      "description": "Extension that pulls content from allporncomic.com.",
+      "version": "1.0.0-alpha.16",
+      "icon": "icons/AllPornComic.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "ADULT",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=AllPornComic",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/AllPornComic/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/AllPornComic",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/AllPornComic/1.0.0-alpha.16/main.js",
+        "sha256": "0811afd071aa274e6cb61b4985a6cb263772ff096476ab18c7a376346c1cf599",
+        "size": 352935,
+        "allowedHTTPSHosts": [
+          "allporncomic.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "AniList",
+      "name": "AniList",
+      "description": "Track manga progress and lists with AniList.",
+      "version": "1.0.0",
+      "icon": "icons/AniList.svg",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "authentication",
+        "progress",
+        "trackerCollections",
+        "trackerSearch"
+      ],
+      "developers": [
+        {
+          "name": "manko Extension Contributors"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=AniList",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/tracker/AniList/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/tracker/AniList",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "tracker",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "authenticationHandoff",
+          "network",
+          "secureState",
+          "trackerUpdates"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.1",
+        "scriptURL": "sources/AniList/1.0.0/main.js",
+        "sha256": "7dd0c9e5e0cf5799435aa880849e15bad1916e2972519a6263021bba7130021e",
+        "size": 5948,
+        "allowedHTTPSHosts": [
+          "anilist.co",
+          "graphql.anilist.co",
+          "s4.anilist.co"
+        ],
+        "authenticationModes": [
+          "oauth2Implicit"
+        ]
+      }
+    },
+    {
+      "id": "Atsumaru",
+      "name": "Atsumaru",
+      "description": "Extension that pulls content from atsu.moe.",
+      "version": "1.0.0-alpha.26",
+      "icon": "icons/Atsumaru.ico",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Lucifers Circle"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Atsumaru",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Atsumaru/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/Atsumaru",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/Atsumaru/1.0.0-alpha.26/main.js",
+        "sha256": "cae75db141ab6c7715d79bb515345a3f8f01f2a9e42ef337846145ac99397839",
+        "size": 69307,
+        "allowedHTTPSHosts": [
+          "atsu.moe",
+          "cdn.atsu.moe"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "Comix",
+      "name": "Comix",
+      "description": "Extension that pulls content from Comix.to.",
+      "version": "1.0.0-alpha.52",
+      "icon": "icons/Comix.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Catta1997"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Comix",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Comix/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/Comix",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state",
+          "webExecution"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.1",
+        "scriptURL": "sources/Comix/1.0.0-alpha.52/main.js",
+        "sha256": "1c545aaeb3204db324a1bb121fa82fbddaa0dc418d872196d4396d04b0b45077",
+        "size": 47456,
+        "allowedHTTPSHosts": [
+          "comix.to",
+          "static.comix.to",
+          "*.wowpic1.store",
+          "*.wowpic2.store",
+          "*.wowpic3.store",
+          "*.wowpic4.store",
+          "*.wowpic5.store",
+          "*.wowpic6.store",
+          "*.wowpic7.store",
+          "*.wowpic8.store",
+          "*.wowpic9.store"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "HitomiLA",
+      "name": "Hitomi.la",
+      "description": "Anonymous multi-language discovery, search, gallery details, and AVIF/WebP page reading for hitomi.la.",
+      "version": "0.2.3",
+      "icon": "icons/HitomiLA.svg",
+      "languages": [
+        "en",
+        "ja",
+        "zh",
+        "es",
+        "fr",
+        "de",
+        "ko",
+        "ru",
+        "it",
+        "pt",
+        "pl",
+        "nl",
+        "vi",
+        "id",
+        "th",
+        "cs",
+        "hu",
+        "ar",
+        "tr",
+        "uk"
+      ],
+      "contentRating": "ADULT",
+      "capabilities": [
+        "browse",
+        "discover",
+        "search",
+        "filters",
+        "details",
+        "installments",
+        "acquisition",
+        "imageSequence"
+      ],
+      "developers": [
+        {
+          "name": "manko Extension Contributors"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=HitomiLA",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/HitomiLA/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/HitomiLA",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "network",
+          "rateLimiting",
+          "redactedLogging"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/HitomiLA/0.2.3/main.js",
+        "sha256": "ef2ccd280008cc3ddb4e13e02af9c88df3ca4f25c5ed4759d99661f801238ba1",
+        "size": 41702,
+        "allowedHTTPSHosts": [
+          "hitomi.la",
+          "ltn.gold-usergeneratedcontent.net",
+          "atn.gold-usergeneratedcontent.net",
+          "a1.gold-usergeneratedcontent.net",
+          "a2.gold-usergeneratedcontent.net"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "LNori",
+      "name": "LNori",
+      "description": "Extension that pulls content from LNori.",
+      "version": "1.0.0-alpha.4",
+      "icon": "icons/LNori.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "acquisition",
+        "browse",
+        "details",
+        "discover",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Catta1997"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=LNori",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/LNori/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/LNori",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.1",
+        "scriptURL": "sources/LNori/1.0.0-alpha.4/main.js",
+        "sha256": "059711e1413ec9ba10e82baee2ea2e602f47036263640cadd21634c5b5b216b3",
+        "size": 332428,
+        "allowedHTTPSHosts": [
+          "cdn.lnori.com",
+          "lnori.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MadaraDex",
+      "name": "MadaraDex",
+      "description": "Extension that pulls content from madaradex.org.",
+      "version": "1.0.0-alpha.17",
+      "icon": "icons/MadaraDex.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "ADULT",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MadaraDex",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MadaraDex/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/MadaraDex",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/MadaraDex/1.0.0-alpha.17/main.js",
+        "sha256": "c38d0ef58be2a506758f94718b538a778550759c09d018014bc0b602485851a3",
+        "size": 354103,
+        "allowedHTTPSHosts": [
+          "madaradex.org"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MangaBat",
+      "name": "MangaBat",
+      "description": "Extension that pulls content from mangabat.com.",
+      "version": "1.0.0-alpha.14",
+      "icon": "icons/MangaBat.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Saw_6"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaBat",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaBat/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/MangaBat",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/MangaBat/1.0.0-alpha.14/main.js",
+        "sha256": "43f7c3bd4c4f394a0110773001963e05030769db0fc00028b31fa46b6e47b14f",
+        "size": 28105,
+        "allowedHTTPSHosts": [
+          "img-r1.2xstorage.com",
+          "img-r2.2xstorage.com",
+          "imgs-2.2xstorage.com",
+          "www.mangabats.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MangaDemon",
+      "name": "MangaDemon",
+      "description": "Extension that pulls content from demonicscans.org.",
+      "version": "1.0.0-alpha.18",
+      "icon": "icons/MangaDemon.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "samipmainali"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDemon",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDemon/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/MangaDemon",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/MangaDemon/1.0.0-alpha.18/main.js",
+        "sha256": "caf575871221139dacf6c254f466ed9b12adbb3e364093cf23142d18931e4fe4",
+        "size": 19402,
+        "allowedHTTPSHosts": [
+          "cdn.demoniclibs.com",
+          "demoniclibs.com",
+          "demonicscans.org",
+          "librarydm.com",
+          "mangareadon.org",
+          "readermc.org"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MangaDex",
+      "name": "MangaDex",
+      "description": "Extension that pulls content from mangadex.org.",
+      "version": "1.0.0-alpha.29",
+      "icon": "icons/MangaDex.png",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search",
+        "updates"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDex",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDex/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/MangaDex",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/MangaDex/1.0.0-alpha.29/main.js",
+        "sha256": "a4904bdd82d04b833e1d4548ecb0047e3f36e48db82620bac033ecfb16fa33a9",
+        "size": 416042,
+        "allowedHTTPSHosts": [
+          "*.mangadex.network",
+          "api.mangadex.org",
+          "mangadex.org",
+          "uploads.mangadex.org"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MangaDot",
+      "name": "MangaDot",
+      "description": "Extension that pulls content from MangaDot.net",
+      "version": "1.0.0-alpha.6",
+      "icon": "icons/MangaDot.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Catta1997"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDot",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDot/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/MangaDot",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/MangaDot/1.0.0-alpha.6/main.js",
+        "sha256": "cb0361cec95cc34e96dd9776de87430c4607e38bb82a34725c2cf3851555b1a5",
+        "size": 80954,
+        "allowedHTTPSHosts": [
+          "mangadot.net"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MangaFox",
+      "name": "MangaFox",
+      "description": "Extension that pulls content from fanfox.net.",
+      "version": "1.0.0-alpha.14",
+      "icon": "icons/MangaFox.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "MATURE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search",
+        "updates"
+      ],
+      "developers": [
+        {
+          "name": "Egwau"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaFox",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaFox/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/MangaFox",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/MangaFox/1.0.0-alpha.14/main.js",
+        "sha256": "2fc5894bad92d5f2472859a3c801b3c031884ff9372256f9625138f9425759f2",
+        "size": 351336,
+        "allowedHTTPSHosts": [
+          "fanfox.net"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "Mangago",
+      "name": "Mangago",
+      "description": "Extension that pulls content from mangago.me.",
+      "version": "1.0.0-alpha.2",
+      "icon": "icons/Mangago.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "ADULT",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Popmango"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Mangago",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Mangago/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/Mangago",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/Mangago/1.0.0-alpha.2/main.js",
+        "sha256": "f3301d39c28313a6c51868cec6130fe05d099d4a7c5a88b00b99386a285c5436",
+        "size": 362907,
+        "allowedHTTPSHosts": [
+          "www.mangago.me",
+          "www.mangago.zone",
+          "www.youhim.me"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MangaKakalot",
+      "name": "MangaKakalot",
+      "description": "Extension that pulls content from mangakakalot.gg.",
+      "version": "1.0.0-alpha.14",
+      "icon": "icons/MangaKakalot.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Saw_6"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaKakalot",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaKakalot/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/MangaKakalot",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/MangaKakalot/1.0.0-alpha.14/main.js",
+        "sha256": "2089b27d3e84c7e063d21457b48084b816fae097d3ae944b0f39d958a8fc9947",
+        "size": 28133,
+        "allowedHTTPSHosts": [
+          "img-r1.2xstorage.com",
+          "img-r2.2xstorage.com",
+          "imgs-2.2xstorage.com",
+          "www.mangakakalot.gg"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "MyAnimeList",
+      "name": "MyAnimeList",
+      "description": "Track manga progress and lists with MyAnimeList.",
+      "version": "1.0.0",
+      "icon": "icons/MyAnimeList.svg",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "authentication",
+        "progress",
+        "trackerCollections",
+        "trackerSearch"
+      ],
+      "developers": [
+        {
+          "name": "manko Extension Contributors"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MyAnimeList",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/tracker/MyAnimeList/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/tracker/MyAnimeList",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "tracker",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "authenticationHandoff",
+          "network",
+          "secureState",
+          "trackerUpdates"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.1",
+        "scriptURL": "sources/MyAnimeList/1.0.0/main.js",
+        "sha256": "d1637135a8a478c7014b33340b876f3a5d2f7af92bd2af142a9c2dba0a1e5933",
+        "size": 6125,
+        "allowedHTTPSHosts": [
+          "api.myanimelist.net",
+          "cdn.myanimelist.net",
+          "myanimelist.net"
+        ],
+        "authenticationModes": [
+          "oauth2PKCE"
+        ]
+      }
+    },
+    {
+      "id": "NHentai",
+      "name": "nHentai",
+      "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
+      "version": "0.3.2",
+      "icon": "icons/NHentai.svg",
+      "languages": [
+        "multi",
+        "en",
+        "ja",
+        "zh",
+        "es",
+        "fr",
+        "de",
+        "ko",
+        "ru"
+      ],
+      "contentRating": "ADULT",
+      "capabilities": [
+        "browse",
+        "discover",
+        "search",
+        "filters",
+        "details",
+        "installments",
+        "acquisition",
+        "imageSequence",
+        "cookies",
+        "challengeHandoff"
+      ],
+      "developers": [
+        {
+          "name": "manko Extension Contributors"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=NHentai",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/NHentai/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/NHentai",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "network",
+          "cookies",
+          "rateLimiting",
+          "redactedLogging",
+          "challengeHandoff"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/NHentai/0.3.2/main.js",
+        "sha256": "42e54ca5df0ef22960feeac6bcae773d4d6d7b21e95472eb0cbb6b1ac99eab2b",
+        "size": 19452,
+        "allowedHTTPSHosts": [
+          "nhentai.net",
+          "i.nhentai.net",
+          "t.nhentai.net"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "RoyalRoad",
+      "name": "RoyalRoad",
+      "description": "Extension that pulls web novels from royalroad.com and renders their chapters as readable pages.",
+      "version": "1.0.0-alpha.4",
+      "icon": "icons/RoyalRoad.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "acquisition",
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Inkdex"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=RoyalRoad",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/RoyalRoad/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/RoyalRoad",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.1",
+        "scriptURL": "sources/RoyalRoad/1.0.0-alpha.4/main.js",
+        "sha256": "f429469768088fc596eb512af1e20f9f7c63f406b296ac5c8ed32f5ad47e0be7",
+        "size": 349224,
+        "allowedHTTPSHosts": [
+          "www.royalroad.com",
+          "www.royalroadcdn.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "Webtoon",
+      "name": "Webtoon",
+      "description": "Extension that pulls content from webtoons.com.",
+      "version": "1.0.0-alpha.20",
+      "icon": "icons/Webtoon.png",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "Yves Pa"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Webtoon",
+      "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Webtoon/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/Webtoon",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/Webtoon/1.0.0-alpha.20/main.js",
+        "sha256": "6dbf70996d80c1f1efde9531aca5d0f757cadd50525f66f96e8d373382a399e5",
+        "size": 342765,
+        "allowedHTTPSHosts": [
+          "m.webtoons.com",
+          "swebtoon-phinf.pstatic.net",
+          "webtoon-phinf.pstatic.net",
+          "www.webtoons.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    },
+    {
+      "id": "WeebCentral",
+      "name": "WeebCentral",
+      "description": "Extension that pulls content from weebcentral.com.",
+      "version": "1.0.0-alpha.26",
+      "icon": "icons/WeebCentral.png",
+      "languages": [
+        "en"
+      ],
+      "contentRating": "SAFE",
+      "capabilities": [
+        "browse",
+        "challengeHandoff",
+        "cookies",
+        "details",
+        "discover",
+        "imageSequence",
+        "installments",
+        "interceptors",
+        "search"
+      ],
+      "developers": [
+        {
+          "name": "GabrielCWT"
+        }
+      ],
+      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=WeebCentral",
+      "rightsDeclaration": "Licensed under Apache-2.0.",
+      "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/WeebCentral/LICENSE",
+      "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
+      "sourceURL": "https://github.com/k800k/extensions/tree/main/extensions/content/WeebCentral",
+      "sourceRevision": "main",
+      "entryType": "extension",
+      "kind": "content",
+      "availability": "approvalRequired",
+      "permissions": {
+        "values": [
+          "challengeHandoff",
+          "cookies",
+          "network",
+          "rateLimiting",
+          "redactedLogging",
+          "secureState",
+          "state"
+        ]
+      },
+      "extension": {
+        "apiVersion": "1.0",
+        "scriptURL": "sources/WeebCentral/1.0.0-alpha.26/main.js",
+        "sha256": "47e15e954cdcb2477c94c93b9e3f28a94932a18865664ffef5de340fcc7c7063",
+        "size": 21128,
+        "allowedHTTPSHosts": [
+          "temp.compsci88.com",
+          "weebcentral.com"
+        ],
+        "authenticationModes": [
+          "none"
+        ]
+      }
+    }
+  ]
+}

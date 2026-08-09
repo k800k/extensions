@@ -1,31 +1,31 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Copyright © 2025 Inkdex -->
-<!-- Copyright © 2026 MangaReader Extension Contributors -->
+<!-- Copyright © 2026 manko Extension Contributors -->
 
 # Frequently Asked Questions
 
 ## General
 
 ::: details Are any extensions published right now?
-Yes. The catalog lists 17 content packages and two tracker packages: AniList and MyAnimeList.
+Yes. The catalog lists 17 content extensions and two tracker extensions: AniList and MyAnimeList.
 :::
 
 ::: details What extension types are supported?
-Content and tracker extensions. Theme extension packages remain unsupported; this does not remove ordinary website or reader color themes.
+Content and tracker extensions. Theme extensions remain unsupported; this does not remove ordinary website or reader color themes.
 :::
 
 ::: details Does this repository include manga or comics?
-No. It publishes extension metadata and package artifacts. External services decide what they host, and users remain responsible for accessing only services and material they are authorized to use.
+No. It publishes extension metadata and versioned JavaScript. External services decide what they host, and users remain responsible for accessing only services and material they are authorized to use.
 :::
 
 ::: details Does adding the repository install every extension?
-No. Adding a repository makes its catalog visible to MangaReader. You still choose each extension through MangaReader's install flow.
+No. Adding a repository makes its catalog visible to manko. You still choose each extension through manko's install flow.
 :::
 
 ## Installation and repositories
 
 ::: details What is a compatible custom catalog?
-It is an HTTP(S) directory containing `catalog.json`, or the full URL to that file. The JSON must include a `sources` array with unique source IDs, and every source must be a `content` or `tracker` package. Theme entries are rejected.
+For manko installation, it is an HTTPS directory containing `versioning.json`, or the full URL to that file. The website's optional catalog browser also accepts `catalog.json`. Each source must have a unique ID and be a content or tracker extension; theme entries are rejected.
 :::
 
 ::: details Where are custom catalogs stored?

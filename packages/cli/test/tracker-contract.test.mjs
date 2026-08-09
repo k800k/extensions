@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
@@ -10,7 +10,7 @@ import { assertTrackerExtension } from "../lib/contracts.mjs";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 test("tracker contracts reject a package missing a required operation", async () => {
-  const temporaryRoot = await mkdtemp(join(tmpdir(), "mangareader-tracker-contract-"));
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "manko-tracker-contract-"));
   const source = join(root, "extensions", "tracker", "AniList");
   const fixture = join(temporaryRoot, "AniList");
   try {

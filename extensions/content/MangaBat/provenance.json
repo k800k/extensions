@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "sourceOwned": true,
   "id": "MangaBat",
-  "releaseVersion": "1.0.0-alpha.13",
+  "releaseVersion": "1.0.0-alpha.14",
   "generator": "scripts/build-source-owned.mjs",
   "upstream": {
     "repository": "https://github.com/Aidoku-Community/sources",
@@ -19,20 +19,20 @@
   "modules": [
     {
       "file": "scripts/source-owned-runtime/00-runtime.js",
-      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+      "sha256": "ec9f9b6e0f82c48a00cb8b9a1cd424331dda500f5e66a3dedd187023d794eceb"
     },
     {
       "file": "scripts/source-owned-runtime/10-html.js",
-      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+      "sha256": "1ae92bbee81731a0ce1b1f9ad4111890baf1466a3f6ae607fc7d2e574003d1d2"
     },
     {
       "file": "scripts/source-owned-runtime/20-mangabox.js",
-      "sha256": "ec438dda7516cfef23e38363c9ed9a8a95040b5a7bc81c7cdbe5d0ac11d47f7e"
+      "sha256": "ed50c6a57e954f36fba26775e4b34fd283382cbfa694ed72389940a40df8cb76"
     },
     {
       "file": "extensions/content/MangaBat/src/20-extension.js",
-      "sha256": "43ee4483b616eaf805e4f85a552c3d7db1644348c955334d65edfec481e9c9f7"
+      "sha256": "7414d5f286e9d46b20c802c1fb7ffba58999376ea9092d4f17da63a5228d191f"
     }
   ],
-  "generatedMainSHA256": "5d231b93b2f6e7fc0b7d4a00864b78c9abc349a90a6224d00371f5bdea7589d6"
+  "generatedMainSHA256": "43f7c3bd4c4f394a0110773001963e05030769db0fc00028b31fa46b6e47b14f"
 }
