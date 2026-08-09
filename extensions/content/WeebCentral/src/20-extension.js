@@ -1,11 +1,11 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 const wcRuntime = mrCreateRuntime({
   name: "WeebCentral",
   baseURL: "https://weebcentral.com",
   challengeURL: "https://weebcentral.com/",
   referer: "https://weebcentral.com/",
-  userAgent: "MangaReader WeebCentral/1.0.0-alpha.26",
+  userAgent: "manko WeebCentral/1.0.0-alpha.26",
   allowedHosts: ["weebcentral.com", "temp.compsci88.com"]
 });
 

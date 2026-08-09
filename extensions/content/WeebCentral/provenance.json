@@ -18,16 +18,16 @@
   "modules": [
     {
       "file": "scripts/source-owned-runtime/00-runtime.js",
-      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+      "sha256": "ec9f9b6e0f82c48a00cb8b9a1cd424331dda500f5e66a3dedd187023d794eceb"
     },
     {
       "file": "scripts/source-owned-runtime/10-html.js",
-      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+      "sha256": "1ae92bbee81731a0ce1b1f9ad4111890baf1466a3f6ae607fc7d2e574003d1d2"
     },
     {
       "file": "extensions/content/WeebCentral/src/20-extension.js",
-      "sha256": "565d8b8fb67d830c2e7ea161e280f57fccf96f03980f2f8361b6a8e8667d9356"
+      "sha256": "e2f4cd014dad8d086435553d283f3e9bc1cb880e6a0e69d29545e90ac17abc7e"
     }
   ],
-  "generatedMainSHA256": "640bf0c6a0e5ec427dd4fdd641c576fe64c1442d6e0c76aa31c2c3add79ace54"
+  "generatedMainSHA256": "47e15e954cdcb2477c94c93b9e3f28a94932a18865664ffef5de340fcc7c7063"
 }

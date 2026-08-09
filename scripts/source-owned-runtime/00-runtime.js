@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 function mrCreateRuntime(configuration) {
   const allowedHosts = new Set(configuration.allowedHosts.map(host => host.toLowerCase()));
@@ -6,13 +6,13 @@ function mrCreateRuntime(configuration) {
   let runtimeContext;
 
   function context() {
-    const value = runtimeContext || globalThis.MangaReader?.context;
-    if (!value) throw operationError("ExtensionRuntimeError", "MangaReader runtime context is unavailable");
+    const value = runtimeContext || globalThis.manko?.context;
+    if (!value) throw operationError("ExtensionRuntimeError", "manko runtime context is unavailable");
     return value;
   }
 
   function initialize(value) {
-    runtimeContext = value || globalThis.MangaReader?.context;
+    runtimeContext = value || globalThis.manko?.context;
     context();
   }
 

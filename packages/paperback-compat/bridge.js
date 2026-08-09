@@ -1,15 +1,15 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
-/* Copyright © 2026 MangaReader Extension Contributors */
+/* Copyright © 2026 manko Extension Contributors */
 /*
  * Compatibility bridge for GPL-licensed Paperback 0.9 extension bundles.
  * This file is concatenated before the unmodified upstream bundle and adapts
- * the public Paperback Application/Extension surface to MangaReader API v1.
+ * the public Paperback Application/Extension surface to manko API v1.
  */
 (() => {
   "use strict";
 
-  const context = globalThis.MangaReader?.context;
-  if (!context) throw new Error("MangaReader Extension API v1 is unavailable");
+  const context = globalThis.manko?.context;
+  if (!context) throw new Error("manko Extension API v1 is unavailable");
 
   const selectors = new Map();
   const interceptors = new Map();
@@ -248,7 +248,7 @@
     setRedirectHandler(selector) { redirectHandler = selector ?? null; },
     async executeInWebView(input) {
       if (!context.web?.execute) {
-        throw new Error("This source requires MangaReader API 1.1 webExecution permission");
+        throw new Error("This source requires manko API 1.1 webExecution permission");
       }
       const source = input?.source ?? {};
       return context.web.execute({
@@ -275,7 +275,7 @@
     const date = value instanceof Date ? value : new Date(value);
     return Number.isNaN(date.valueOf()) ? undefined : date.toISOString();
   };
-  // MangaReader decodes domain-model Date fields with Swift Codable's default
+  // manko decodes domain-model Date fields with Swift Codable's default
   // reference date (2001-01-01), while installment dates deliberately use ISO.
   const codableDate = value => {
     if (value === undefined || value === null || value === "") return undefined;
@@ -284,8 +284,215 @@
   };
   const rating = value => ["SAFE", "MATURE", "ADULT"].includes(value) ? value : "SAFE";
   const compact = object => Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined));
-  const workFromSourceManga = (manga, fallbackMediaKind = "manga") => {
+  const paperbackSearchPolicies = Object.freeze({
+    AllPornComic: {
+      fields: [{ id: "genres", title: "Genres", shape: "triStateObject", supportsExclusion: false }],
+      tagGroups: { genres: { fieldID: "genres", groupTitle: "Genres" } }
+    },
+    Atsumaru: {
+      fields: [{ id: "tags", title: "Tags", shape: "triStateArray", supportsExclusion: true }],
+      tagGroups: { tags: { fieldID: "tags", groupTitle: "Tags" } }
+    },
+    MadaraDex: {
+      fields: [{ id: "genres", title: "Genres", shape: "triStateObject", supportsExclusion: false }],
+      tagGroups: { genres: { fieldID: "genres", groupTitle: "Genres" } }
+    },
+    MangaDex: {
+      fields: [
+        { id: "format", title: "Format", shape: "nestedTriState", supportsExclusion: true },
+        { id: "genre", title: "Genre", shape: "nestedTriState", supportsExclusion: true },
+        { id: "theme", title: "Theme", shape: "nestedTriState", supportsExclusion: true },
+        { id: "content", title: "Content", shape: "nestedTriState", supportsExclusion: true },
+        { id: "tags", title: "Tags", shape: "nestedTriState", supportsExclusion: true }
+      ],
+      dynamicTagGroups: true,
+      groupOrder: ["format", "genre", "theme", "content", "tags"]
+    },
+    MangaDot: {
+      fields: [
+        { id: "genres", title: "Genres", shape: "triStateObject", supportsExclusion: true },
+        { id: "author", title: "Authors", shape: "valueArray", supportsExclusion: false },
+        { id: "artist", title: "Artists", shape: "valueArray", supportsExclusion: false }
+      ],
+      tagGroups: { genres: { fieldID: "genres", groupTitle: "Genres" } },
+      creators: {
+        author: { fieldID: "author", groupTitle: "Authors" },
+        artist: { fieldID: "artist", groupTitle: "Artists" }
+      }
+    },
+    MangaFox: {
+      fields: [{ id: "genres", title: "Genres", shape: "triStateArray", supportsExclusion: false }],
+      tagGroups: { genres: { fieldID: "genres", groupTitle: "Genres" } }
+    },
+    Mangago: {
+      fields: [{ id: "genres", title: "Genres", shape: "triStateObject", supportsExclusion: true }],
+      tagGroups: { genres: { fieldID: "genres", groupTitle: "Genres" } }
+    },
+    RoyalRoad: {
+      fields: [
+        { id: "genres", title: "Genres", shape: "triStateObject", supportsExclusion: true },
+        { id: "tags", title: "Tags", shape: "triStateObject", supportsExclusion: true },
+        { id: "author", title: "Author", shape: "text", supportsExclusion: false }
+      ],
+      tagGroups: {
+        genres: { fieldID: "genres", groupTitle: "Genres" },
+        tags: { fieldID: "tags", groupTitle: "Tags" }
+      },
+      creators: { author: { fieldID: "author", groupTitle: "Authors" } }
+    },
+    Webtoon: {
+      fields: [{ id: "genres", title: "Genres", shape: "valueArray", supportsExclusion: false }],
+      tagGroups: {
+        "0": { fieldID: "genres", groupTitle: "Genres" },
+        genres: { fieldID: "genres", groupTitle: "Genres" }
+      }
+    }
+  });
+  const canonical = value => string(value).trim().toLowerCase();
+  const titleCase = value => string(value)
+    .trim()
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, character => character.toUpperCase());
+  const splitCreators = value => string(value)
+    .split(/[,\r\n]+/)
+    .map(item => item.trim())
+    .filter(Boolean);
+  const tagRule = (policy, group) => {
+    const groupID = string(group?.id).trim();
+    const explicit = policy?.tagGroups?.[groupID];
+    if (explicit) return explicit;
+    if (!policy?.dynamicTagGroups || !groupID) return null;
+    return {
+      fieldID: groupID,
+      groupTitle: string(group?.title, titleCase(groupID))
+    };
+  };
+  const orderedTagGroups = (policy, groups) => {
+    const values = Array.isArray(groups) ? groups.map((group, index) => ({ group, index })) : [];
+    if (!policy?.groupOrder) return values.map(item => item.group);
+    const order = new Map(policy.groupOrder.map((id, index) => [id, index]));
+    return values
+      .sort((left, right) => {
+        const leftOrder = order.get(string(left.group?.id)) ?? Number.MAX_SAFE_INTEGER;
+        const rightOrder = order.get(string(right.group?.id)) ?? Number.MAX_SAFE_INTEGER;
+        return leftOrder - rightOrder || left.index - right.index;
+      })
+      .map(item => item.group);
+  };
+  const searchFacetsForManga = (sourceID, info) => {
+    const policy = paperbackSearchPolicies[sourceID];
+    if (!policy) return [];
+    const facets = [];
+    const seen = new Set();
+    const append = facet => {
+      const fieldID = string(facet.fieldID).trim();
+      const value = string(facet.value).trim();
+      const title = string(facet.title).trim();
+      if (!fieldID || !value || !title) return;
+      const key = `${facet.presentation}\u0000${fieldID}\u0000${value}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      facets.push(compact({ ...facet, fieldID, value, title }));
+    };
+    for (const group of orderedTagGroups(policy, info?.tagGroups)) {
+      const rule = tagRule(policy, group);
+      if (!rule) continue;
+      const groupTitle = string(rule.groupTitle, string(group?.title, titleCase(group?.id)));
+      for (const tag of Array.isArray(group?.tags) ? group.tags : []) {
+        append({
+          fieldID: rule.fieldID,
+          value: tag?.id,
+          title: tag?.title,
+          groupTitle,
+          presentation: "tag"
+        });
+      }
+    }
+    for (const [property, rule] of Object.entries(policy.creators ?? {})) {
+      for (const title of splitCreators(info?.[property])) {
+        append({
+          fieldID: rule.fieldID,
+          value: title,
+          title,
+          groupTitle: rule.groupTitle,
+          presentation: "creator"
+        });
+      }
+    }
+    return facets;
+  };
+  const paperbackSearchMetadata = (sourceID, selections) => {
+    const policy = paperbackSearchPolicies[sourceID];
+    if (!policy || !Array.isArray(selections) || !selections.length) return undefined;
+    const fields = new Map((policy.fields ?? []).map(field => [field.id, field]));
+    const objectMetadata = {};
+    const arrayMetadata = [];
+    for (const selection of selections.slice(0, 24)) {
+      const fieldID = string(selection?.fieldID).trim();
+      const value = string(selection?.value).trim();
+      const field = fields.get(fieldID)
+        ?? (policy.dynamicTagGroups
+          ? { id: fieldID, title: titleCase(fieldID), shape: "nestedTriState", supportsExclusion: true }
+          : null);
+      if (!field || !value) continue;
+      const excluded = selection?.polarity === "exclude";
+      if (excluded && !field.supportsExclusion) continue;
+      const state = excluded ? "excluded" : "included";
+      if (field.shape === "triStateArray") {
+        let entry = arrayMetadata.find(item => item.id === fieldID);
+        if (!entry) {
+          entry = { id: fieldID, value: {} };
+          arrayMetadata.push(entry);
+        }
+        entry.value[value] = state;
+      } else if (field.shape === "nestedTriState") {
+        objectMetadata.tagsByGroup ??= {};
+        objectMetadata.tagsByGroup[fieldID] ??= {};
+        objectMetadata.tagsByGroup[fieldID][value] = state;
+      } else if (field.shape === "triStateObject") {
+        objectMetadata[fieldID] ??= {};
+        objectMetadata[fieldID][value] = state;
+      } else if (field.shape === "valueArray") {
+        if (excluded) continue;
+        objectMetadata[fieldID] ??= [];
+        if (!objectMetadata[fieldID].includes(value)) objectMetadata[fieldID].push(value);
+      } else if (field.shape === "text" && !excluded) {
+        objectMetadata[fieldID] = value;
+      }
+    }
+    if (arrayMetadata.length) return arrayMetadata;
+    return Object.keys(objectMetadata).length ? objectMetadata : undefined;
+  };
+  const paperbackSearchConfiguration = async (sourceID, instance) => {
+    const policy = paperbackSearchPolicies[sourceID];
+    const fields = (policy?.fields ?? []).map(field => ({
+      id: field.id,
+      title: field.title,
+      queryPrefix: `${field.id}:`,
+      placeholder: `Filter by ${field.title.toLowerCase()}`,
+      supportsExclusion: field.supportsExclusion,
+      options: []
+    }));
+    let sortOptions = [];
+    if (typeof instance.getSortingOptions === "function") {
+      try {
+        const values = await instance.getSortingOptions({ title: "" });
+        sortOptions = (Array.isArray(values) ? values : [])
+          .filter(value => value?.id !== undefined && value?.label !== undefined)
+          .map(value => ({ id: string(value.id), title: string(value.label) }));
+      } catch (_) {}
+    }
+    return {
+      id: `${sourceID.toLowerCase()}-search`,
+      title: `${sourceID} Search`,
+      fields,
+      sortOptions,
+      defaultSortID: sortOptions[0]?.id
+    };
+  };
+  const workFromSourceManga = (manga, fallbackMediaKind = "manga", sourceID = "") => {
     const info = manga?.mangaInfo ?? {};
+    const searchFacets = searchFacetsForManga(sourceID, info);
     return {
       workId: string(manga?.mangaId),
       workInfo: compact({
@@ -297,6 +504,7 @@
         status: info.status,
         artist: info.artist,
         author: info.author,
+        searchFacets,
         shareUrl: info.shareUrl,
         mediaKind: info.contentType === "novel" ? "lightNovel" : fallbackMediaKind
       })
@@ -320,10 +528,11 @@
     subtitle: item?.subtitle,
     contentRating: item?.contentRating ? rating(item.contentRating) : undefined
   });
-  const sortingOption = async (instance, query) => {
+  const sortingOption = async (instance, query, requestedID) => {
     if (typeof instance.getSortingOptions !== "function") return undefined;
     const options = await instance.getSortingOptions(query);
-    return Array.isArray(options) ? options[0] : undefined;
+    if (!Array.isArray(options)) return undefined;
+    return options.find(option => string(option?.id) === string(requestedID)) ?? options[0];
   };
   const formSchema = async (instance, method, id, title, query) => {
     if (typeof instance[method] !== "function") return { id, title, fields: [] };
@@ -432,7 +641,7 @@
   const latestUpdates = async (instance, { cursor } = {}) => {
     if (typeof instance.getLatestUpdates !== "function") return { items: [] };
     // Paperback's latest-update providers do not accept a date boundary. Keep
-    // MangaReader's `since` argument advisory and preserve only upstream data.
+    // manko's `since` argument advisory and preserve only upstream data.
     const result = await instance.getLatestUpdates(undefined, paperbackCursor(cursor) ?? undefined);
     const items = [];
     for (const item of result?.items ?? []) {
@@ -572,13 +781,18 @@
         const result = await instance.getDiscoverSectionItems(section, cursor ?? undefined);
         return { items: (result?.items ?? []).map(mapDiscoverItem), metadata: result?.metadata ?? null };
       },
-      searchFilters: () => formSchema(instance, "getAdvancedSearchForm", "search", "Search", { title: "" }),
-      search: async ({ query, cursor }) => {
-        const searchQuery = { title: string(query) };
-        const result = await instance.getSearchResults(searchQuery, cursor ?? undefined, await sortingOption(instance, searchQuery));
+      searchFilters: () => paperbackSearchConfiguration(id, instance),
+      search: async ({ query, selections, sort, cursor }) => {
+        const metadata = paperbackSearchMetadata(id, selections);
+        const searchQuery = compact({ title: string(query), metadata });
+        const result = await instance.getSearchResults(
+          searchQuery,
+          cursor ?? undefined,
+          await sortingOption(instance, searchQuery, sort)
+        );
         return { items: (result?.items ?? []).map(item => mapSearchItem(item, mediaKind)), metadata: result?.metadata ?? null };
       },
-      details: async workID => workFromSourceManga(cacheManga(await instance.getMangaDetails(string(workID))), mediaKind),
+      details: async workID => workFromSourceManga(cacheManga(await instance.getMangaDetails(string(workID))), mediaKind, id),
       installments: async sourceWork => {
         const chapters = await refreshedChapters(sourceWork);
         const format = sourceWork?.workInfo?.mediaKind === "lightNovel" || sourceWork?.workInfo?.mediaKind === "book"

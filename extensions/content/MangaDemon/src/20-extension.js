@@ -1,11 +1,11 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 const mdRuntime = mrCreateRuntime({
   name: "MangaDemon",
   baseURL: "https://demonicscans.org",
   challengeURL: "https://demonicscans.org/",
   referer: "https://demonicscans.org/",
-  userAgent: "MangaReader MangaDemon/1.0.0-alpha.18",
+  userAgent: "manko MangaDemon/1.0.0-alpha.18",
   allowedHosts: ["demonicscans.org", "demoniclibs.com", "cdn.demoniclibs.com", "librarydm.com", "mangareadon.org", "readermc.org"]
 });
 

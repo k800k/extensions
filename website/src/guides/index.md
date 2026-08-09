@@ -1,21 +1,21 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Copyright © 2025 Inkdex -->
-<!-- Copyright © 2026 MangaReader Extension Contributors -->
+<!-- Copyright © 2026 manko Extension Contributors -->
 
 # Guides
 
-MangaReader content and tracker extensions connect the app to external services. The repository does not host comics. Theme extension packages are not supported.
+manko content and tracker extensions connect the app to external services. The repository does not host comics. Theme extensions are not supported.
 
 ## Browse extensions
 
 The [Extension List](/extension-list) presents:
 
 1. **Package identity** — name, version, kind, language, and content rating.
-2. **Compatibility** — supported MangaReader API version, features, and known limitations.
+2. **Compatibility** — supported manko API version, features, and known limitations.
 3. **Package information** — compressed size, contributors, and repository.
-4. **Source and provenance** — package source, upstream snapshot, license, and revision links.
+4. **Source and provenance** — extension source, upstream snapshot, license, and revision links.
 
-::: tip Keep packages current
+::: tip Keep extensions current
 Refresh a repository to check for newer manifest versions, then use Update for the extensions you want to replace.
 :::
 
@@ -27,7 +27,7 @@ The catalog browser accepts either a full `catalog.json` URL or the directory co
 - expose a JSON object with a `sources` array;
 - give every source a unique, non-empty `id`;
 - contain content or tracker extensions (`kind: "content"` or `kind: "tracker"`; an omitted kind defaults to content);
-- publish package and icon paths relative to its repository URL; and
+- publish versioned script and icon paths relative to its repository URL; and
 - permit browser access with appropriate cross-origin response headers.
 
 Custom catalog URLs are saved in local browser storage. They are never synchronized to an account because this website has no sign-in or backend. Shared catalog links include the custom URLs required to reproduce the view.

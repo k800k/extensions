@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 import assert from "node:assert/strict";
 import { assertDeclaredHTTPSCovers } from "./test-assertions.mjs";
@@ -14,6 +14,7 @@ export async function assertMangaBoxBehavior(mainPath, hostname) {
     <div class="manga-info-pic"><img src="https://img-r1.2xstorage.com/covers/sanitized.png"></div>
     <h1>Sanitized Manga</h1>
     <div id="contentBox">A sanitized live-shape synopsis.</div>
+    <div class="genres"><a href="/genre/action">Action</a><a href="/genre/fantasy">Fantasy</a></div>
     <span>Ongoing</span>
     <div id="chapter-list-container"
       data-comic-slug="manga-sanitized"
@@ -29,6 +30,10 @@ export async function assertMangaBoxBehavior(mainPath, hostname) {
     const url = new URL(request.url);
     if (url.hostname === hostname && url.pathname === "/genre/all") {
       assert.equal(url.searchParams.get("filter"), "1");
+      assert.equal(url.searchParams.get("page"), "1");
+      return runtimeResponse({ url: request.url, text: listFixture });
+    }
+    if (url.hostname === hostname && url.pathname === "/genre/action") {
       assert.equal(url.searchParams.get("page"), "1");
       return runtimeResponse({ url: request.url, text: listFixture });
     }
@@ -73,6 +78,15 @@ export async function assertMangaBoxBehavior(mainPath, hostname) {
   const work = await loaded.extension.details(discovery.items[0].workId);
   assert.equal(work.title, "Sanitized Manga");
   assert.equal(work.workInfo.status, "ongoing");
+  assert.deepEqual(JSON.parse(JSON.stringify(work.workInfo.searchFacets)), [
+    { fieldID: "genre", value: "action", title: "Action", groupTitle: "Genres", presentation: "tag" },
+    { fieldID: "genre", value: "fantasy", title: "Fantasy", groupTitle: "Genres", presentation: "tag" }
+  ]);
+  const genrePage = await loaded.extension.search({
+    query: "",
+    selections: [{ fieldID: "genre", value: "action", title: "Action", polarity: "include" }]
+  });
+  assert.equal(genrePage.items[0]?.workId, "/manga/manga-sanitized");
   const chapters = await loaded.extension.installments(work);
   assert.equal(chapters.length, 1);
   assert.equal(chapters[0].number, 1);

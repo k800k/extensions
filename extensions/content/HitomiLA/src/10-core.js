@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 const HIT_STATIC = "https://ltn.gold-usergeneratedcontent.net";
 const HIT_SITE = "https://hitomi.la";
@@ -26,10 +26,12 @@ let hitRuntime;
 let hitRoutingCache;
 let hitRoutingPromise;
 let hitIndexCache;
+let hitSuggestionCatalog;
+let hitSuggestionCatalogPromise;
 
 function hitContext() {
-  const context = hitRuntime || globalThis.MangaReader?.context;
-  if (!context) throw hitError("ExtensionRuntimeError", "MangaReader runtime context is unavailable");
+  const context = hitRuntime || globalThis.manko?.context;
+  if (!context) throw hitError("ExtensionRuntimeError", "manko runtime context is unavailable");
   return context;
 }
 
@@ -401,6 +403,113 @@ function hitQuery(input) {
   return { language, positive, negative };
 }
 
+function hitComposedQuery(input) {
+  const raw = String(input?.query ?? input?.text ?? "").trim();
+  const allowed = new Set(["tag", "female", "male", "artist", "group", "series", "character", "language", "type"]);
+  const selections = Array.isArray(input?.selections) ? input.selections : [];
+  const terms = [];
+  for (const selection of selections.slice(0, 24)) {
+    const field = String(selection?.fieldID || "").trim().toLowerCase();
+    const value = String(selection?.value || "").trim().toLowerCase().replace(/\s+/g, "_");
+    if (!allowed.has(field) || !value || value.length > 100) continue;
+    const excluded = selection?.polarity === "exclude" && field !== "language";
+    terms.push(`${excluded ? "-" : ""}${field}:${value}`);
+  }
+  return [raw, ...terms].filter(Boolean).join(" ");
+}
+
+function hitSort(input) {
+  const value = String(input?.sort || "newest");
+  return value === "popular-week" ? value : "newest";
+}
+
+async function hitSortedSearchIDs(query, sort) {
+  const ids = await hitSearchIDs(query);
+  if (sort !== "popular-week") return ids;
+  const allowed = new Set(ids);
+  const popular = await hitNozomiAll({ language: query.language, popular: "week" });
+  return popular.filter(id => allowed.has(id));
+}
+
+function hitSuggestionNamespace(key) {
+  const normalized = String(key || "").toLowerCase();
+  if (["tag", "tags"].includes(normalized)) return "tag";
+  if (["artist", "artists"].includes(normalized)) return "artist";
+  if (["group", "groups"].includes(normalized)) return "group";
+  if (["series", "parody", "parodys"].includes(normalized)) return "series";
+  if (["character", "characters"].includes(normalized)) return "character";
+  if (["language", "languages"].includes(normalized)) return "language";
+  if (["type", "types"].includes(normalized)) return "type";
+  if (normalized === "female" || normalized === "male") return normalized;
+  return null;
+}
+
+async function hitSuggestions(input) {
+  const fieldID = String(input?.fieldID || "").toLowerCase();
+  const query = String(input?.query || "").trim().toLowerCase();
+  const limit = Math.max(1, Math.min(30, Number(input?.limit) || 20));
+  const catalog = await hitLoadSuggestionCatalog();
+  const values = catalog.get(fieldID) || [];
+  return values
+    .filter(item => !query || item.value.toLowerCase().includes(query))
+    .slice(0, limit)
+    .map(item => ({ fieldID, value: item.value, title: item.value, subtitle: item.count ? `${item.count} galleries` : undefined }));
+}
+
+async function hitLoadSuggestionCatalog() {
+  if (hitSuggestionCatalog) return hitSuggestionCatalog;
+  if (hitSuggestionCatalogPromise) return hitSuggestionCatalogPromise;
+  hitSuggestionCatalogPromise = (async () => {
+    const catalog = new Map();
+    const seen = new Map();
+    const add = (field, rawValue, rawCount) => {
+      const value = String(rawValue || "").trim();
+      if (!field || !value || value.length > 100) return;
+      if (!catalog.has(field)) {
+        catalog.set(field, []);
+        seen.set(field, new Set());
+      }
+      const key = value.toLowerCase();
+      if (seen.get(field).has(key) || catalog.get(field).length >= 5000) return;
+      seen.get(field).add(key);
+      const count = Number(rawCount);
+      catalog.get(field).push({ value, count: Number.isFinite(count) && count > 0 ? Math.floor(count) : 0 });
+    };
+    const visit = (value, namespace, depth = 0) => {
+      if (depth > 8 || value == null) return;
+      if (typeof value === "string") {
+        add(namespace, value, 0);
+        return;
+      }
+      if (Array.isArray(value)) {
+        for (const item of value.slice(0, 25000)) visit(item, namespace, depth + 1);
+        return;
+      }
+      if (typeof value !== "object") return;
+      if (typeof value.tag === "string") {
+        add(value.female ? "female" : value.male ? "male" : namespace || "tag", value.tag, value.count);
+      }
+      if (typeof value.name === "string" && namespace) add(namespace, value.name, value.count);
+      for (const [key, child] of Object.entries(value)) {
+        const nextNamespace = hitSuggestionNamespace(key) || namespace;
+        if (typeof child === "string" && hitSuggestionNamespace(key)) add(nextNamespace, child, value.count);
+        else visit(child, nextNamespace, depth + 1);
+      }
+    };
+    try {
+      const text = await hitRequest(`${HIT_STATIC}/tags.json`, { accept: "application/json" });
+      if (text.length > 8 * 1024 * 1024) throw hitError("InvalidResponseError", "Hitomi.la suggestion catalog is too large", "invalidResponse");
+      visit(JSON.parse(text), null);
+    } catch {
+      return catalog;
+    }
+    for (const values of catalog.values()) values.sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+    hitSuggestionCatalog = catalog;
+    return catalog;
+  })();
+  return hitSuggestionCatalogPromise;
+}
+
 async function hitIDsForTerm(term, language) {
   const separator = term.indexOf(":");
   if (separator < 0) return hitTitleIDs(term.replace(/_/g, " "));
@@ -573,7 +682,31 @@ async function hitWork(gallery) {
   const cover = hitCoverURL(gallery.files[0].hash);
   const artists = hitValues(gallery.artists, "artist");
   const groups = hitValues(gallery.groups, "group");
+  const series = hitValues(gallery.parodys, "parody");
+  const characters = hitValues(gallery.characters, "character");
   const tags = hitTagGroups(gallery);
+  const tagNamespaces = [
+    ["female", "Female"],
+    ["male", "Male"],
+    ["tag", "Tags"]
+  ];
+  const searchFacets = [
+    ...artists.map(value => ({ fieldID: "artist", value, title: value, groupTitle: "Artists", presentation: "creator" })),
+    ...groups.map(value => ({ fieldID: "group", value, title: value, groupTitle: "Groups", presentation: "creator" })),
+    ...series.map(value => ({ fieldID: "series", value, title: value, groupTitle: "Series", presentation: "tag" })),
+    ...characters.map(value => ({ fieldID: "character", value, title: value, groupTitle: "Characters", presentation: "tag" })),
+    ...tagNamespaces.flatMap(([namespace, groupTitle]) => (tags[namespace] || []).map(value => ({
+      fieldID: namespace,
+      value,
+      title: value,
+      groupTitle,
+      presentation: "tag"
+    })))
+  ];
+  if (gallery.language) searchFacets.push({ fieldID: "language", value: gallery.language, title: gallery.language_localname || gallery.language, groupTitle: "Language", presentation: "tag" });
+  if (typeof gallery.type === "string" && gallery.type.trim()) {
+    searchFacets.push({ fieldID: "type", value: gallery.type.trim(), title: gallery.type.trim(), groupTitle: "Type", presentation: "tag" });
+  }
   const alternate = typeof gallery.japanese_title === "string" && gallery.japanese_title.trim() && gallery.japanese_title.trim() !== gallery.title.trim() ? [gallery.japanese_title.trim()] : [];
   let shareUrl = `${HIT_SITE}/galleries/${id}.html`;
   if (typeof gallery.galleryurl === "string" && gallery.galleryurl.startsWith("/")) shareUrl = hitURL(gallery.galleryurl, new Set(["hitomi.la"])).href;
@@ -599,13 +732,14 @@ async function hitWork(gallery) {
     publishedAt: typeof gallery.date === "string" ? gallery.date : null,
     workInfo: {
       thumbnailUrl: cover,
-      synopsis: Object.entries(tags).map(([namespace, values]) => `${namespace}: ${values.join(", ")}`).join("\n"),
+      synopsis: "",
       primaryTitle: gallery.title.trim(),
       secondaryTitles: alternate,
       contentRating: "ADULT",
       status: "completed",
       artist: artists.join(", ") || undefined,
       author: [...artists, ...groups].join(", ") || undefined,
+      searchFacets,
       shareUrl
     }
   };

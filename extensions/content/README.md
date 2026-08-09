@@ -5,7 +5,7 @@ The catalog contains 17 content packages. Each package includes a manifest, impl
 Create a new scaffold from the repository root with:
 
 ```sh
-node packages/cli/bin/mr-ext.mjs new --id ExampleSource --name "Example Source"
+node packages/cli/bin/manko-ext.mjs new --id ExampleSource --name "Example Source"
 ```
 
 Tracker packages live under `extensions/tracker`. Theme extension packages are unsupported.

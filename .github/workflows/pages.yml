@@ -25,7 +25,7 @@ jobs:
       - name: Build packages at the exact published source revision
         run: npm run bundle
         env:
-          MR_SOURCE_REVISION: ${{ github.sha }}
+          MANKO_SOURCE_REVISION: ${{ github.sha }}
       - run: npm run docs:build
       - uses: actions/configure-pages@v5
       - run: mkdir _site && cp -R site/. _site/ && cp -R dist _site/dist

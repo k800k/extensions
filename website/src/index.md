@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: MangaReader
+  name: manko
   text: Extension Registry
-  tagline: Open-source content and tracker extensions for your MangaReader library.
+  tagline: Open-source content and tracker extensions for your manko library.
   actions:
     - theme: brand
       text: Add the Repository
@@ -31,13 +31,13 @@ features:
     linkText: Get support
   - icon: 🧰
     title: Open development
-    details: Build and validate MangaReader Extension API 1.0/1.1 packages with the repository tooling.
+    details: Build and validate manko Extension API 1.0/1.1 packages with the repository tooling.
     link: /development/
     linkText: Start developing
 ---
 
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Copyright © 2025 Inkdex -->
-<!-- Copyright © 2026 MangaReader Extension Contributors -->
+<!-- Copyright © 2026 manko Extension Contributors -->
 
-The catalog contains 17 content packages plus AniList and MyAnimeList tracker extensions. Add the repository once, then get or update extensions individually in MangaReader.
+The catalog contains 17 content packages plus AniList and MyAnimeList tracker extensions. Add the repository once, then get or update extensions individually in manko.

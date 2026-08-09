@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "sourceOwned": true,
   "id": "MangaKakalot",
-  "releaseVersion": "1.0.0-alpha.13",
+  "releaseVersion": "1.0.0-alpha.14",
   "generator": "scripts/build-source-owned.mjs",
   "upstream": {
     "repository": "https://github.com/Aidoku-Community/sources",
@@ -19,20 +19,20 @@
   "modules": [
     {
       "file": "scripts/source-owned-runtime/00-runtime.js",
-      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+      "sha256": "ec9f9b6e0f82c48a00cb8b9a1cd424331dda500f5e66a3dedd187023d794eceb"
     },
     {
       "file": "scripts/source-owned-runtime/10-html.js",
-      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+      "sha256": "1ae92bbee81731a0ce1b1f9ad4111890baf1466a3f6ae607fc7d2e574003d1d2"
     },
     {
       "file": "scripts/source-owned-runtime/20-mangabox.js",
-      "sha256": "ec438dda7516cfef23e38363c9ed9a8a95040b5a7bc81c7cdbe5d0ac11d47f7e"
+      "sha256": "ed50c6a57e954f36fba26775e4b34fd283382cbfa694ed72389940a40df8cb76"
     },
     {
       "file": "extensions/content/MangaKakalot/src/20-extension.js",
-      "sha256": "b77ae2f75c6b971d41dbb9764fbf7f0e7dc3fb2b2c5b2c78e9ad2de35eecadf2"
+      "sha256": "e95b0b7ab2d185a8856ba52a33580ce7b8a40c9dda6cb09109ea2cb200a6f466"
     }
   ],
-  "generatedMainSHA256": "48cd35fd2ac8b31e9acc95bf0428e54c387b84b742d78b4b2ece69f10c5b4cb4"
+  "generatedMainSHA256": "2089b27d3e84c7e063d21457b48084b816fae097d3ae944b0f39d958a8fc9947"
 }

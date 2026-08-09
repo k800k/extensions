@@ -1,8 +1,8 @@
 {
-  "name": "@mangareader/extensions-website",
+  "name": "@manko/extensions-website",
   "version": "1.0.0",
   "private": true,
-  "description": "Documentation and extension catalog for MangaReader.",
+  "description": "Documentation and extension catalog for manko.",
   "type": "module",
   "scripts": {
     "dev": "vitepress dev src",

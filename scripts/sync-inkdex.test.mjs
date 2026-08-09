@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -31,11 +31,11 @@ test("the checked-in repository publishes seventeen content and two tracker pack
   assert.deepEqual(catalog.sources.map(source => source.id), expectedIDs);
   assert.ok(catalog.sources.every(source => source.availability === "approvalRequired"));
   assert.deepEqual(
-    catalog.sources.filter(source => source.mangaReaderExtension.apiVersion === "1.1").map(source => source.id),
+    catalog.sources.filter(source => source.extension.apiVersion === "1.1").map(source => source.id),
     ["AniList", "Comix", "LNori", "MyAnimeList", "RoyalRoad"]
   );
   const mangaDex = catalog.sources.find(source => source.id === "MangaDex");
-  assert.deepEqual(mangaDex.mangaReaderExtension.allowedHTTPSHosts, [
+  assert.deepEqual(mangaDex.extension.allowedHTTPSHosts, [
     "*.mangadex.network", "api.mangadex.org", "mangadex.org", "uploads.mangadex.org"
   ]);
 });
@@ -67,15 +67,15 @@ test("the InkDex importer cannot overwrite source-owned packages", () => {
 
 test("repaired source releases declare their reviewed cover hosts", async () => {
   const expected = new Map([
-    ["Atsumaru", ["1.0.0-alpha.25", "cdn.atsu.moe"]],
+    ["Atsumaru", ["1.0.0-alpha.26", "cdn.atsu.moe"]],
     ["Comix", ["1.0.0-alpha.52", "*.wowpic1.store"]],
-    ["HitomiLA", ["0.2.2", "atn.gold-usergeneratedcontent.net"]],
-    ["LNori", ["1.0.0-alpha.3", "cdn.lnori.com"]],
-    ["MangaBat", ["1.0.0-alpha.13", "img-r1.2xstorage.com"]],
+    ["HitomiLA", ["0.2.3", "atn.gold-usergeneratedcontent.net"]],
+    ["LNori", ["1.0.0-alpha.4", "cdn.lnori.com"]],
+    ["MangaBat", ["1.0.0-alpha.14", "img-r1.2xstorage.com"]],
     ["MangaDemon", ["1.0.0-alpha.18", "readermc.org"]],
-    ["MangaKakalot", ["1.0.0-alpha.13", "img-r1.2xstorage.com"]],
-    ["NHentai", ["0.3.1", "t.nhentai.net"]],
-    ["RoyalRoad", ["1.0.0-alpha.3", "www.royalroadcdn.com"]],
+    ["MangaKakalot", ["1.0.0-alpha.14", "img-r1.2xstorage.com"]],
+    ["NHentai", ["0.3.2", "t.nhentai.net"]],
+    ["RoyalRoad", ["1.0.0-alpha.4", "www.royalroadcdn.com"]],
     ["WeebCentral", ["1.0.0-alpha.26", "temp.compsci88.com"]]
   ]);
   for (const [id, [version, host]] of expected) {
@@ -88,13 +88,13 @@ test("repaired source releases declare their reviewed cover hosts", async () => 
 test("MangaFox and Mangago are enabled API 1.0 imports from the pinned registry artifacts", async () => {
   const expected = new Map([
     ["MangaFox", {
-      version: "1.0.0-alpha.13",
+      version: "1.0.0-alpha.14",
       contentRating: "MATURE",
       hosts: ["fanfox.net"],
       artifactSHA256: "4326a7e64c9a45fd90b46e9b70a417038e7a31e5496edbc7cacc60d6289b1f11"
     }],
     ["Mangago", {
-      version: "1.0.0-alpha.1",
+      version: "1.0.0-alpha.2",
       contentRating: "ADULT",
       hosts: ["www.mangago.me", "www.mangago.zone", "www.youhim.me"],
       artifactSHA256: "8589c51e2dfdb317756e626615157d8949ff0b0b5357f2e95c6a65909e250db3"

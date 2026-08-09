@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright © 2025 Inkdex */
-/* Copyright © 2026 MangaReader Extension Contributors */
+/* Copyright © 2026 manko Extension Contributors */
 
 import rawDefaultCatalog from "../../../../../dist/v1/stable/catalog.json";
 
@@ -54,9 +54,8 @@ export interface CatalogSource {
   sourceKey: string;
   extension: {
     apiVersion?: string;
-    packageURL?: string;
-    compressedSize?: number;
-    uncompressedSize?: number;
+    scriptURL?: string;
+    size?: number;
   } | null;
 }
 
@@ -73,7 +72,7 @@ interface RawCatalog {
   sources?: unknown;
 }
 
-const MANGAREADER_REPOSITORY_URL = "https://kayvenchen.github.io/mangareader/repository/";
+const MANKO_REPOSITORY_URL = "https://kayvenchen.github.io/mangareader/repository/";
 
 function stringValue(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value.trim() || fallback : fallback;
@@ -134,7 +133,7 @@ export function sourceKey(repositoryURL: string, sourceID: string): string {
 function repositoryLabel(catalog: RawCatalog, repositoryURL: string, isDefault: boolean): string {
   const configured = stringValue(catalog.repository?.name);
   if (configured) return configured;
-  if (isDefault) return "MangaReader Extensions";
+  if (isDefault) return "manko Extensions";
   const url = new URL(repositoryURL);
   const path = url.pathname.split("/").filter(Boolean).slice(-2).join("/");
   return path ? `${url.hostname}/${path}` : url.hostname;
@@ -179,8 +178,8 @@ export function normalizeCatalog(
     }
 
     const extensionRaw =
-      raw.mangaReaderExtension && typeof raw.mangaReaderExtension === "object"
-        ? (raw.mangaReaderExtension as Record<string, unknown>)
+      raw.extension && typeof raw.extension === "object"
+        ? (raw.extension as Record<string, unknown>)
         : null;
     const compatibilityRaw =
       raw.compatibility && typeof raw.compatibility === "object"
@@ -242,15 +241,8 @@ export function normalizeCatalog(
       extension: extensionRaw
         ? {
             apiVersion: stringValue(extensionRaw.apiVersion) || undefined,
-            packageURL: httpURL(extensionRaw.packageURL, repositoryURL) || undefined,
-            compressedSize:
-              typeof extensionRaw.compressedSize === "number"
-                ? extensionRaw.compressedSize
-                : undefined,
-            uncompressedSize:
-              typeof extensionRaw.uncompressedSize === "number"
-                ? extensionRaw.uncompressedSize
-                : undefined,
+            scriptURL: httpURL(extensionRaw.scriptURL, repositoryURL) || undefined,
+            size: typeof extensionRaw.size === "number" ? extensionRaw.size : undefined,
           }
         : null,
     };
@@ -263,7 +255,7 @@ export function normalizeCatalog(
 }
 
 export function buildAddRepositoryLink(repositoryURL: string): string {
-  const link = new URL("add", MANGAREADER_REPOSITORY_URL);
+  const link = new URL("add", MANKO_REPOSITORY_URL);
   link.searchParams.set("url", normalizeRepositoryURL(repositoryURL));
   return link.href;
 }
@@ -271,7 +263,7 @@ export function buildAddRepositoryLink(repositoryURL: string): string {
 export function buildInstallLink(repositoryURL: string, sourceIDs: Iterable<string>): string {
   const ids = [...new Set(sourceIDs)].filter(Boolean);
   if (ids.length === 0) throw new RangeError("Choose at least one extension.");
-  const link = new URL("install", MANGAREADER_REPOSITORY_URL);
+  const link = new URL("install", MANKO_REPOSITORY_URL);
   link.searchParams.set("url", normalizeRepositoryURL(repositoryURL));
   ids.forEach((id) => link.searchParams.append("source", id));
   return link.href;

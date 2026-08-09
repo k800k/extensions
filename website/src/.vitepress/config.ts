@@ -1,19 +1,19 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright © 2025 Inkdex */
-/* Copyright © 2026 MangaReader Extension Contributors */
+/* Copyright © 2026 manko Extension Contributors */
 
 import { defineConfig } from "vitepress";
 
-const base = process.env.MANGAREADER_SITE_BASE || "/extensions/";
+const base = process.env.MANKO_SITE_BASE || "/extensions/";
 
 export default defineConfig({
-  title: "MangaReader Extensions",
-  titleTemplate: ":title | MangaReader Extensions",
-  description: "Browse and install community extensions for MangaReader.",
+  title: "manko Extensions",
+  titleTemplate: ":title | manko Extensions",
+  description: "Browse and install community extensions for manko.",
   base,
   outDir: "../../site",
   cleanUrls: true,
-  lastUpdated: true,
+  lastUpdated: false,
   sitemap: {
     hostname: "https://k800k.github.io/extensions/",
   },
@@ -23,7 +23,7 @@ export default defineConfig({
     ["meta", { name: "referrer", content: "no-referrer-when-downgrade" }],
   ],
   themeConfig: {
-    siteTitle: "MangaReader Extensions",
+    siteTitle: "manko Extensions",
     search: {
       provider: "local",
     },
@@ -74,7 +74,7 @@ export default defineConfig({
     },
     footer: {
       message: `Documentation site license: <a href="${base}LICENSE">GPL-3.0-or-later</a> · <a href="https://github.com/k800k/extensions">source</a>.`,
-      copyright: "Copyright © 2026 MangaReader Extension Contributors",
+      copyright: "Copyright © 2026 manko Extension Contributors",
     },
     outline: [2, 3],
   },

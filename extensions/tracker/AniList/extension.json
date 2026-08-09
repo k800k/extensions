@@ -13,7 +13,7 @@
   "permissions": ["authenticationHandoff", "network", "secureState", "trackerUpdates"],
   "allowedHTTPSHosts": ["anilist.co", "graphql.anilist.co", "s4.anilist.co"],
   "authenticationModes": ["oauth2Implicit"],
-  "developers": [{ "name": "MangaReader Extension Contributors", "github": "https://github.com/k800k/extensions" }],
+  "developers": [{ "name": "manko Extension Contributors", "github": "https://github.com/k800k/extensions" }],
   "iconFile": "icon.svg",
   "license": "Apache-2.0",
   "upstream": {

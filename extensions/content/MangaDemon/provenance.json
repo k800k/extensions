@@ -16,16 +16,16 @@
   "modules": [
     {
       "file": "scripts/source-owned-runtime/00-runtime.js",
-      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+      "sha256": "ec9f9b6e0f82c48a00cb8b9a1cd424331dda500f5e66a3dedd187023d794eceb"
     },
     {
       "file": "scripts/source-owned-runtime/10-html.js",
-      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+      "sha256": "1ae92bbee81731a0ce1b1f9ad4111890baf1466a3f6ae607fc7d2e574003d1d2"
     },
     {
       "file": "extensions/content/MangaDemon/src/20-extension.js",
-      "sha256": "08ea173faac209b4d93432470031337f2880b375949be873de45e17e8d6f96be"
+      "sha256": "d505b7b1f68c9760f19514aa63f7fbc7c62e1b9876c44d86082e8c0853ed963d"
     }
   ],
-  "generatedMainSHA256": "5e17fd70f6632152d263d8a72cce5c27b66be055b682cdae89d64717ac54b9fa"
+  "generatedMainSHA256": "caf575871221139dacf6c254f466ed9b12adbb3e364093cf23142d18931e4fe4"
 }

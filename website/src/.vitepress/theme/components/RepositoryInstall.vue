@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <!-- Copyright © 2025 Inkdex -->
-<!-- Copyright © 2026 MangaReader Extension Contributors -->
+<!-- Copyright © 2026 manko Extension Contributors -->
 
 <script setup lang="ts">
 import { ref } from "vue";
@@ -18,7 +18,7 @@ async function copyRepositoryURL() {
       copied.value = false;
     }, 1800);
   } catch {
-    window.prompt("Copy the MangaReader repository URL:", repositoryURL);
+    window.prompt("Copy the manko repository URL:", repositoryURL);
   }
 }
 </script>
@@ -31,7 +31,7 @@ async function copyRepositoryURL() {
       <span />
     </div>
     <div class="repository-install-copy">
-      <h3 id="repository-install-title">MangaReader Extensions</h3>
+      <h3 id="repository-install-title">manko Extensions</h3>
       <code>{{ repositoryURL }}</code>
     </div>
     <div class="repository-install-actions">

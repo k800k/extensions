@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Copyright © 2025 Inkdex */
-/* Copyright © 2026 MangaReader Extension Contributors */
+/* Copyright © 2026 manko Extension Contributors */
 
 import DefaultTheme from "vitepress/theme";
 import type { Theme } from "vitepress";

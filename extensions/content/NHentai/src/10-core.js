@@ -1,4 +1,4 @@
-/* Copyright 2026 MangaReader Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
 const NH_BASE = "https://nhentai.net";
 const NH_API = `${NH_BASE}/api/v2`;
@@ -6,12 +6,13 @@ const NH_IMAGE_HOSTS = new Set(["i.nhentai.net"]);
 const NH_THUMB_HOSTS = new Set(["t.nhentai.net"]);
 const NH_MEDIA_HOSTS = new Set([...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
 const NH_HOSTS = new Set(["nhentai.net", ...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
-const NH_USER_AGENT = "MangaReader NHentai Extension/0.3.1 (+https://github.com/k800k/extensions)";
+const NH_USER_AGENT = "manko NHentai Extension/0.3.2 (+https://github.com/k800k/extensions)";
 let nhRuntime;
+const nhKnownSearchValues = new Map();
 
 function nhContext() {
-  const context = nhRuntime || globalThis.MangaReader?.context;
-  if (!context) throw nhError("ExtensionRuntimeError", "MangaReader runtime context is unavailable");
+  const context = nhRuntime || globalThis.manko?.context;
+  if (!context) throw nhError("ExtensionRuntimeError", "manko runtime context is unavailable");
   return context;
 }
 
@@ -129,6 +130,51 @@ function nhPage(input) {
   return value;
 }
 
+function nhComposedQuery(input) {
+  const raw = String(input?.query ?? input?.text ?? "").trim();
+  const allowed = new Set(["tag", "artist", "parody", "character", "group", "language", "category", "pages", "favorites", "uploaded", "title", "jtitle"]);
+  const terms = [];
+  for (const selection of (Array.isArray(input?.selections) ? input.selections : []).slice(0, 24)) {
+    const field = String(selection?.fieldID || "").trim().toLowerCase();
+    const value = String(selection?.value || "").trim();
+    if (!allowed.has(field) || !value || value.length > 200) continue;
+    const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    const formatted = /\s/.test(escaped) ? `"${escaped}"` : escaped;
+    const excluded = selection?.polarity === "exclude";
+    terms.push(`${excluded ? "-" : ""}${field}:${formatted}`);
+  }
+  return [raw, ...terms].filter(Boolean).join(" ");
+}
+
+function nhSort(input, fallback = "date") {
+  const value = String(input?.sort || fallback);
+  return new Set(["date", "popular-today", "popular-week", "popular"]).has(value) ? value : fallback;
+}
+
+function nhRememberSearchValues(tagGroups) {
+  for (const [fieldID, values] of Object.entries(tagGroups || {})) {
+    if (!nhKnownSearchValues.has(fieldID)) nhKnownSearchValues.set(fieldID, []);
+    const known = nhKnownSearchValues.get(fieldID);
+    const seen = new Set(known.map(value => value.toLowerCase()));
+    for (const rawValue of Array.isArray(values) ? values : []) {
+      const value = String(rawValue || "").trim();
+      if (!value || value.length > 200 || seen.has(value.toLowerCase()) || known.length >= 1000) continue;
+      known.push(value);
+      seen.add(value.toLowerCase());
+    }
+  }
+}
+
+function nhSuggestions(input) {
+  const fieldID = String(input?.fieldID || "").trim().toLowerCase();
+  const query = String(input?.query || "").trim().toLowerCase();
+  const limit = Math.max(1, Math.min(30, Number(input?.limit) || 20));
+  return (nhKnownSearchValues.get(fieldID) || [])
+    .filter(value => !query || value.toLowerCase().includes(query))
+    .slice(0, limit)
+    .map(value => ({ fieldID, value, title: value }));
+}
+
 function nhMediaURL(path, isCover) {
   const hosts = isCover ? NH_THUMB_HOSTS : NH_IMAGE_HOSTS;
   const base = isCover ? "https://t.nhentai.net" : "https://i.nhentai.net";
@@ -159,6 +205,7 @@ function nhTags(gallery) {
     if (!result[tag.type]) result[tag.type] = [];
     result[tag.type].push(tag.name);
   }
+  nhRememberSearchValues(result);
   return result;
 }
 
@@ -214,6 +261,24 @@ function nhWork(gallery) {
     throw nhError("InvalidResponseError", "Gallery pages are missing or malformed", "invalidResponse");
   }
   const creators = [...(tagGroups.artist || []), ...(tagGroups.group || [])];
+  const facetGroups = [
+    ["parody", "Parodies", "tag"],
+    ["character", "Characters", "tag"],
+    ["tag", "Tags", "tag"],
+    ["artist", "Artists", "creator"],
+    ["group", "Groups", "creator"],
+    ["language", "Languages", "tag"],
+    ["category", "Categories", "tag"]
+  ];
+  const searchFacets = facetGroups.flatMap(([fieldID, groupTitle, presentation]) =>
+    (tagGroups[fieldID] || []).map(value => ({
+      fieldID,
+      value,
+      title: value,
+      groupTitle,
+      presentation
+    }))
+  );
   const secondaryTitles = [titles.english, titles.japanese, titles.pretty]
     .filter(value => value && value !== card.title)
     .filter((value, index, values) => values.indexOf(value) === index);
@@ -226,13 +291,14 @@ function nhWork(gallery) {
     tags: tagGroups,
     workInfo: {
       thumbnailUrl: card.imageUrl,
-      synopsis: (tagGroups.tag || []).join(", "),
+      synopsis: "",
       primaryTitle: card.title,
       secondaryTitles,
       contentRating: "ADULT",
       status: "completed",
-      artist: creators.join(", ") || undefined,
+      artist: (tagGroups.artist || []).join(", ") || undefined,
       author: creators.join(", ") || undefined,
+      searchFacets,
       shareUrl: `${NH_BASE}/g/${card.workId}/`
     }
   };

@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from mangadex.org.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.28",
+  "version": "1.0.0-alpha.29",
   "language": "multi",
   "languages": [
     "multi"
@@ -60,8 +60,8 @@
     "scope": "core",
     "note": null,
     "limitations": [
-      "Advanced search form values and actions are not passed to Paperback search callbacks by MangaReader API v1.",
-      "Paperback genre-query discover cards have no equivalent MangaReader API v1 discover-item representation."
+      "Structured metadata search is limited to fields verified against this pinned provider snapshot.",
+      "Paperback genre-query discover cards have no equivalent manko API v1 discover-item representation."
     ]
   },
   "upstream": {

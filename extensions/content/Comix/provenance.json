@@ -18,16 +18,16 @@
   "modules": [
     {
       "file": "scripts/source-owned-runtime/00-runtime.js",
-      "sha256": "fd9f7f429f38265d63f6f8b4598e77272a0a993b1fbabe1662789ba14df49cf8"
+      "sha256": "ec9f9b6e0f82c48a00cb8b9a1cd424331dda500f5e66a3dedd187023d794eceb"
     },
     {
       "file": "scripts/source-owned-runtime/10-html.js",
-      "sha256": "dd3add8d65626699c63797722cc45725f51ae103e2a3c3e6a2d22c07fa3e449b"
+      "sha256": "1ae92bbee81731a0ce1b1f9ad4111890baf1466a3f6ae607fc7d2e574003d1d2"
     },
     {
       "file": "extensions/content/Comix/src/20-extension.js",
-      "sha256": "2b11b78d15a47fcca3b1674bfa0d77073eb9ccf9af6a5042c376bed03021c313"
+      "sha256": "3caefa7744039c0ec8d2670d856b3481e01f7600a6f6326d2c99b48346480aaf"
     }
   ],
-  "generatedMainSHA256": "8dec701a6748b2d76c3e1e3fd821ac9d1c74ac7af15093d7eb1f3f4a3a819450"
+  "generatedMainSHA256": "1c545aaeb3204db324a1bb121fa82fbddaa0dc418d872196d4396d04b0b45077"
 }

@@ -1,7 +1,7 @@
 {
-  "name": "@mangareader/extension-cli",
+  "name": "@manko/extension-cli",
   "version": "1.0.0",
   "type": "module",
-  "bin": { "mr-ext": "./bin/mr-ext.mjs" },
+  "bin": { "manko-ext": "./bin/manko-ext.mjs" },
   "license": "Apache-2.0"
 }
