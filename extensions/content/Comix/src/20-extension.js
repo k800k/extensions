@@ -4,7 +4,7 @@ const COMIX_BASE = "https://comix.to";
 const COMIX_API = `${COMIX_BASE}/api/v1`;
 const COMIX_MAX_IMAGE_BASE64_LENGTH = Math.ceil((16 * 1024 * 1024) / 3) * 4;
 const COMIX_MAX_PROTECTED_JSON_BYTES = 256 * 1024;
-const COMIX_USER_AGENT = "manko Comix/1.0.0-alpha.52";
+const COMIX_USER_AGENT = "manko Comix/1.0.0-alpha.53";
 const comixRuntime = mrCreateRuntime({
   name: "Comix",
   baseURL: COMIX_BASE,
@@ -534,8 +534,8 @@ try {
   if (parsedImageURL.protocol !== "https:" || !allowedImageHost) {
     return failure("invalidImageTarget", "Comix descrambler target is not allowed");
   }
-  const payloadBase64 = String(globalThis.__mangaReaderPayloadBase64 || "");
-  const payloadMimeType = String(globalThis.__mangaReaderPayloadMimeType || "");
+  const payloadBase64 = String(globalThis.__mankoPayloadBase64 || "");
+  const payloadMimeType = String(globalThis.__mankoPayloadMimeType || "");
   if (!payloadBase64 || payloadBase64.length > maximumImageBase64Length || !/^image\/(?:avif|gif|jpeg|png|webp)$/.test(payloadMimeType)) {
     return failure("invalidImagePayload", "Comix brokered image payload is invalid");
   }

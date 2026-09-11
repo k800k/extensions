@@ -37,7 +37,7 @@
           "name": "Inkdex"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=AllPornComic",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=AllPornComic",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/AllPornComic/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -74,7 +74,7 @@
       "id": "AniList",
       "name": "AniList",
       "description": "Track manga progress and lists with AniList.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "icon": "icons/AniList.svg",
       "languages": [
         "multi"
@@ -91,7 +91,7 @@
           "name": "manko Extension Contributors"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=AniList",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=AniList",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/tracker/AniList/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -110,9 +110,9 @@
       },
       "extension": {
         "apiVersion": "1.1",
-        "scriptURL": "sources/AniList/1.0.0/main.js",
-        "sha256": "7dd0c9e5e0cf5799435aa880849e15bad1916e2972519a6263021bba7130021e",
-        "size": 5948,
+        "scriptURL": "sources/AniList/1.0.1/main.js",
+        "sha256": "b2b76e5821ab2baf539a644db16252b65ce44492f339264c35dabec76cc1998f",
+        "size": 5951,
         "allowedHTTPSHosts": [
           "anilist.co",
           "graphql.anilist.co",
@@ -149,7 +149,7 @@
           "name": "Lucifers Circle"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Atsumaru",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Atsumaru",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Atsumaru/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -187,7 +187,7 @@
       "id": "Comix",
       "name": "Comix",
       "description": "Extension that pulls content from Comix.to.",
-      "version": "1.0.0-alpha.52",
+      "version": "1.0.0-alpha.53",
       "icon": "icons/Comix.png",
       "languages": [
         "en"
@@ -209,7 +209,7 @@
           "name": "Catta1997"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Comix",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Comix",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Comix/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -232,9 +232,9 @@
       },
       "extension": {
         "apiVersion": "1.1",
-        "scriptURL": "sources/Comix/1.0.0-alpha.52/main.js",
-        "sha256": "1c545aaeb3204db324a1bb121fa82fbddaa0dc418d872196d4396d04b0b45077",
-        "size": 47456,
+        "scriptURL": "sources/Comix/1.0.0-alpha.53/main.js",
+        "sha256": "2e7c3dc5147aee2f72160a5edf3e04590292cf93ab46598a40ac0b25b045e943",
+        "size": 47444,
         "allowedHTTPSHosts": [
           "comix.to",
           "static.comix.to",
@@ -297,7 +297,7 @@
           "name": "manko Extension Contributors"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=HitomiLA",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=HitomiLA",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/HitomiLA/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -354,7 +354,7 @@
           "name": "Catta1997"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=LNori",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=LNori",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/LNori/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -411,7 +411,7 @@
           "name": "Inkdex"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MadaraDex",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MadaraDex",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MadaraDex/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -470,7 +470,7 @@
           "name": "Saw_6"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaBat",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaBat",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaBat/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -532,7 +532,7 @@
           "name": "samipmainali"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDemon",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDemon",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDemon/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -595,7 +595,7 @@
           "name": "Inkdex"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDex",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDex",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDex/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -656,7 +656,7 @@
           "name": "Catta1997"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDot",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaDot",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaDot/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -716,7 +716,7 @@
           "name": "Egwau"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaFox",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaFox",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaFox/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -775,7 +775,7 @@
           "name": "Popmango"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Mangago",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Mangago",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Mangago/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -836,7 +836,7 @@
           "name": "Saw_6"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaKakalot",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MangaKakalot",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/MangaKakalot/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -876,7 +876,7 @@
       "id": "MyAnimeList",
       "name": "MyAnimeList",
       "description": "Track manga progress and lists with MyAnimeList.",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "icon": "icons/MyAnimeList.svg",
       "languages": [
         "multi"
@@ -893,7 +893,7 @@
           "name": "manko Extension Contributors"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MyAnimeList",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=MyAnimeList",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/tracker/MyAnimeList/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -912,9 +912,9 @@
       },
       "extension": {
         "apiVersion": "1.1",
-        "scriptURL": "sources/MyAnimeList/1.0.0/main.js",
-        "sha256": "d1637135a8a478c7014b33340b876f3a5d2f7af92bd2af142a9c2dba0a1e5933",
-        "size": 6125,
+        "scriptURL": "sources/MyAnimeList/1.0.1/main.js",
+        "sha256": "65baccbaa78ff1d19fbe1a513b283cdd0c17f0284832b3dfbdae57f57300abbd",
+        "size": 6128,
         "allowedHTTPSHosts": [
           "api.myanimelist.net",
           "cdn.myanimelist.net",
@@ -960,7 +960,7 @@
           "name": "manko Extension Contributors"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=NHentai",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=NHentai",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/NHentai/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -1019,7 +1019,7 @@
           "name": "Inkdex"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=RoyalRoad",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=RoyalRoad",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/RoyalRoad/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -1078,7 +1078,7 @@
           "name": "Yves Pa"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Webtoon",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=Webtoon",
       "rightsDeclaration": "Licensed under GPL-3.0-or-later.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/Webtoon/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -1117,7 +1117,7 @@
       "id": "WeebCentral",
       "name": "WeebCentral",
       "description": "Extension that pulls content from weebcentral.com.",
-      "version": "1.0.0-alpha.26",
+      "version": "1.0.0-alpha.27",
       "icon": "icons/WeebCentral.png",
       "languages": [
         "en"
@@ -1139,7 +1139,7 @@
           "name": "GabrielCWT"
         }
       ],
-      "universalLink": "https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=WeebCentral",
+      "universalLink": "https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=WeebCentral",
       "rightsDeclaration": "Licensed under Apache-2.0.",
       "rightsURL": "https://github.com/k800k/extensions/blob/main/extensions/content/WeebCentral/LICENSE",
       "reportURL": "https://github.com/k800k/extensions/issues/new/choose",
@@ -1161,9 +1161,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/WeebCentral/1.0.0-alpha.26/main.js",
-        "sha256": "47e15e954cdcb2477c94c93b9e3f28a94932a18865664ffef5de340fcc7c7063",
-        "size": 21128,
+        "scriptURL": "sources/WeebCentral/1.0.0-alpha.27/main.js",
+        "sha256": "4729121419a6c183cb05349e10027b8a99517144d7f444462ae591d261608378",
+        "size": 21683,
         "allowedHTTPSHosts": [
           "temp.compsci88.com",
           "weebcentral.com"

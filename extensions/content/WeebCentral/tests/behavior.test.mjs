@@ -67,3 +67,48 @@ test("WeebCentral parses real-shape catalog through page images and excludes unr
   const page = await loaded.extension.imagePageContent({ url: sequence.pages[0] });
   assert.equal(page.dataBase64, Buffer.from(MINIMAL_WEBP_BYTES).toString("base64"));
 });
+
+
+test("WeebCentral groups series URL aliases and excludes chapter-list links in every catalog", async () => {
+  for (const bareFirst of [true, false]) {
+    const bare = '<a href="/series/ABC123/">Example Manga</a>';
+    const titled = '<a href="https://weebcentral.com/series/ABC123/Example-Manga/?from=search#title">Example Manga</a>';
+    const html = `<article>
+      <a href="/series/ABC123/full-chapter-list/?from=search">Chapters</a>
+      <img src="https://temp.compsci88.com/covers/example.webp" alt="Example Manga">
+      ${bareFirst ? bare + titled : titled + bare}
+      <a href="/series/ABC123/Example-Manga">Example Manga</a>
+      <a href="/chapters/CH38">Chapter 38</a>
+    </article>
+    <article><a href="/series/DEF456/Chapters">Chapters</a></article>
+    <a href="/series/ORPHAN/full-chapter-list">Chapters</a>`;
+    const loaded = await loadContentExtension(mainPath, request => runtimeResponse({url:request.url,text:html}));
+    const expected = [
+      {workId:"/series/ABC123/Example-Manga",title:"Example Manga"},
+      {workId:"/series/DEF456/Chapters",title:"Chapters"}
+    ];
+    for (const page of [
+      await loaded.extension.search({query:"example"}),
+      await loaded.extension.discover({sectionId:"latest"}),
+      await loaded.extension.discover({sectionId:"hot"})
+    ]) {
+      assert.deepEqual(JSON.parse(JSON.stringify(page.items.map(({workId,title})=>({workId,title})))), expected);
+      assert.equal(page.items[0].imageUrl,"https://temp.compsci88.com/covers/example.webp");
+    }
+  }
+});
+
+test("WeebCentral keeps bare-only series links readable", async () => {
+  const loaded = await loadContentExtension(mainPath, request => {
+    const path = new URL(request.url).pathname;
+    if (path === "/series/ABC123") return runtimeResponse({url:request.url,text:detailFixture});
+    if (path === "/series/ABC123/full-chapter-list") return runtimeResponse({url:request.url,text:chaptersFixture});
+    return runtimeResponse({url:request.url,text:'<a href="/series/ABC123?from=search">Example Manga</a><a href="/series/ABC123/">Example Manga</a>'});
+  });
+  const page = await loaded.extension.search({query:"example"});
+  assert.equal(page.items.length,1);
+  assert.equal(page.items[0].workId,"/series/ABC123");
+  const work = await loaded.extension.details(page.items[0].workId);
+  assert.equal(work.workInfo.primaryTitle,"Sanitized Title");
+  assert.equal((await loaded.extension.installments(work)).length,2);
+});

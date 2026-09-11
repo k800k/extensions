@@ -67,7 +67,7 @@ defineTrackerExtension({
       tokenURL: "https://myanimelist.net/v1/oauth2/token",
       callbackScheme: "manko",
       callbackURL: "manko://oauth/myanimelist",
-      clientIDInfoPlistKey: "MR_MYANIMELIST_OAUTH_CLIENT_ID",
+      clientIDInfoPlistKey: "MANKO_MYANIMELIST_OAUTH_CLIENT_ID",
       responseType: "code",
       scopes: [],
       pkceMethod: "plain"

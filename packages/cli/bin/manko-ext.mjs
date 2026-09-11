@@ -188,7 +188,7 @@ async function buildArtifacts() {
       contentRating: metadata.contentRating,
       capabilities: metadata.capabilities,
       developers: metadata.developers.map(developer => ({ name: developer.name })),
-      universalLink: `https://kayvenchen.github.io/mangareader/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=${encodeURIComponent(id)}`,
+      universalLink: `https://k800k.github.io/manko/repository/install?url=https%3A%2F%2Fk800k.github.io%2Fextensions%2Fdist%2Fv1%2Fstable%2F&source=${encodeURIComponent(id)}`,
       rightsDeclaration: `Licensed under ${metadata.license || "Apache-2.0"}.`,
       rightsURL: `https://github.com/k800k/extensions/blob/${sourceRevision}/extensions/${kind}/${id}/LICENSE`,
       reportURL: "https://github.com/k800k/extensions/issues/new/choose",

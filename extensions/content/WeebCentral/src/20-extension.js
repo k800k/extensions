@@ -5,7 +5,7 @@ const wcRuntime = mrCreateRuntime({
   baseURL: "https://weebcentral.com",
   challengeURL: "https://weebcentral.com/",
   referer: "https://weebcentral.com/",
-  userAgent: "manko WeebCentral/1.0.0-alpha.26",
+  userAgent: "manko WeebCentral/1.0.0-alpha.27",
   allowedHosts: ["weebcentral.com", "temp.compsci88.com"]
 });
 
@@ -19,7 +19,7 @@ function wcWorkID(value) {
 
 function wcCards(html) {
   const result = [];
-  const seen = new Set();
+  const seen = new Map();
   for (const { html: anchor } of mrElements(html, "a")) {
     const href = mrAttribute(anchor, "href");
     if (!href.includes("/series/")) continue;
@@ -29,14 +29,25 @@ function wcCards(html) {
     } catch {
       continue;
     }
-    if (seen.has(id)) continue;
+    if (id.endsWith("/full-chapter-list")) continue;
+    const seriesID = id.split("/")[2];
+    const existingIndex = seen.get(seriesID);
+    const bareID = `/series/${seriesID}`;
+    // Group by the stable series token, retaining existing title URLs. Prefer
+    // a slugged title link when the same card also has a bare series alias.
+    if (existingIndex !== undefined && (result[existingIndex].workId !== bareID || id === bareID)) continue;
     const nearby = mrWindow(html, html.indexOf(anchor), 1200, 1800);
     const image = mrTags(nearby, "img").find(item => mrAttribute(item.tag, "src") || mrAttribute(item.tag, "data-src"))?.tag || "";
     const title = (mrTextContent(anchor) || mrAttribute(image, "alt")).replace(/^Official\s+/i, "").trim();
     const imageUrl = mrAbsoluteURL(mrAttribute(image, "src") || mrAttribute(image, "data-src"), "https://weebcentral.com");
     if (!title) continue;
-    seen.add(id);
-    result.push({ type: "work", workId: id, title, imageUrl, coverURL: imageUrl, contentRating: "SAFE", mediaKind: "manga" });
+    const card = { type: "work", workId: id, title, imageUrl, coverURL: imageUrl, contentRating: "SAFE", mediaKind: "manga" };
+    if (existingIndex === undefined) {
+      seen.set(seriesID, result.length);
+      result.push(card);
+    } else {
+      result[existingIndex] = card;
+    }
   }
   return result;
 }

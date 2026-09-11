@@ -91,7 +91,7 @@ defineTrackerExtension({
       authorizationURL: "https://anilist.co/api/v2/oauth/authorize",
       callbackScheme: "manko",
       callbackURL: "manko://oauth/anilist",
-      clientIDInfoPlistKey: "MR_ANILIST_OAUTH_CLIENT_ID",
+      clientIDInfoPlistKey: "MANKO_ANILIST_OAUTH_CLIENT_ID",
       responseType: "token",
       scopes: []
     };

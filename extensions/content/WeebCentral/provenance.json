@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "sourceOwned": true,
   "id": "WeebCentral",
-  "releaseVersion": "1.0.0-alpha.26",
+  "releaseVersion": "1.0.0-alpha.27",
   "generator": "scripts/build-source-owned.mjs",
   "upstream": {
     "repository": "https://github.com/Aidoku-Community/sources",
@@ -26,8 +26,8 @@
     },
     {
       "file": "extensions/content/WeebCentral/src/20-extension.js",
-      "sha256": "e2f4cd014dad8d086435553d283f3e9bc1cb880e6a0e69d29545e90ac17abc7e"
+      "sha256": "2ff822c836ac44cad570f70c77738ffd8d268e181881fe05934be6ad42d24a44"
     }
   ],
-  "generatedMainSHA256": "47e15e954cdcb2477c94c93b9e3f28a94932a18865664ffef5de340fcc7c7063"
+  "generatedMainSHA256": "4729121419a6c183cb05349e10027b8a99517144d7f444462ae591d261608378"
 }

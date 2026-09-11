@@ -68,7 +68,7 @@ test("the InkDex importer cannot overwrite source-owned packages", () => {
 test("repaired source releases declare their reviewed cover hosts", async () => {
   const expected = new Map([
     ["Atsumaru", ["1.0.0-alpha.26", "cdn.atsu.moe"]],
-    ["Comix", ["1.0.0-alpha.52", "*.wowpic1.store"]],
+    ["Comix", ["1.0.0-alpha.53", "*.wowpic1.store"]],
     ["HitomiLA", ["0.2.4", "atn.gold-usergeneratedcontent.net"]],
     ["LNori", ["1.0.0-alpha.4", "cdn.lnori.com"]],
     ["MangaBat", ["1.0.0-alpha.15", "img-r1.2xstorage.com"]],
@@ -76,7 +76,7 @@ test("repaired source releases declare their reviewed cover hosts", async () => 
     ["MangaKakalot", ["1.0.0-alpha.15", "img-r1.2xstorage.com"]],
     ["NHentai", ["0.3.3", "t.nhentai.net"]],
     ["RoyalRoad", ["1.0.0-alpha.4", "www.royalroadcdn.com"]],
-    ["WeebCentral", ["1.0.0-alpha.26", "temp.compsci88.com"]]
+    ["WeebCentral", ["1.0.0-alpha.27", "temp.compsci88.com"]]
   ]);
   for (const [id, [version, host]] of expected) {
     const metadata = JSON.parse(await readFile(join(root, "extensions", "content", id, "extension.json"), "utf8"));

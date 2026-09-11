@@ -33,7 +33,7 @@ const EXTRA_HOSTS = new Map([
 const RELEASE_VERSIONS = new Map([
   ["AllPornComic", "1.0.0-alpha.16"],
   ["Atsumaru", "1.0.0-alpha.26"],
-  ["Comix", "1.0.0-alpha.52"],
+  ["Comix", "1.0.0-alpha.53"],
   ["HitomiLA", "0.2.2"],
   ["LNori", "1.0.0-alpha.4"],
   ["MadaraDex", "1.0.0-alpha.17"],

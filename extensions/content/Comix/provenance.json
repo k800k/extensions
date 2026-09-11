@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "sourceOwned": true,
   "id": "Comix",
-  "releaseVersion": "1.0.0-alpha.52",
+  "releaseVersion": "1.0.0-alpha.53",
   "generator": "scripts/build-source-owned.mjs",
   "upstream": {
     "repository": "https://github.com/Aidoku-Community/sources",
@@ -26,8 +26,8 @@
     },
     {
       "file": "extensions/content/Comix/src/20-extension.js",
-      "sha256": "3caefa7744039c0ec8d2670d856b3481e01f7600a6f6326d2c99b48346480aaf"
+      "sha256": "75b0e5ab897309d03bf1ba4d1c5810549975ce816a63c5b4964153b83cd5e8f9"
     }
   ],
-  "generatedMainSHA256": "1c545aaeb3204db324a1bb121fa82fbddaa0dc418d872196d4396d04b0b45077"
+  "generatedMainSHA256": "2e7c3dc5147aee2f72160a5edf3e04590292cf93ab46598a40ac0b25b045e943"
 }

@@ -72,7 +72,7 @@ interface RawCatalog {
   sources?: unknown;
 }
 
-const MANKO_REPOSITORY_URL = "https://kayvenchen.github.io/mangareader/repository/";
+const MANKO_REPOSITORY_URL = "https://k800k.github.io/manko/repository/";
 
 function stringValue(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value.trim() || fallback : fallback;
