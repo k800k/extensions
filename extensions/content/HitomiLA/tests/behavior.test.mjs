@@ -164,6 +164,11 @@ test("HitomiLA declares searchable fields and provides bounded tag suggestions",
   assert.ok(configuration.fields.some(field => field.id === "artist" && field.supportsExclusion));
   const suggestions = await loaded.extension.searchSuggestions({ fieldID: "tag", query: "blue", limit: 3 });
   assert.deepEqual(Array.from(suggestions, suggestion => suggestion.value), ["blue sky"]);
+  const crossField = await loaded.extension.searchSuggestions({ query: "sample", limit: 3 });
+  assert.deepEqual(
+    Array.from(crossField, suggestion => [suggestion.fieldID, suggestion.value]),
+    [["artist", "Sample Creator"]]
+  );
   assert.equal(loaded.calls.filter(call => new URL(call.url).pathname === "/tags.json").length, 1);
 });
 
@@ -383,4 +388,44 @@ test("HitomiLA rejects compressed and inconsistent ranged Nozomi representations
       error => error.name === "InvalidResponseError"
     );
   }
+});
+
+
+test("HitomiLA reuses gallery metadata across the typed app bridge, coalesces requests, and expires it", async () => {
+  let now = 1_000;
+  let galleryRequests = 0;
+  const loaded = await loadContentExtension(mainPath, async request => {
+    if (request.url.endsWith("/gg.js")) return runtimeResponse({ url: request.url, text: routing });
+    galleryRequests++;
+    await Promise.resolve();
+    return runtimeResponse({ url: request.url, text: galleryAssignment(42) });
+  }, { globals: { Date: class extends Date { static now() { return now; } } } });
+  const [first, second] = await Promise.all([loaded.extension.details("42"), loaded.extension.details("42")]);
+  assert.equal(galleryRequests, 1);
+  assert.equal(first.workId, second.workId);
+  const typedWork = { workId: first.workId, workInfo: first.workInfo };
+  const [chapter] = await loaded.extension.installments(typedWork);
+  const typedChapter = { installmentId: chapter.installmentId, workId: chapter.workId };
+  assert.equal((await loaded.extension.imagePages(typedChapter)).pages.length, 1);
+  assert.equal(galleryRequests, 1, "details → installments → pages must reuse the validated gallery");
+  now += 5 * 60 * 1000;
+  await loaded.extension.details("42");
+  assert.equal(galleryRequests, 2);
+});
+
+test("HitomiLA evicts old gallery metadata and retries invalid responses", async () => {
+  const counts = new Map();
+  let invalid = true;
+  const loaded = await loadContentExtension(mainPath, request => {
+    const id = Number(new URL(request.url).pathname.match(/[0-9]+/)[0]);
+    counts.set(id, (counts.get(id) || 0) + 1);
+    return runtimeResponse({ url: request.url, text: invalid ? "invalid" : galleryAssignment(id) });
+  });
+  await assert.rejects(() => loaded.extension.details("1"));
+  invalid = false;
+  for (let id = 1; id <= 101; id++) await loaded.extension.details(String(id));
+  await loaded.extension.details("101");
+  assert.equal(counts.get(101), 1);
+  await loaded.extension.details("1");
+  assert.equal(counts.get(1), 3, "failed responses are not cached and the oldest successful entry is evicted");
 });

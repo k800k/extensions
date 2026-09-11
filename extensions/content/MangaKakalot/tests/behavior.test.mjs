@@ -4,6 +4,7 @@ import test from "node:test";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  assertMangaBoxSearchCards,
   assertMangaBoxBehavior,
   assertMangaBoxImageDataBounds,
   assertMangaBoxVerificationCookieRetry
@@ -18,4 +19,8 @@ test("MangaKakalot fails closed on malformed or oversized site image data", () =
 });
 test("MangaKakalot retries with a cookie saved by visible verification", () => {
   return assertMangaBoxVerificationCookieRetry(mainPath, "www.mangakakalot.gg");
+});
+
+test("MangaKakalot returns manga cards without chapter-link duplicates", () => {
+  return assertMangaBoxSearchCards(mainPath, "www.mangakakalot.gg");
 });

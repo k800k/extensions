@@ -69,12 +69,12 @@ test("repaired source releases declare their reviewed cover hosts", async () => 
   const expected = new Map([
     ["Atsumaru", ["1.0.0-alpha.26", "cdn.atsu.moe"]],
     ["Comix", ["1.0.0-alpha.52", "*.wowpic1.store"]],
-    ["HitomiLA", ["0.2.3", "atn.gold-usergeneratedcontent.net"]],
+    ["HitomiLA", ["0.2.4", "atn.gold-usergeneratedcontent.net"]],
     ["LNori", ["1.0.0-alpha.4", "cdn.lnori.com"]],
-    ["MangaBat", ["1.0.0-alpha.14", "img-r1.2xstorage.com"]],
+    ["MangaBat", ["1.0.0-alpha.15", "img-r1.2xstorage.com"]],
     ["MangaDemon", ["1.0.0-alpha.18", "readermc.org"]],
-    ["MangaKakalot", ["1.0.0-alpha.14", "img-r1.2xstorage.com"]],
-    ["NHentai", ["0.3.2", "t.nhentai.net"]],
+    ["MangaKakalot", ["1.0.0-alpha.15", "img-r1.2xstorage.com"]],
+    ["NHentai", ["0.3.3", "t.nhentai.net"]],
     ["RoyalRoad", ["1.0.0-alpha.4", "www.royalroadcdn.com"]],
     ["WeebCentral", ["1.0.0-alpha.26", "temp.compsci88.com"]]
   ]);

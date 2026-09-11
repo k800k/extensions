@@ -406,6 +406,8 @@ function mrDefineMangaBoxSource(configuration) {
     } catch {
       return null;
     }
+    // Listing pages also link to installments beneath the same /manga/ prefix.
+    if (!/^\/manga\/[^/]+$/.test(id)) return null;
     const index = html.indexOf(anchor);
     const nearby = mrWindow(html, index, 900, 1800);
     const imageTag = mrTags(nearby, "img").find(item => mrAttribute(item.tag, "src") || mrAttribute(item.tag, "data-src"))?.tag || "";
@@ -653,6 +655,6 @@ mrDefineMangaBoxSource({
   id: "MangaKakalot",
   name: "MangaKakalot",
   baseURL: "https://www.mangakakalot.gg",
-  userAgent: "manko MangaKakalot/1.0.0-alpha.14",
+  userAgent: "manko MangaKakalot/1.0.0-alpha.15",
   allowedHosts: ["www.mangakakalot.gg", "img-r1.2xstorage.com", "img-r2.2xstorage.com", "imgs-2.2xstorage.com"]
 });

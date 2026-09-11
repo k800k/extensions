@@ -178,3 +178,31 @@ export async function assertMangaBoxVerificationCookieRetry(mainPath, hostname) 
   assert.equal(result.items[0]?.workId, "/manga/recovered");
   assert.deepEqual(recovered.challenges, []);
 }
+
+
+export async function assertMangaBoxSearchCards(mainPath, hostname) {
+  for (const chaptersFirst of [false, true]) {
+    const chapterLinks = `<a href="/manga/example/chapter-38">Chapter 38</a>
+      <a href="/manga/example/chapter/37?from=search">Chapter 37</a>`;
+    const mangaLinks = `<a href="/manga/example/?from=search#title" title="Example Manga"><img src="https://img-r1.2xstorage.com/cover.png"></a>
+      <h3><a href="https://${hostname}/manga/example">Example Manga</a></h3>`;
+    const html = `<article>${chaptersFirst ? chapterLinks + mangaLinks : mangaLinks + chapterLinks}</article>
+      <article><a href="/manga/chapter-of-dawn" title="Chapter of Dawn"><img src="https://img-r1.2xstorage.com/cover.png"></a></article>
+      <a href="/manga/orphan/chapter-2">Chapter 2</a>
+      <a href="/manga/">Manga directory</a>
+      <a href="/genre/action">Action</a>`;
+    const loaded = await loadContentExtension(mainPath, request => runtimeResponse({ url: request.url, text: html }));
+    const expected = [
+      { workId: "/manga/example", title: "Example Manga" },
+      { workId: "/manga/chapter-of-dawn", title: "Chapter of Dawn" }
+    ];
+    for (const page of [
+      await loaded.extension.search({ query: "fagot" }),
+      await loaded.extension.discover({ sectionId: "latest" })
+    ]) {
+      assert.deepEqual(JSON.parse(JSON.stringify(page.items.map(({workId, title}) => ({workId, title})))), expected);
+      assert.equal(page.items[0].imageUrl, "https://img-r1.2xstorage.com/cover.png");
+      assert.ok(page.items.every(item => !item.workId.match(/\/manga\/[^/]+\/chapter/)), "chapter routes cannot become title cards");
+    }
+  }
+}

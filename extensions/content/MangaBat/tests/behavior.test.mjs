@@ -3,7 +3,7 @@
 import test from "node:test";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { assertMangaBoxBehavior, assertMangaBoxImageDataBounds } from "../../mangabox-behavior.mjs";
+import { assertMangaBoxSearchCards, assertMangaBoxBehavior, assertMangaBoxImageDataBounds } from "../../mangabox-behavior.mjs";
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 test("MangaBat parses real-shape cover, details, chapter API, pages, and images", () => {
@@ -11,4 +11,8 @@ test("MangaBat parses real-shape cover, details, chapter API, pages, and images"
 });
 test("MangaBat fails closed on malformed or oversized site image data", () => {
   return assertMangaBoxImageDataBounds(mainPath, "www.mangabats.com");
+});
+
+test("MangaBat returns manga cards without chapter-link duplicates", () => {
+  return assertMangaBoxSearchCards(mainPath, "www.mangabats.com");
 });

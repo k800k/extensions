@@ -28,6 +28,12 @@ let hitRoutingPromise;
 let hitIndexCache;
 let hitSuggestionCatalog;
 let hitSuggestionCatalogPromise;
+const hitGalleryCache = new Map();
+const hitGalleryFlights = new Map();
+let hitGalleryCacheBytes = 0;
+const HIT_GALLERY_CACHE_MAX_BYTES = 16 * 1024 * 1024;
+const HIT_GALLERY_CACHE_MAX_ENTRIES = 100;
+const HIT_GALLERY_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function hitContext() {
   const context = hitRuntime || globalThis.manko?.context;
@@ -445,15 +451,22 @@ function hitSuggestionNamespace(key) {
 }
 
 async function hitSuggestions(input) {
-  const fieldID = String(input?.fieldID || "").toLowerCase();
+  const requestedFieldID = String(input?.fieldID || "").toLowerCase();
   const query = String(input?.query || "").trim().toLowerCase();
   const limit = Math.max(1, Math.min(30, Number(input?.limit) || 20));
   const catalog = await hitLoadSuggestionCatalog();
-  const values = catalog.get(fieldID) || [];
-  return values
+  const fields = requestedFieldID ? [requestedFieldID] : Array.from(catalog.keys());
+  return fields
+    .flatMap(fieldID => (catalog.get(fieldID) || []).map(item => ({ fieldID, ...item })))
     .filter(item => !query || item.value.toLowerCase().includes(query))
+    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
     .slice(0, limit)
-    .map(item => ({ fieldID, value: item.value, title: item.value, subtitle: item.count ? `${item.count} galleries` : undefined }));
+    .map(item => ({
+      fieldID: item.fieldID,
+      value: item.value,
+      title: item.value,
+      subtitle: item.count ? `${item.count} galleries` : undefined
+    }));
 }
 
 async function hitLoadSuggestionCatalog() {
@@ -554,6 +567,23 @@ function hitGalleryAssignment(source) {
 
 async function hitGallery(id) {
   const galleryID = hitPositiveInteger(id);
+  const cached = hitGalleryCache.get(galleryID);
+  if (cached) {
+    hitGalleryCache.delete(galleryID);
+    if (Date.now() - cached.loadedAt < HIT_GALLERY_CACHE_TTL_MS) {
+      hitGalleryCache.set(galleryID, cached);
+      return cached.gallery;
+    }
+    hitGalleryCacheBytes -= cached.bytes;
+  }
+  if (hitGalleryFlights.has(galleryID)) return hitGalleryFlights.get(galleryID);
+  const flight = hitLoadGallery(galleryID);
+  hitGalleryFlights.set(galleryID, flight);
+  try { return await flight; }
+  finally { if (hitGalleryFlights.get(galleryID) === flight) hitGalleryFlights.delete(galleryID); }
+}
+
+async function hitLoadGallery(galleryID) {
   const source = await hitRequest(`${HIT_STATIC}/galleries/${galleryID}.js`);
   const gallery = hitGalleryAssignment(source);
   if (hitPositiveInteger(gallery.id) !== galleryID) throw hitError("InvalidResponseError", "Hitomi.la gallery metadata identifier does not match the request", "invalidResponse");
@@ -563,6 +593,16 @@ async function hitGallery(id) {
   gallery.files.forEach(file => {
     if (!file || typeof file.hash !== "string" || !/^[0-9a-f]{64}$/.test(file.hash)) throw hitError("InvalidResponseError", "Hitomi.la gallery contains an invalid file hash", "invalidResponse");
   });
+  const bytes = new TextEncoder().encode(JSON.stringify(gallery)).byteLength;
+  if (bytes <= HIT_GALLERY_CACHE_MAX_BYTES) {
+    hitGalleryCache.set(galleryID, { gallery, bytes, loadedAt: Date.now() });
+    hitGalleryCacheBytes += bytes;
+    while (hitGalleryCache.size > HIT_GALLERY_CACHE_MAX_ENTRIES || hitGalleryCacheBytes > HIT_GALLERY_CACHE_MAX_BYTES) {
+      const oldest = hitGalleryCache.keys().next().value;
+      hitGalleryCacheBytes -= hitGalleryCache.get(oldest).bytes;
+      hitGalleryCache.delete(oldest);
+    }
+  }
   return gallery;
 }
 

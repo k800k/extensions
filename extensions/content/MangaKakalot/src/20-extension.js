@@ -4,6 +4,6 @@ mrDefineMangaBoxSource({
   id: "MangaKakalot",
   name: "MangaKakalot",
   baseURL: "https://www.mangakakalot.gg",
-  userAgent: "manko MangaKakalot/1.0.0-alpha.14",
+  userAgent: "manko MangaKakalot/1.0.0-alpha.15",
   allowedHosts: ["www.mangakakalot.gg", "img-r1.2xstorage.com", "img-r2.2xstorage.com", "imgs-2.2xstorage.com"]
 });

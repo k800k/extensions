@@ -4,6 +4,6 @@ mrDefineMangaBoxSource({
   id: "MangaBat",
   name: "MangaBat",
   baseURL: "https://www.mangabats.com",
-  userAgent: "manko MangaBat/1.0.0-alpha.14",
+  userAgent: "manko MangaBat/1.0.0-alpha.15",
   allowedHosts: ["www.mangabats.com", "img-r1.2xstorage.com", "img-r2.2xstorage.com", "imgs-2.2xstorage.com"]
 });

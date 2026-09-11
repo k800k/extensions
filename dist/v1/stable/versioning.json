@@ -257,7 +257,7 @@
       "id": "HitomiLA",
       "name": "Hitomi.la",
       "description": "Anonymous multi-language discovery, search, gallery details, and AVIF/WebP page reading for hitomi.la.",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "icon": "icons/HitomiLA.svg",
       "languages": [
         "en",
@@ -315,9 +315,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/HitomiLA/0.2.3/main.js",
-        "sha256": "ef2ccd280008cc3ddb4e13e02af9c88df3ca4f25c5ed4759d99661f801238ba1",
-        "size": 41702,
+        "scriptURL": "sources/HitomiLA/0.2.4/main.js",
+        "sha256": "339247a4ba368d4b59b59efcd29ec4a051fdaffcfe0c7e1321cec2db10c86d78",
+        "size": 43376,
         "allowedHTTPSHosts": [
           "hitomi.la",
           "ltn.gold-usergeneratedcontent.net",
@@ -448,7 +448,7 @@
       "id": "MangaBat",
       "name": "MangaBat",
       "description": "Extension that pulls content from mangabat.com.",
-      "version": "1.0.0-alpha.14",
+      "version": "1.0.0-alpha.15",
       "icon": "icons/MangaBat.png",
       "languages": [
         "en"
@@ -492,9 +492,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MangaBat/1.0.0-alpha.14/main.js",
-        "sha256": "43f7c3bd4c4f394a0110773001963e05030769db0fc00028b31fa46b6e47b14f",
-        "size": 28105,
+        "scriptURL": "sources/MangaBat/1.0.0-alpha.15/main.js",
+        "sha256": "2b50c93e4557319d9eee52cb5f877421f8a7416ce8f90125a1e24648fa382bb9",
+        "size": 28236,
         "allowedHTTPSHosts": [
           "img-r1.2xstorage.com",
           "img-r2.2xstorage.com",
@@ -814,7 +814,7 @@
       "id": "MangaKakalot",
       "name": "MangaKakalot",
       "description": "Extension that pulls content from mangakakalot.gg.",
-      "version": "1.0.0-alpha.14",
+      "version": "1.0.0-alpha.15",
       "icon": "icons/MangaKakalot.png",
       "languages": [
         "en"
@@ -858,9 +858,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MangaKakalot/1.0.0-alpha.14/main.js",
-        "sha256": "2089b27d3e84c7e063d21457b48084b816fae097d3ae944b0f39d958a8fc9947",
-        "size": 28133,
+        "scriptURL": "sources/MangaKakalot/1.0.0-alpha.15/main.js",
+        "sha256": "1eaabad8751db4853ceeb41fa65cab4d0e4f18a8019bbd0761bcae0511d31e10",
+        "size": 28264,
         "allowedHTTPSHosts": [
           "img-r1.2xstorage.com",
           "img-r2.2xstorage.com",
@@ -929,7 +929,7 @@
       "id": "NHentai",
       "name": "nHentai",
       "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
-      "version": "0.3.2",
+      "version": "0.3.3",
       "icon": "icons/NHentai.svg",
       "languages": [
         "multi",
@@ -980,9 +980,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/NHentai/0.3.2/main.js",
-        "sha256": "42e54ca5df0ef22960feeac6bcae773d4d6d7b21e95472eb0cbb6b1ac99eab2b",
-        "size": 19452,
+        "scriptURL": "sources/NHentai/0.3.3/main.js",
+        "sha256": "c73f23d9dc5944389b5fac02c833ea22ba1f2a0634a6ac7ec8c3643725e53a82",
+        "size": 21506,
         "allowedHTTPSHosts": [
           "nhentai.net",
           "i.nhentai.net",

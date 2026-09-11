@@ -9,7 +9,7 @@ import { MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse } from "../..
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 const manifest = JSON.parse(await readFile(resolve(dirname(mainPath), "extension.json"), "utf8"));
-const expectedUserAgent = "manko NHentai Extension/0.3.2 (+https://github.com/k800k/extensions)";
+const expectedUserAgent = "manko NHentai Extension/0.3.3 (+https://github.com/k800k/extensions)";
 const listGallery = {
   id: 101,
   media_id: "9001",
@@ -108,7 +108,44 @@ test("NHentai maps v2 returned paths directly and brokers both covers and pages"
   assert.equal(image.dataBase64, Buffer.from(MINIMAL_WEBP_BYTES).toString("base64"));
 });
 
-test("NHentai composes structured selections, forwards sort, and reuses observed facets for suggestions", async () => {
+test("NHentai uses live typed suggestions, caches them, and falls back to observed facets", async () => {
+  let suggestionRequests = 0;
+  const loaded = await loadContentExtension(mainPath, request => {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/v2/tags/search") {
+      suggestionRequests++;
+      assert.equal(request.method, "POST");
+      assert.equal(request.headers["Content-Type"], "application/json");
+      const body = request.body;
+      assert.equal(body.query, "big breasts");
+      assert.equal(body.limit, 5);
+      assert.equal(body.type, suggestionRequests === 1 ? null : "tag");
+      return jsonResponse(request, [
+        { id: 1, type: "tag", name: "big breasts", slug: "big-breasts", count: 231086 },
+        { id: 2, type: "unknown", name: "ignored", slug: "ignored", count: 1 }
+      ]);
+    }
+    if (url.pathname === "/api/v2/galleries/101") return jsonResponse(request, detailGallery);
+    throw new Error(`Unexpected request ${request.url}`);
+  });
+
+  const crossField = await loaded.extension.searchSuggestions({ query: "big breasts", limit: 5 });
+  assert.deepEqual(Array.from(crossField, suggestion => [suggestion.fieldID, suggestion.value, suggestion.subtitle]), [
+    ["tag", "big breasts", "231086 galleries"]
+  ]);
+  await loaded.extension.searchSuggestions({ query: "big breasts", limit: 5 });
+  assert.equal(suggestionRequests, 1, "identical cross-field suggestions are cached");
+
+  const typed = await loaded.extension.searchSuggestions({ fieldID: "tag", query: "big breasts", limit: 5 });
+  assert.deepEqual(Array.from(typed, suggestion => suggestion.value), ["big breasts"]);
+  assert.equal(suggestionRequests, 2);
+
+  await loaded.extension.details("101");
+  const fallback = await loaded.extension.searchSuggestions({ fieldID: "artist", query: "sample", limit: 5 });
+  assert.deepEqual(Array.from(fallback, suggestion => suggestion.value), ["Sample Creator"]);
+});
+
+test("NHentai composes structured selections and forwards sort", async () => {
   const loaded = await loadContentExtension(mainPath, request => {
     const url = new URL(request.url);
     if (url.pathname === "/api/v2/galleries/101") return jsonResponse(request, detailGallery);
@@ -122,9 +159,6 @@ test("NHentai composes structured selections, forwards sort, and reuses observed
   const configuration = loaded.extension.searchFilters();
   assert.ok(configuration.fields.some(field => field.id === "parody" && field.supportsExclusion));
   assert.ok(configuration.fields.some(field => field.id === "uploaded" && !field.supportsExclusion));
-  await loaded.extension.details("101");
-  const suggestions = await loaded.extension.searchSuggestions({ fieldID: "artist", query: "sample", limit: 5 });
-  assert.deepEqual(Array.from(suggestions, suggestion => suggestion.value), ["Sample Creator"]);
   await loaded.extension.search({
     query: "sample",
     sort: "popular-week",
