@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 
 const packageRoot = dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = resolve(packageRoot, "../..");
-const bridgeSource = await readFile(join(packageRoot, "bridge.js"), "utf8");
+const bridgeSource = (await readFile(join(monorepoRoot, "scripts/source-owned-runtime/15-search.js"), "utf8")) + "\n" + (await readFile(join(packageRoot, "bridge.js"), "utf8"));
 const registryRoot = resolve(process.env.INKDEX_REGISTRY_ROOT ?? "/tmp/inkdex-registry/0.9/stable");
 const registrySkip = existsSync(registryRoot)
   ? false
@@ -107,6 +107,11 @@ function loadSyntheticPaperback(id, mangaInfo = {}) {
   vm.runInContext(`
     globalThis.__searchCalls = [];
     globalThis.__synthetic = {
+      getSearchFilters: async () => [
+        {id:"tags",options:[{id:"action-id",value:"Action"},{id:"blocked-id",value:"Blocked"}]},
+        {id:"genre",options:[{id:"action-id",value:"Action"}]},
+        {id:"genres",options:[{id:"action",value:"Action"},{id:"fantasy",value:"Fantasy"},{id:"DRAMA",value:"Drama"}]}
+      ],
       getSortingOptions: async () => [
         { id: "default", label: "Default" },
         { id: "requested", label: "Requested" }
@@ -490,8 +495,7 @@ test("Paperback structured selections use each pinned source metadata shape", as
     {
       id: "MangaFox",
       selections: [
-        { fieldID: "genres", value: "action", polarity: "include" },
-        { fieldID: "genres", value: "blocked", polarity: "exclude" }
+        { fieldID: "genres", value: "action", polarity: "include" }
       ],
       expected: [{ id: "genres", value: { action: "included" } }]
     }
@@ -500,16 +504,16 @@ test("Paperback structured selections use each pinned source metadata shape", as
   for (const fixture of cases) {
     const runtime = loadSyntheticPaperback(fixture.id);
     await runtime.definition.search({
-      query: "needle",
+      query: fixture.id === "Webtoon" ? "" : "needle",
       selections: fixture.selections,
-      sort: "requested",
+      sort: fixture.id === "Webtoon" ? undefined : "requested",
       cursor: { page: 2 }
     });
     const [[query, cursor, sorting]] = plain(runtime.context.__searchCalls);
-    assert.equal(query.title, "needle", fixture.id);
+    assert.equal(query.title, fixture.id === "Webtoon" ? "" : "needle", fixture.id);
     assert.deepEqual(query.metadata, fixture.expected, fixture.id);
     assert.deepEqual(cursor, { page: 2 }, fixture.id);
-    assert.equal(sorting.id, "requested", fixture.id);
+    assert.equal(sorting.id, fixture.id === "Webtoon" ? "default" : "requested", fixture.id);
   }
 });
 
@@ -689,14 +693,14 @@ test("MangaFox and Mangago traverse catalog covers through first-page bytes in t
   const fixtures = [
     {
       id: "MangaFox",
-      version: "1.0.0-alpha.14",
+      version: "1.0.0-alpha.15",
       rating: "MATURE",
       coverURL: "https://fanfox.net/fixtures/cover.png",
       pageURL: "https://fanfox.net/fixtures/page-1.png"
     },
     {
       id: "Mangago",
-      version: "1.0.0-alpha.2",
+      version: "1.0.0-alpha.3",
       rating: "ADULT",
       coverURL: "https://www.mangago.me/fixtures/cover.png",
       pageURL: "https://www.youhim.me/cspiclink/fixtures/page-1.png"
@@ -1118,4 +1122,78 @@ test("managed collections preserve upstream membership and commit an actual diff
   assert.equal(commits[0].collection.marker, "upstream-object");
   assert.deepEqual(commits[0].additions, [{ mangaId: "add", mangaInfo: { primaryTitle: "Fetched add", verified: true } }]);
   assert.deepEqual(commits[0].deletions, [{ mangaId: "remove", mangaInfo: { primaryTitle: "Remove" } }]);
+});
+
+// Assert every published Paperback field at the upstream request boundary. The
+// same metadata must survive discovery, search, pagination and saved exclusions.
+test("all Paperback filter declarations map to native requests in every scope",async()=>{
+ const policies={
+  AllPornComic:{genres:"object"}, Atsumaru:{tags:"array",types:"array",statuses:"array",years:"array",minChapters:"scalar",officialTranslation:"scalar"},
+  LNori:{},MadaraDex:{genres:"object"},MangaDex:{format:"nested",genre:"nested",theme:"nested",content:"nested",tags:"nested"},
+  MangaDot:{genres:"object",author:"values",artist:"values"},MangaFox:{genres:"array"},Mangago:{genres:"object"},
+  RoyalRoad:{genres:"object",tags:"object",author:"text"},Webtoon:{genres:"values"}
+ };
+ for(const [id,fields] of Object.entries(policies)){
+  const loaded=loadSyntheticPaperback(id);
+  loaded.context.__fields=Object.entries(fields).map(([key,shape])=>({id:key,type:key==="officialTranslation"?"dropdown":"multiselect",options:[{id:key==="officialTranslation"?"true":"canonical-id",value:"Readable Name"},{id:"other-id",value:"Other Name"}]}));
+  vm.runInContext("__synthetic.getSearchFilters=async()=>__fields",loaded.context);
+  const config=await loaded.definition.searchFilters();
+  assert.deepEqual(Array.from(config.fields,x=>x.id),Object.keys(fields),id);
+  for(const field of config.fields){
+   const value=field.inputKind==="number"?"12":field.id==="officialTranslation"?"true":"canonical-id";
+   for(const polarity of field.supportsExclusion?["include","exclude"]:["include"]){
+    const selection={fieldID:field.id,value,title:"Readable Name",polarity};
+    const state=polarity==="exclude"?"excluded":"included";
+    const shape=fields[field.id];
+    const expected=shape==="array"?[{id:field.id,value:{[value]:state}}]:shape==="scalar"?[{id:field.id,value}]:shape==="nested"?{tagsByGroup:{[field.id]:{[value]:state}}}:shape==="values"?{[field.id]:[value]}:shape==="text"?{[field.id]:value}:{[field.id]:{[value]:state}};
+    for(const scope of ["search","discover"]){
+     for(const page of [1,2]){
+      await loaded.definition[scope]({query:"",section:{id:"latest"},selections:[selection],cursor:{page}});
+      const call=plain(loaded.context.__searchCalls.at(-1));
+      assert.deepEqual(call[0].metadata,expected,`${id}.${field.id}.${polarity}.${scope}`);
+      assert.deepEqual(call[1],{page});
+     }
+    }
+   }
+   if(!field.supportsExclusion) await assert.rejects(loaded.definition.search({selections:[{fieldID:field.id,value,polarity:"exclude"}]}),/exclusion/);
+   if(field.maximumSelections===1) await assert.rejects(loaded.definition.search({selections:[value,"other-id"].map(value=>({fieldID:field.id,value,polarity:"include"}))}),/at most|available|whole number/);
+   if(field.inputKind==="number") await assert.rejects(loaded.definition.search({selections:[{fieldID:field.id,value:"-1.5",polarity:"include"}]}),/whole number/);
+   if(field.inputKind==="choice") await assert.rejects(loaded.definition.search({selections:[{fieldID:field.id,value:"stale",polarity:"include"}]}),/available/);
+  }
+  await assert.rejects(loaded.definition.search({selections:[{fieldID:"unsupported",value:"x",polarity:"include"}]}),/Unsupported/);
+  if(id==="Webtoon") await assert.rejects(loaded.definition.search({query:"title",selections:[{fieldID:"genres",value:"canonical-id",polarity:"include"}]}),/Clear the keyword/);
+ }
+});
+
+test("Atsumaru provider choices reach the real Typesense request",async()=>{
+ const metadata={genres:[{id:"39",name:"Action"}],tags:[],types:[{id:"Manga",name:"Manga"}],statuses:[{id:"Ongoing",name:"Ongoing"}]};
+ const loaded=await loadBundle("Atsumaru",{generated:true,response:request=>{
+  const path=new URL(request.url).pathname;
+  const payload=path==="/api/explore/availableFilters"?metadata:{hits:[],found:0,page:2};
+  return {url:request.url,status:200,headers:{"content-type":"application/json"},dataBase64:base64(JSON.stringify(payload))};
+ }});
+ const config=await loaded.definition.searchFilters();
+ assert.deepEqual(Array.from(config.fields,x=>x.id),["tags","types","statuses","years","minChapters","officialTranslation"]);
+ const selections=[['tags','39'],['types','Manga'],['statuses','Ongoing'],['years','2025'],['minChapters','12'],['officialTranslation','true']].map(([fieldID,value])=>({fieldID,value,polarity:"include"}));
+ for(const scope of ["search","discover"]){
+  await loaded.definition[scope]({query:"journey",section:{id:"latest"},selections,cursor:{page:2}});
+  const url=new URL(loaded.requests.at(-1).url);
+  assert.ok(url.pathname.endsWith("/collections/manga/documents/search"));
+  const filter=url.searchParams.get("filter_by");
+  for(const value of ['genreIds:=`39`','type:=[`Manga`]','status:=[`Ongoing`]','releaseYear:=[2025]','chapterCount:>=12','officialTranslation:=true']) assert.ok(filter.includes(value),value);
+  assert.equal(url.searchParams.get("page"),"2");
+  assert.equal(url.searchParams.get("q"),scope==="search"?"journey":"*");
+ }
+});
+
+test("metadata refresh retains successful choices on failure and recovers without dropping selections",async()=>{
+ const loaded=loadSyntheticPaperback("MangaFox");let time=0;
+ loaded.context.Date={now:()=>time};
+ const first=await loaded.definition.searchFilters();
+ time=300001;vm.runInContext('__synthetic.getSearchFilters=async()=>{throw new Error("offline")}',loaded.context);
+ assert.deepEqual(plain(await loaded.definition.searchFilters()),plain(first));
+ vm.runInContext('__synthetic.getSearchFilters=async()=>[{id:"genres",options:[{id:"new-id",value:"New Genre"}]}]',loaded.context);
+ const fresh=await loaded.definition.searchFilters();
+ assert.equal(fresh.fields[0].options[0].id,"new-id");
+ await assert.rejects(loaded.definition.search({selections:[{fieldID:"genres",value:"action",polarity:"include"}]}),/available/);
 });

@@ -4,20 +4,53 @@
   "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "language": "multi",
-  "languages": ["multi", "en", "ja", "zh", "es", "fr", "de", "ko", "ru"],
+  "languages": [
+    "multi",
+    "en",
+    "ja",
+    "zh",
+    "es",
+    "fr",
+    "de",
+    "ko",
+    "ru"
+  ],
   "contentRating": "ADULT",
   "availability": "approvalRequired",
-  "capabilities": ["browse", "discover", "search", "filters", "details", "installments", "acquisition", "imageSequence", "cookies", "challengeHandoff"],
-  "permissions": ["network", "cookies", "rateLimiting", "redactedLogging", "challengeHandoff"],
+  "capabilities": [
+    "browse",
+    "discover",
+    "search",
+    "filters",
+    "details",
+    "installments",
+    "acquisition",
+    "imageSequence",
+    "cookies",
+    "challengeHandoff"
+  ],
+  "permissions": [
+    "network",
+    "cookies",
+    "rateLimiting",
+    "redactedLogging",
+    "challengeHandoff"
+  ],
   "allowedHTTPSHosts": [
     "nhentai.net",
     "i.nhentai.net",
     "t.nhentai.net"
   ],
-  "authenticationModes": ["none"],
-  "developers": [{ "name": "manko Extension Contributors" }],
+  "authenticationModes": [
+    "none"
+  ],
+  "developers": [
+    {
+      "name": "manko Extension Contributors"
+    }
+  ],
   "iconFile": "icon.svg",
   "license": "Apache-2.0",
   "compatibility": {

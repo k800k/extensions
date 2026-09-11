@@ -7,5 +7,7 @@
     "sources/multi.hitomi/src/models.rs",
     "sources/multi.hitomi/src/search.rs"
   ],
-  "sharedModules": []
+  "sharedModules": [
+    "scripts/source-owned-runtime/15-search.js"
+  ]
 }

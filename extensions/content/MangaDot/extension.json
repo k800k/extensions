@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from MangaDot.net",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.6",
+  "version": "1.0.0-alpha.7",
   "language": "en",
   "languages": [
     "en"

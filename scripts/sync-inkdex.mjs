@@ -31,23 +31,23 @@ const EXTRA_HOSTS = new Map([
   ["Webtoon", ["webtoon-phinf.pstatic.net", "swebtoon-phinf.pstatic.net"]]
 ]);
 const RELEASE_VERSIONS = new Map([
-  ["AllPornComic", "1.0.0-alpha.16"],
-  ["Atsumaru", "1.0.0-alpha.26"],
-  ["Comix", "1.0.0-alpha.53"],
-  ["HitomiLA", "0.2.2"],
-  ["LNori", "1.0.0-alpha.4"],
-  ["MadaraDex", "1.0.0-alpha.17"],
-  ["MangaBat", "1.0.0-alpha.13"],
+  ["AllPornComic", "1.0.0-alpha.17"],
+  ["Atsumaru", "1.0.0-alpha.27"],
+  ["Comix", "1.0.0-alpha.54"],
+  ["HitomiLA", "0.2.5"],
+  ["LNori", "1.0.0-alpha.5"],
+  ["MadaraDex", "1.0.0-alpha.18"],
+  ["MangaBat", "1.0.0-alpha.16"],
   ["MangaDemon", "1.0.0-alpha.18"],
-  ["MangaDex", "1.0.0-alpha.29"],
-  ["MangaDot", "1.0.0-alpha.6"],
-  ["MangaFox", "1.0.0-alpha.14"],
-  ["Mangago", "1.0.0-alpha.2"],
-  ["MangaKakalot", "1.0.0-alpha.13"],
-  ["NHentai", "0.3.1"],
-  ["RoyalRoad", "1.0.0-alpha.4"],
-  ["Webtoon", "1.0.0-alpha.20"],
-  ["WeebCentral", "1.0.0-alpha.26"]
+  ["MangaDex", "1.0.0-alpha.30"],
+  ["MangaDot", "1.0.0-alpha.7"],
+  ["MangaFox", "1.0.0-alpha.15"],
+  ["Mangago", "1.0.0-alpha.3"],
+  ["MangaKakalot", "1.0.0-alpha.16"],
+  ["NHentai", "0.3.4"],
+  ["RoyalRoad", "1.0.0-alpha.5"],
+  ["Webtoon", "1.0.0-alpha.21"],
+  ["WeebCentral", "1.0.0-alpha.27"]
 ]);
 const EXCLUDED_HOSTS = new Map([
   ["MangaDex", new Set(["auth.mangadex.org", "status.mangadex.org"])]
@@ -274,7 +274,7 @@ async function main() {
         upstreamVersion: source.version,
         releaseVersion: metadata.version,
         importedFromRegistryBuild: versioning.buildTime,
-        adapter: { name: "@manko/paperback-compat", version: "1.2.0", license: "GPL-3.0-or-later" },
+        adapter: { name: "@manko/paperback-compat", version: "1.3.0", license: "GPL-3.0-or-later" },
         compatibilityPatches: patchResult.records,
         generatedMainSHA256: sha256(combined)
       }),

@@ -9,7 +9,7 @@ import { MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse } from "../..
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 const manifest = JSON.parse(await readFile(resolve(dirname(mainPath), "extension.json"), "utf8"));
-const expectedUserAgent = "manko NHentai Extension/0.3.3 (+https://github.com/k800k/extensions)";
+const expectedUserAgent = "manko NHentai Extension/0.3.4 (+https://github.com/k800k/extensions)";
 const listGallery = {
   id: 101,
   media_id: "9001",
@@ -118,7 +118,7 @@ test("NHentai uses live typed suggestions, caches them, and falls back to observ
       assert.equal(request.headers["Content-Type"], "application/json");
       const body = request.body;
       assert.equal(body.query, "big breasts");
-      assert.equal(body.limit, 5);
+      assert.equal(body.limit, 30);
       assert.equal(body.type, suggestionRequests === 1 ? null : "tag");
       return jsonResponse(request, [
         { id: 1, type: "tag", name: "big breasts", slug: "big-breasts", count: 231086 },
@@ -251,4 +251,23 @@ test("NHentai fails closed on malformed JSON, traversal, and undeclared returned
   const callsBefore = badHost.calls.length;
   await assert.rejects(() => badHost.extension.imagePageContent({ url: "https://outside.example/page.webp" }), error => error.name === "HostNotAllowedError");
   assert.equal(badHost.calls.length, callsBefore);
+});
+
+test("every NHentai filter preserves canonical query syntax, sort and pagination",async()=>{
+ const loaded=await loadContentExtension(mainPath,request=>jsonResponse(request,{result:[],num_pages:3,per_page:25,total:0}));
+ const config=loaded.extension.searchFilters();
+ for(const field of config.fields){
+  const value=field.id==="language"?"english":field.inputKind==="number"?"20":field.id==="uploaded"?"7d":"blue sky";
+  for(const polarity of field.supportsExclusion?["include","exclude"]:["include"]){
+   for(const scope of ["search","discover"]){
+    for(const page of [1,2]){
+     await loaded.extension[scope]({sectionId:"latest",query:"titleword",selections:[{fieldID:field.id,value,polarity}],sort:"popular-week",metadata:{page}});
+     const url=new URL(loaded.calls.at(-1).url);
+     assert.equal(url.searchParams.get("query"),`titleword ${polarity==="exclude"?"-":""}${field.id}:${value.includes(" ")?JSON.stringify(value):value}`);
+     assert.equal(url.searchParams.get("page"),String(page));assert.equal(url.searchParams.get("sort"),"popular-week");
+    }
+   }
+  }
+ }
+ await assert.rejects(loaded.extension.search({selections:[{fieldID:"pages",value:"-2",polarity:"include"}]}),/whole number/);
 });

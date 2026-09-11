@@ -1,3 +1,33 @@
+function nhSearchConfiguration() {
+    return {
+      id: "nhentai-search",
+      title: "nHentai Search",
+      fields: [
+        { id: "tag", title: "Tag", queryPrefix: "tag:", placeholder: "Filter by tag", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "artist", title: "Artist", queryPrefix: "artist:", placeholder: "Filter by artist", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "parody", title: "Parody", queryPrefix: "parody:", placeholder: "Filter by parody", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "character", title: "Character", queryPrefix: "character:", placeholder: "Filter by character", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "group", title: "Group", queryPrefix: "group:", placeholder: "Filter by group", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "language", title: "Language", queryPrefix: "language:", placeholder: "Filter by language", supportsExclusion: true, options: [
+          { id: "english", title: "English" }, { id: "japanese", title: "Japanese" }, { id: "chinese", title: "Chinese" }
+        ] },
+        { id: "category", title: "Category", queryPrefix: "category:", placeholder: "Filter by category", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { inputKind: "number", maximumSelections: 1, id: "pages", title: "Page Count", queryPrefix: "pages:", placeholder: "For example, pages:20", supportsExclusion: false, options: [] },
+        { inputKind: "number", maximumSelections: 1, id: "favorites", title: "Favorites", queryPrefix: "favorites:", placeholder: "For example, favorites:100", supportsExclusion: false, options: [] },
+        { inputKind: "text", maximumSelections: 1, id: "uploaded", title: "Upload Date", queryPrefix: "uploaded:", placeholder: "For example, uploaded:7d", supportsExclusion: false, options: [] },
+        { inputKind: "text", maximumSelections: 1, id: "title", title: "Title", queryPrefix: "title:", placeholder: "Search title text", supportsExclusion: false, options: [] },
+        { inputKind: "text", maximumSelections: 1, id: "jtitle", title: "Japanese Title", queryPrefix: "jtitle:", placeholder: "Search Japanese title", supportsExclusion: false, options: [] }
+      ],
+      sortOptions: [
+        { id: "date", title: "Newest" },
+        { id: "popular-today", title: "Popular Today" },
+        { id: "popular-week", title: "Popular This Week" },
+        { id: "popular", title: "Popular All Time" }
+      ],
+      defaultSortID: "date"
+    };
+}
+
 defineContentExtension({
   id: "NHentai",
   apiVersion: "1.0",
@@ -19,6 +49,7 @@ defineContentExtension({
   },
 
   async discover(input) {
+    mrValidateSearchSelections(nhSearchConfiguration(), input?.selections, input?.sort);
     const page = nhPage(input);
     const section = input?.sectionId || input?.section?.id || "latest";
     if (section !== "latest" && section !== "popular") throw nhError("InvalidSectionError", "Unknown nHentai discovery section");
@@ -41,41 +72,13 @@ defineContentExtension({
     return nhListPayload(payload, page);
   },
 
-  searchFilters() {
-    return {
-      id: "nhentai-search",
-      title: "nHentai Search",
-      fields: [
-        { id: "tag", title: "Tag", queryPrefix: "tag:", placeholder: "Filter by tag", supportsExclusion: true, options: [] },
-        { id: "artist", title: "Artist", queryPrefix: "artist:", placeholder: "Filter by artist", supportsExclusion: true, options: [] },
-        { id: "parody", title: "Parody", queryPrefix: "parody:", placeholder: "Filter by parody", supportsExclusion: true, options: [] },
-        { id: "character", title: "Character", queryPrefix: "character:", placeholder: "Filter by character", supportsExclusion: true, options: [] },
-        { id: "group", title: "Group", queryPrefix: "group:", placeholder: "Filter by group", supportsExclusion: true, options: [] },
-        { id: "language", title: "Language", queryPrefix: "language:", placeholder: "Filter by language", supportsExclusion: true, options: [
-          { id: "english", title: "English" }, { id: "japanese", title: "Japanese" }, { id: "chinese", title: "Chinese" }
-        ] },
-        { id: "category", title: "Category", queryPrefix: "category:", placeholder: "Filter by category", supportsExclusion: true, options: [] },
-        { id: "pages", title: "Page Count", queryPrefix: "pages:", placeholder: "For example, pages:20", supportsExclusion: false, options: [] },
-        { id: "favorites", title: "Favorites", queryPrefix: "favorites:", placeholder: "For example, favorites:100", supportsExclusion: false, options: [] },
-        { id: "uploaded", title: "Upload Date", queryPrefix: "uploaded:", placeholder: "For example, uploaded:7d", supportsExclusion: false, options: [] },
-        { id: "title", title: "Title", queryPrefix: "title:", placeholder: "Search title text", supportsExclusion: false, options: [] },
-        { id: "jtitle", title: "Japanese Title", queryPrefix: "jtitle:", placeholder: "Search Japanese title", supportsExclusion: false, options: [] }
-      ],
-      sortOptions: [
-        { id: "date", title: "Newest" },
-        { id: "popular-today", title: "Popular Today" },
-        { id: "popular-week", title: "Popular This Week" },
-        { id: "popular", title: "Popular All Time" }
-      ],
-      defaultSortID: "date"
-    };
-  },
-
+  searchFilters: nhSearchConfiguration,
   async searchSuggestions(input) {
     return nhSuggestions(input);
   },
 
   async search(input) {
+    mrValidateSearchSelections(nhSearchConfiguration(), input?.selections, input?.sort);
     const query = nhComposedQuery(input);
     const sort = nhSort(input);
     const page = nhPage(input);

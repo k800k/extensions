@@ -5,7 +5,7 @@
       "id": "AllPornComic",
       "name": "AllPornComic",
       "description": "Extension that pulls content from allporncomic.com.",
-      "version": "1.0.0-alpha.16",
+      "version": "1.0.0-alpha.17",
       "icon": "icons/AllPornComic.png",
       "languages": [
         "en"
@@ -51,9 +51,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/AllPornComic/1.0.0-alpha.16/main.js",
-        "sha256": "0811afd071aa274e6cb61b4985a6cb263772ff096476ab18c7a376346c1cf599",
-        "size": 352935,
+        "scriptURL": "sources/AllPornComic/1.0.0-alpha.17/main.js",
+        "sha256": "93ea8f85d0c69836ff94716b75a54cbbab5a18091b5bc64aa12ef6d28d82fa42",
+        "size": 367607,
         "allowedHTTPSHosts": [
           "allporncomic.com"
         ],
@@ -61,7 +61,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "0811afd071aa274e6cb61b4985a6cb263772ff096476ab18c7a376346c1cf599",
+      "scriptSHA256": "93ea8f85d0c69836ff94716b75a54cbbab5a18091b5bc64aa12ef6d28d82fa42",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -152,7 +152,7 @@
       "id": "Atsumaru",
       "name": "Atsumaru",
       "description": "Extension that pulls content from atsu.moe.",
-      "version": "1.0.0-alpha.26",
+      "version": "1.0.0-alpha.27",
       "icon": "icons/Atsumaru.ico",
       "languages": [
         "en"
@@ -198,9 +198,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/Atsumaru/1.0.0-alpha.26/main.js",
-        "sha256": "cae75db141ab6c7715d79bb515345a3f8f01f2a9e42ef337846145ac99397839",
-        "size": 69307,
+        "scriptURL": "sources/Atsumaru/1.0.0-alpha.27/main.js",
+        "sha256": "c33603ed953f3ec4c37d9bdc7c5406ed4f7e0610076b21dcc4fef87b85628a8c",
+        "size": 83979,
         "allowedHTTPSHosts": [
           "atsu.moe",
           "cdn.atsu.moe"
@@ -209,7 +209,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "cae75db141ab6c7715d79bb515345a3f8f01f2a9e42ef337846145ac99397839",
+      "scriptSHA256": "c33603ed953f3ec4c37d9bdc7c5406ed4f7e0610076b21dcc4fef87b85628a8c",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -236,7 +236,7 @@
       "id": "Comix",
       "name": "Comix",
       "description": "Extension that pulls content from Comix.to.",
-      "version": "1.0.0-alpha.53",
+      "version": "1.0.0-alpha.54",
       "icon": "icons/Comix.png",
       "languages": [
         "en"
@@ -283,9 +283,9 @@
       },
       "extension": {
         "apiVersion": "1.1",
-        "scriptURL": "sources/Comix/1.0.0-alpha.53/main.js",
-        "sha256": "2e7c3dc5147aee2f72160a5edf3e04590292cf93ab46598a40ac0b25b045e943",
-        "size": 47444,
+        "scriptURL": "sources/Comix/1.0.0-alpha.54/main.js",
+        "sha256": "0f2f6208be0e5f5fc2c5d500248de750e28892b8744ef5f24d03610dc4e0df21",
+        "size": 59211,
         "allowedHTTPSHosts": [
           "comix.to",
           "static.comix.to",
@@ -303,7 +303,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "2e7c3dc5147aee2f72160a5edf3e04590292cf93ab46598a40ac0b25b045e943",
+      "scriptSHA256": "0f2f6208be0e5f5fc2c5d500248de750e28892b8744ef5f24d03610dc4e0df21",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -326,7 +326,7 @@
       "id": "HitomiLA",
       "name": "Hitomi.la",
       "description": "Anonymous multi-language discovery, search, gallery details, and AVIF/WebP page reading for hitomi.la.",
-      "version": "0.2.4",
+      "version": "0.2.5",
       "icon": "icons/HitomiLA.svg",
       "languages": [
         "en",
@@ -384,21 +384,22 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/HitomiLA/0.2.4/main.js",
-        "sha256": "339247a4ba368d4b59b59efcd29ec4a051fdaffcfe0c7e1321cec2db10c86d78",
-        "size": 43376,
+        "scriptURL": "sources/HitomiLA/0.2.5/main.js",
+        "sha256": "0e38f397aaf7d7382dfc9ef2ae7809bf7c6085e9085e20b448a2496903c703ff",
+        "size": 48914,
         "allowedHTTPSHosts": [
           "hitomi.la",
           "ltn.gold-usergeneratedcontent.net",
           "atn.gold-usergeneratedcontent.net",
           "a1.gold-usergeneratedcontent.net",
-          "a2.gold-usergeneratedcontent.net"
+          "a2.gold-usergeneratedcontent.net",
+          "tagindex.hitomi.la"
         ],
         "authenticationModes": [
           "none"
         ]
       },
-      "scriptSHA256": "339247a4ba368d4b59b59efcd29ec4a051fdaffcfe0c7e1321cec2db10c86d78",
+      "scriptSHA256": "0e38f397aaf7d7382dfc9ef2ae7809bf7c6085e9085e20b448a2496903c703ff",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -419,7 +420,7 @@
       "id": "LNori",
       "name": "LNori",
       "description": "Extension that pulls content from LNori.",
-      "version": "1.0.0-alpha.4",
+      "version": "1.0.0-alpha.5",
       "icon": "icons/LNori.png",
       "languages": [
         "en"
@@ -460,9 +461,9 @@
       },
       "extension": {
         "apiVersion": "1.1",
-        "scriptURL": "sources/LNori/1.0.0-alpha.4/main.js",
-        "sha256": "059711e1413ec9ba10e82baee2ea2e602f47036263640cadd21634c5b5b216b3",
-        "size": 332428,
+        "scriptURL": "sources/LNori/1.0.0-alpha.5/main.js",
+        "sha256": "98989c62132caf92cf6dc2aa514956d94679f702df5710dd70070a3abce14318",
+        "size": 347100,
         "allowedHTTPSHosts": [
           "cdn.lnori.com",
           "lnori.com"
@@ -471,7 +472,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "059711e1413ec9ba10e82baee2ea2e602f47036263640cadd21634c5b5b216b3",
+      "scriptSHA256": "98989c62132caf92cf6dc2aa514956d94679f702df5710dd70070a3abce14318",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -498,7 +499,7 @@
       "id": "MadaraDex",
       "name": "MadaraDex",
       "description": "Extension that pulls content from madaradex.org.",
-      "version": "1.0.0-alpha.17",
+      "version": "1.0.0-alpha.18",
       "icon": "icons/MadaraDex.png",
       "languages": [
         "en"
@@ -544,9 +545,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MadaraDex/1.0.0-alpha.17/main.js",
-        "sha256": "c38d0ef58be2a506758f94718b538a778550759c09d018014bc0b602485851a3",
-        "size": 354103,
+        "scriptURL": "sources/MadaraDex/1.0.0-alpha.18/main.js",
+        "sha256": "2a763af1e550c688fc88bf179b9bbfa6f3eb28ac1a044c1b6634b1cd2f82337a",
+        "size": 368775,
         "allowedHTTPSHosts": [
           "madaradex.org"
         ],
@@ -554,7 +555,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "c38d0ef58be2a506758f94718b538a778550759c09d018014bc0b602485851a3",
+      "scriptSHA256": "2a763af1e550c688fc88bf179b9bbfa6f3eb28ac1a044c1b6634b1cd2f82337a",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -581,7 +582,7 @@
       "id": "MangaBat",
       "name": "MangaBat",
       "description": "Extension that pulls content from mangabat.com.",
-      "version": "1.0.0-alpha.15",
+      "version": "1.0.0-alpha.16",
       "icon": "icons/MangaBat.png",
       "languages": [
         "en"
@@ -627,9 +628,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MangaBat/1.0.0-alpha.15/main.js",
-        "sha256": "2b50c93e4557319d9eee52cb5f877421f8a7416ce8f90125a1e24648fa382bb9",
-        "size": 28236,
+        "scriptURL": "sources/MangaBat/1.0.0-alpha.16/main.js",
+        "sha256": "43662a50363802868b12b033e9287e5d1e4f65f24b5aa467a3e0a4e26ebea660",
+        "size": 36892,
         "allowedHTTPSHosts": [
           "img-r1.2xstorage.com",
           "img-r2.2xstorage.com",
@@ -640,7 +641,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "2b50c93e4557319d9eee52cb5f877421f8a7416ce8f90125a1e24648fa382bb9",
+      "scriptSHA256": "43662a50363802868b12b033e9287e5d1e4f65f24b5aa467a3e0a4e26ebea660",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -743,7 +744,7 @@
       "id": "MangaDex",
       "name": "MangaDex",
       "description": "Extension that pulls content from mangadex.org.",
-      "version": "1.0.0-alpha.29",
+      "version": "1.0.0-alpha.30",
       "icon": "icons/MangaDex.png",
       "languages": [
         "multi"
@@ -787,9 +788,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MangaDex/1.0.0-alpha.29/main.js",
-        "sha256": "a4904bdd82d04b833e1d4548ecb0047e3f36e48db82620bac033ecfb16fa33a9",
-        "size": 416042,
+        "scriptURL": "sources/MangaDex/1.0.0-alpha.30/main.js",
+        "sha256": "d46d0d415158ba49265aa0952da33cc36d1bb1648c47429f5e5f339b1e82047f",
+        "size": 430714,
         "allowedHTTPSHosts": [
           "*.mangadex.network",
           "api.mangadex.org",
@@ -800,7 +801,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "a4904bdd82d04b833e1d4548ecb0047e3f36e48db82620bac033ecfb16fa33a9",
+      "scriptSHA256": "d46d0d415158ba49265aa0952da33cc36d1bb1648c47429f5e5f339b1e82047f",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -827,7 +828,7 @@
       "id": "MangaDot",
       "name": "MangaDot",
       "description": "Extension that pulls content from MangaDot.net",
-      "version": "1.0.0-alpha.6",
+      "version": "1.0.0-alpha.7",
       "icon": "icons/MangaDot.png",
       "languages": [
         "en"
@@ -873,9 +874,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MangaDot/1.0.0-alpha.6/main.js",
-        "sha256": "cb0361cec95cc34e96dd9776de87430c4607e38bb82a34725c2cf3851555b1a5",
-        "size": 80954,
+        "scriptURL": "sources/MangaDot/1.0.0-alpha.7/main.js",
+        "sha256": "9e185716d19fca01051815f001f4883dbf4f7ff7bc2042e5f75f52ee8a30bbc4",
+        "size": 95626,
         "allowedHTTPSHosts": [
           "mangadot.net"
         ],
@@ -883,7 +884,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "cb0361cec95cc34e96dd9776de87430c4607e38bb82a34725c2cf3851555b1a5",
+      "scriptSHA256": "9e185716d19fca01051815f001f4883dbf4f7ff7bc2042e5f75f52ee8a30bbc4",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -910,7 +911,7 @@
       "id": "MangaFox",
       "name": "MangaFox",
       "description": "Extension that pulls content from fanfox.net.",
-      "version": "1.0.0-alpha.14",
+      "version": "1.0.0-alpha.15",
       "icon": "icons/MangaFox.png",
       "languages": [
         "en"
@@ -957,9 +958,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MangaFox/1.0.0-alpha.14/main.js",
-        "sha256": "2fc5894bad92d5f2472859a3c801b3c031884ff9372256f9625138f9425759f2",
-        "size": 351336,
+        "scriptURL": "sources/MangaFox/1.0.0-alpha.15/main.js",
+        "sha256": "7d43ca9ba694dd23e040e0d55e104af94a97ad1ea39fd17c6a9a97632ba66828",
+        "size": 366008,
         "allowedHTTPSHosts": [
           "fanfox.net"
         ],
@@ -967,7 +968,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "2fc5894bad92d5f2472859a3c801b3c031884ff9372256f9625138f9425759f2",
+      "scriptSHA256": "7d43ca9ba694dd23e040e0d55e104af94a97ad1ea39fd17c6a9a97632ba66828",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -994,7 +995,7 @@
       "id": "Mangago",
       "name": "Mangago",
       "description": "Extension that pulls content from mangago.me.",
-      "version": "1.0.0-alpha.2",
+      "version": "1.0.0-alpha.3",
       "icon": "icons/Mangago.png",
       "languages": [
         "en"
@@ -1040,9 +1041,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/Mangago/1.0.0-alpha.2/main.js",
-        "sha256": "f3301d39c28313a6c51868cec6130fe05d099d4a7c5a88b00b99386a285c5436",
-        "size": 362907,
+        "scriptURL": "sources/Mangago/1.0.0-alpha.3/main.js",
+        "sha256": "9d6019568a7139359bbbf9f316c2b940e4b336b7154df311b130abf1f7048f97",
+        "size": 377579,
         "allowedHTTPSHosts": [
           "www.mangago.me",
           "www.mangago.zone",
@@ -1052,7 +1053,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "f3301d39c28313a6c51868cec6130fe05d099d4a7c5a88b00b99386a285c5436",
+      "scriptSHA256": "9d6019568a7139359bbbf9f316c2b940e4b336b7154df311b130abf1f7048f97",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -1079,7 +1080,7 @@
       "id": "MangaKakalot",
       "name": "MangaKakalot",
       "description": "Extension that pulls content from mangakakalot.gg.",
-      "version": "1.0.0-alpha.15",
+      "version": "1.0.0-alpha.16",
       "icon": "icons/MangaKakalot.png",
       "languages": [
         "en"
@@ -1125,9 +1126,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/MangaKakalot/1.0.0-alpha.15/main.js",
-        "sha256": "1eaabad8751db4853ceeb41fa65cab4d0e4f18a8019bbd0761bcae0511d31e10",
-        "size": 28264,
+        "scriptURL": "sources/MangaKakalot/1.0.0-alpha.16/main.js",
+        "sha256": "5b748db994403977afdc43e5c3efce04a60e896ec271dc7d2f7bc3e40571ed73",
+        "size": 36920,
         "allowedHTTPSHosts": [
           "img-r1.2xstorage.com",
           "img-r2.2xstorage.com",
@@ -1138,7 +1139,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "1eaabad8751db4853ceeb41fa65cab4d0e4f18a8019bbd0761bcae0511d31e10",
+      "scriptSHA256": "5b748db994403977afdc43e5c3efce04a60e896ec271dc7d2f7bc3e40571ed73",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -1217,7 +1218,7 @@
       "id": "NHentai",
       "name": "nHentai",
       "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "icon": "icons/NHentai.svg",
       "languages": [
         "multi",
@@ -1268,9 +1269,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/NHentai/0.3.3/main.js",
-        "sha256": "c73f23d9dc5944389b5fac02c833ea22ba1f2a0634a6ac7ec8c3643725e53a82",
-        "size": 21506,
+        "scriptURL": "sources/NHentai/0.3.4/main.js",
+        "sha256": "1ba2251d70b22e98774d48a01e858e3e5e13a20e4fcdb5da98c15a6e383ba55f",
+        "size": 28249,
         "allowedHTTPSHosts": [
           "nhentai.net",
           "i.nhentai.net",
@@ -1280,7 +1281,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "c73f23d9dc5944389b5fac02c833ea22ba1f2a0634a6ac7ec8c3643725e53a82",
+      "scriptSHA256": "1ba2251d70b22e98774d48a01e858e3e5e13a20e4fcdb5da98c15a6e383ba55f",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -1301,7 +1302,7 @@
       "id": "RoyalRoad",
       "name": "RoyalRoad",
       "description": "Extension that pulls web novels from royalroad.com and renders their chapters as readable pages.",
-      "version": "1.0.0-alpha.4",
+      "version": "1.0.0-alpha.5",
       "icon": "icons/RoyalRoad.png",
       "languages": [
         "en"
@@ -1347,9 +1348,9 @@
       },
       "extension": {
         "apiVersion": "1.1",
-        "scriptURL": "sources/RoyalRoad/1.0.0-alpha.4/main.js",
-        "sha256": "f429469768088fc596eb512af1e20f9f7c63f406b296ac5c8ed32f5ad47e0be7",
-        "size": 349224,
+        "scriptURL": "sources/RoyalRoad/1.0.0-alpha.5/main.js",
+        "sha256": "d4e88accbee033c1cf04f670d91f26c7dfc24d0c1c4d81b389d7aacdb1e854ce",
+        "size": 363896,
         "allowedHTTPSHosts": [
           "www.royalroad.com",
           "www.royalroadcdn.com"
@@ -1358,7 +1359,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "f429469768088fc596eb512af1e20f9f7c63f406b296ac5c8ed32f5ad47e0be7",
+      "scriptSHA256": "d4e88accbee033c1cf04f670d91f26c7dfc24d0c1c4d81b389d7aacdb1e854ce",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -1385,7 +1386,7 @@
       "id": "Webtoon",
       "name": "Webtoon",
       "description": "Extension that pulls content from webtoons.com.",
-      "version": "1.0.0-alpha.20",
+      "version": "1.0.0-alpha.21",
       "icon": "icons/Webtoon.png",
       "languages": [
         "multi"
@@ -1429,9 +1430,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/Webtoon/1.0.0-alpha.20/main.js",
-        "sha256": "6dbf70996d80c1f1efde9531aca5d0f757cadd50525f66f96e8d373382a399e5",
-        "size": 342765,
+        "scriptURL": "sources/Webtoon/1.0.0-alpha.21/main.js",
+        "sha256": "05206178d72d727a42bfa12316a3ae11dd3138fbf601bcca0319406ac8abf04d",
+        "size": 357437,
         "allowedHTTPSHosts": [
           "m.webtoons.com",
           "swebtoon-phinf.pstatic.net",
@@ -1442,7 +1443,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "6dbf70996d80c1f1efde9531aca5d0f757cadd50525f66f96e8d373382a399e5",
+      "scriptSHA256": "05206178d72d727a42bfa12316a3ae11dd3138fbf601bcca0319406ac8abf04d",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",

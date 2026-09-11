@@ -6,5 +6,7 @@
     "sources/multi.nhentai/src/models.rs",
     "sources/multi.nhentai/src/home.rs"
   ],
-  "sharedModules": []
+  "sharedModules": [
+    "scripts/source-owned-runtime/15-search.js"
+  ]
 }

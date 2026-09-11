@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from mangago.me.",
   "kind": "content",
   "apiVersion": "1.0",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "language": "en",
   "languages": [
     "en"

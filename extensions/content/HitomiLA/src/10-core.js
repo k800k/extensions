@@ -11,7 +11,7 @@ const HIT_IMAGE_HOSTS = {
 };
 const HIT_HOSTS = {
   has(host, origin) {
-    return host === "hitomi.la"
+    return host === "tagindex.hitomi.la" || host === "hitomi.la"
       || host === "ltn.gold-usergeneratedcontent.net"
       || HIT_IMAGE_HOSTS.has(host, origin);
   }
@@ -26,8 +26,6 @@ let hitRuntime;
 let hitRoutingCache;
 let hitRoutingPromise;
 let hitIndexCache;
-let hitSuggestionCatalog;
-let hitSuggestionCatalogPromise;
 const hitGalleryCache = new Map();
 const hitGalleryFlights = new Map();
 let hitGalleryCacheBytes = 0;
@@ -450,78 +448,25 @@ function hitSuggestionNamespace(key) {
   return null;
 }
 
-async function hitSuggestions(input) {
-  const requestedFieldID = String(input?.fieldID || "").toLowerCase();
-  const query = String(input?.query || "").trim().toLowerCase();
-  const limit = Math.max(1, Math.min(30, Number(input?.limit) || 20));
-  const catalog = await hitLoadSuggestionCatalog();
-  const fields = requestedFieldID ? [requestedFieldID] : Array.from(catalog.keys());
-  return fields
-    .flatMap(fieldID => (catalog.get(fieldID) || []).map(item => ({ fieldID, ...item })))
-    .filter(item => !query || item.value.toLowerCase().includes(query))
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
-    .slice(0, limit)
-    .map(item => ({
-      fieldID: item.fieldID,
-      value: item.value,
-      title: item.value,
-      subtitle: item.count ? `${item.count} galleries` : undefined
-    }));
-}
+const hitSuggestionLookup = mrCreateSuggestionLookup(async (fieldID, query) => {
+  const field = fieldID || "global";
+  if (field !== "global" && !hitSuggestionNamespace(field)) throw hitError("InvalidSearchTermError", "Unknown Hitomi.la suggestion field", "invalidSearchTerm");
+  const segments = Array.from(query).map(character => encodeURIComponent(({" ":"_", "/":"slash", ".":"dot"})[character] || character));
+  const text = await hitRequest(`https://tagindex.hitomi.la/${field}/${segments.join("/")}.json`, {accept:"application/json", missingOK:true});
+  if (text === null) return [];
+  if (text.length > 256 * 1024) throw hitError("InvalidResponseError", "Hitomi.la suggestions are too large", "invalidResponse");
+  const values = JSON.parse(text);
+  if (!Array.isArray(values)) throw hitError("InvalidResponseError", "Hitomi.la suggestions are malformed", "invalidResponse");
+  return values.slice(0,100).flatMap(item => {
+    const namespace = hitSuggestionNamespace(item?.[2]);
+    if (!Array.isArray(item) || typeof item[2] !== "string" || typeof item[0] !== "string" || !item[0].trim()) throw hitError("InvalidResponseError", "Hitomi.la returned a malformed tag candidate", "invalidResponse");
+    if (!namespace) return [];
+    const count = Number(item[1]);
+    return [{fieldID:namespace, value:item[0], title:item[0], subtitle:Number.isFinite(count) && count > 0 ? `${count} galleries` : undefined}];
+  });
+});
 
-async function hitLoadSuggestionCatalog() {
-  if (hitSuggestionCatalog) return hitSuggestionCatalog;
-  if (hitSuggestionCatalogPromise) return hitSuggestionCatalogPromise;
-  hitSuggestionCatalogPromise = (async () => {
-    const catalog = new Map();
-    const seen = new Map();
-    const add = (field, rawValue, rawCount) => {
-      const value = String(rawValue || "").trim();
-      if (!field || !value || value.length > 100) return;
-      if (!catalog.has(field)) {
-        catalog.set(field, []);
-        seen.set(field, new Set());
-      }
-      const key = value.toLowerCase();
-      if (seen.get(field).has(key) || catalog.get(field).length >= 5000) return;
-      seen.get(field).add(key);
-      const count = Number(rawCount);
-      catalog.get(field).push({ value, count: Number.isFinite(count) && count > 0 ? Math.floor(count) : 0 });
-    };
-    const visit = (value, namespace, depth = 0) => {
-      if (depth > 8 || value == null) return;
-      if (typeof value === "string") {
-        add(namespace, value, 0);
-        return;
-      }
-      if (Array.isArray(value)) {
-        for (const item of value.slice(0, 25000)) visit(item, namespace, depth + 1);
-        return;
-      }
-      if (typeof value !== "object") return;
-      if (typeof value.tag === "string") {
-        add(value.female ? "female" : value.male ? "male" : namespace || "tag", value.tag, value.count);
-      }
-      if (typeof value.name === "string" && namespace) add(namespace, value.name, value.count);
-      for (const [key, child] of Object.entries(value)) {
-        const nextNamespace = hitSuggestionNamespace(key) || namespace;
-        if (typeof child === "string" && hitSuggestionNamespace(key)) add(nextNamespace, child, value.count);
-        else visit(child, nextNamespace, depth + 1);
-      }
-    };
-    try {
-      const text = await hitRequest(`${HIT_STATIC}/tags.json`, { accept: "application/json" });
-      if (text.length > 8 * 1024 * 1024) throw hitError("InvalidResponseError", "Hitomi.la suggestion catalog is too large", "invalidResponse");
-      visit(JSON.parse(text), null);
-    } catch {
-      return catalog;
-    }
-    for (const values of catalog.values()) values.sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
-    hitSuggestionCatalog = catalog;
-    return catalog;
-  })();
-  return hitSuggestionCatalogPromise;
-}
+async function hitSuggestions(input) { return hitSuggestionLookup(input); }
 
 async function hitIDsForTerm(term, language) {
   const separator = term.indexOf(":");

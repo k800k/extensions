@@ -12,7 +12,9 @@ const IDS = [
   "MangaDot", "MangaFox", "Mangago", "RoyalRoad", "Webtoon"
 ];
 const checkOnly = process.argv.includes("--check");
-const bridge = (await readFile(join(ROOT, "packages", "paperback-compat", "bridge.js"), "utf8")).trim();
+const searchHelpers = (await readFile(join(ROOT, "scripts", "source-owned-runtime", "15-search.js"), "utf8")).trim();
+const bridge = (await readFile(join(ROOT, "packages", "paperback-compat", "bridge.js"), "utf8")).trim()
+  .replace("/* SPDX-License-Identifier: GPL-3.0-or-later */", "/* SPDX-License-Identifier: GPL-3.0-or-later */\n" + searchHelpers);
 const bridgeStart = "/* SPDX-License-Identifier: GPL-3.0-or-later */";
 const bundleMarkers = [
   "/* Hash-guarded compatibility-patched compiled InkDex/Paperback bundle follows. */",
@@ -39,7 +41,7 @@ for (const id of IDS) {
   const expectedProvenance = {
     ...provenance,
     releaseVersion: manifest.version,
-    adapter: { name: "@manko/paperback-compat", version: "1.2.0", license: "GPL-3.0-or-later" },
+    adapter: { name: "@manko/paperback-compat", version: "1.3.0", license: "GPL-3.0-or-later" },
     generatedMainSHA256: sha256(expected)
   };
   if (current === expected && provenanceText === json(expectedProvenance)) continue;

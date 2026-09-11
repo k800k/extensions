@@ -8,6 +8,7 @@ export async function assertMangaBoxBehavior(mainPath, hostname) {
   const baseURL = `https://${hostname}`;
   const listFixture = `<!doctype html><html><body>
     <article><a href="/manga/manga-sanitized" title="Sanitized Manga"><img src="https://img-r1.2xstorage.com/covers/sanitized.png" alt="Sanitized Manga"></a></article>
+    <nav><a href="/genre/action">Action</a><a href="/genre/fantasy">Fantasy</a></nav>
     <a class="page_last">Last (2)</a>
   </body></html>`;
   const detailsFixture = `<!doctype html><html><body>

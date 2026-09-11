@@ -1,3 +1,26 @@
+function hitSearchConfiguration() {
+    return {
+      id: "hitomi-search",
+      title: "Hitomi.la Search",
+      fields: [
+        { id: "tag", title: "Tag", queryPrefix: "tag:", placeholder: "Filter by tag", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "female", title: "Female Tag", queryPrefix: "female:", placeholder: "Filter by female tag", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "male", title: "Male Tag", queryPrefix: "male:", placeholder: "Filter by male tag", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "artist", title: "Artist", queryPrefix: "artist:", placeholder: "Filter by artist", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "group", title: "Group", queryPrefix: "group:", placeholder: "Filter by group", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "series", title: "Series", queryPrefix: "series:", placeholder: "Filter by series", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "character", title: "Character", queryPrefix: "character:", placeholder: "Filter by character", supportsExclusion: true, inputKind: "lookup", options: [] },
+        { id: "language", title: "Language", queryPrefix: "language:", placeholder: "Filter by language", supportsExclusion: false, maximumSelections: 1, options: Array.from(HIT_LANGUAGES).map(value => ({ id: value, title: value })) },
+        { id: "type", title: "Type", queryPrefix: "type:", placeholder: "Filter by gallery type", supportsExclusion: true, inputKind: "lookup", options: [] }
+      ],
+      sortOptions: [
+        { id: "newest", title: "Newest" },
+        { id: "popular-week", title: "Popular This Week" }
+      ],
+      defaultSortID: "newest"
+    };
+}
+
 defineContentExtension({
   id: "HitomiLA",
   apiVersion: "1.0",
@@ -19,46 +42,26 @@ defineContentExtension({
   },
 
   async discover(input) {
+    mrValidateSearchSelections(hitSearchConfiguration(), input?.selections, input?.sort);
     const page = hitPage(input);
     const section = input?.sectionId || input?.section?.id || "latest";
     if (section !== "latest" && section !== "popular") throw hitError("InvalidSectionError", "Unknown Hitomi.la discovery section");
     const composed = hitComposedQuery(input);
     if (composed) {
-      return this.search({ ...input, query: composed, selections: [], sort: section === "popular" ? "popular-week" : input?.sort });
+      return this.search({ ...input, query: composed, selections: [], sort: input?.sort || (section === "popular" ? "popular-week" : "newest") });
     }
-    const state = section === "popular" ? { language: "english", popular: "week" } : { language: "english", area: "all" };
+    const state = (input?.sort || (section === "popular" ? "popular-week" : "newest")) === "popular-week" ? { language: "english", popular: "week" } : { language: "english", area: "all" };
     const result = await hitNozomiRange(state, page);
     return { items: await hitCards(result.ids), metadata: result.hasNext ? { page: page + 1 } : null };
   },
 
-  searchFilters() {
-    return {
-      id: "hitomi-search",
-      title: "Hitomi.la Search",
-      fields: [
-        { id: "tag", title: "Tag", queryPrefix: "tag:", placeholder: "Filter by tag", supportsExclusion: true, options: [] },
-        { id: "female", title: "Female Tag", queryPrefix: "female:", placeholder: "Filter by female tag", supportsExclusion: true, options: [] },
-        { id: "male", title: "Male Tag", queryPrefix: "male:", placeholder: "Filter by male tag", supportsExclusion: true, options: [] },
-        { id: "artist", title: "Artist", queryPrefix: "artist:", placeholder: "Filter by artist", supportsExclusion: true, options: [] },
-        { id: "group", title: "Group", queryPrefix: "group:", placeholder: "Filter by group", supportsExclusion: true, options: [] },
-        { id: "series", title: "Series", queryPrefix: "series:", placeholder: "Filter by series", supportsExclusion: true, options: [] },
-        { id: "character", title: "Character", queryPrefix: "character:", placeholder: "Filter by character", supportsExclusion: true, options: [] },
-        { id: "language", title: "Language", queryPrefix: "language:", placeholder: "Filter by language", supportsExclusion: false, options: Array.from(HIT_LANGUAGES).map(value => ({ id: value, title: value })) },
-        { id: "type", title: "Type", queryPrefix: "type:", placeholder: "Filter by gallery type", supportsExclusion: true, options: [] }
-      ],
-      sortOptions: [
-        { id: "newest", title: "Newest" },
-        { id: "popular-week", title: "Popular This Week" }
-      ],
-      defaultSortID: "newest"
-    };
-  },
-
+  searchFilters: hitSearchConfiguration,
   async searchSuggestions(input) {
     return hitSuggestions(input);
   },
 
   async search(input) {
+    mrValidateSearchSelections(hitSearchConfiguration(), input?.selections, input?.sort);
     const page = hitPage(input);
     const raw = hitComposedQuery(input);
     if (/^[1-9][0-9]*$/.test(raw)) {
@@ -67,7 +70,8 @@ defineContentExtension({
     }
     const query = hitQuery({ query: raw });
     if (!query.positive.length && !query.negative.length) {
-      const result = await hitNozomiRange({ language: query.language, area: "all" }, page);
+      const state = hitSort(input) === "popular-week" ? {language:query.language,popular:"week"} : {language:query.language,area:"all"};
+      const result = await hitNozomiRange(state, page);
       return { items: await hitCards(result.ids), metadata: result.hasNext ? { page: page + 1 } : null };
     }
     const ids = await hitSortedSearchIDs(query, hitSort(input));

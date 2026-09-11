@@ -145,31 +145,22 @@ test("HitomiLA decodes ranged Nozomi IDs, limits metadata concurrency, and cache
   assert.equal(routingRequests, 1, "routing configuration remains cached for the bounded refresh window");
 });
 
-test("HitomiLA declares searchable fields and provides bounded tag suggestions", async () => {
+test("HitomiLA uses current indexed suggestions, including typo recovery and namespaces", async () => {
+  let failures = 1;
   const loaded = await loadContentExtension(mainPath, request => {
     const url = new URL(request.url);
-    if (url.pathname === "/tags.json") {
-      return runtimeResponse({
-        url: request.url,
-        text: JSON.stringify({
-          tags: [{ tag: "blue sky", count: 42 }, { tag: "landscape", count: 10 }],
-          artists: [{ name: "Sample Creator", count: 7 }]
-        })
-      });
-    }
-    throw new Error(`Unexpected request ${request.url}`);
+    assert.equal(url.hostname,"tagindex.hitomi.la");
+    if (url.pathname === "/global/g/l/a/s/e/s.json") return runtimeResponse({url:request.url,status:404});
+    if (failures) { failures--; throw new Error("temporary suggestion failure"); }
+    return runtimeResponse({url:request.url,text:JSON.stringify([["glasses",42,"female"],["glasses",20,"male"],["unrelated",100,"tag"]])});
   });
-  const configuration = loaded.extension.searchFilters();
-  assert.equal(configuration.defaultSortID, "newest");
-  assert.ok(configuration.fields.some(field => field.id === "artist" && field.supportsExclusion));
-  const suggestions = await loaded.extension.searchSuggestions({ fieldID: "tag", query: "blue", limit: 3 });
-  assert.deepEqual(Array.from(suggestions, suggestion => suggestion.value), ["blue sky"]);
-  const crossField = await loaded.extension.searchSuggestions({ query: "sample", limit: 3 });
-  assert.deepEqual(
-    Array.from(crossField, suggestion => [suggestion.fieldID, suggestion.value]),
-    [["artist", "Sample Creator"]]
-  );
-  assert.equal(loaded.calls.filter(call => new URL(call.url).pathname === "/tags.json").length, 1);
+  await assert.rejects(() => loaded.extension.searchSuggestions({query:"glass"}),/temporary/);
+  const matches = await loaded.extension.searchSuggestions({query:"glases",limit:3});
+  assert.deepEqual(Array.from(matches,value=>[value.fieldID,value.value]),[["female","glasses"],["male","glasses"]]);
+  const count = loaded.calls.length;
+  await loaded.extension.searchSuggestions({query:"glases",limit:3});
+  assert.equal(loaded.calls.length,count,"successful lookup pages are cached");
+  assert.equal(loaded.extension.searchFilters().fields.find(field=>field.id === "language").maximumSelections,1);
 });
 
 test("HitomiLA applies language overrides, namespaces, intersections, and negative terms", async () => {
@@ -428,4 +419,26 @@ test("HitomiLA evicts old gallery metadata and retries invalid responses", async
   assert.equal(counts.get(101), 1);
   await loaded.extension.details("1");
   assert.equal(counts.get(1), 3, "failed responses are not cached and the oldest successful entry is evicted");
+});
+
+test("every Hitomi filter maps canonical namespaces through discovery, search and exclusions",async()=>{
+ for(const field of ["tag","female","male","artist","group","series","character","language","type"]){
+  for(const polarity of field==="language"?["include"]:["include","exclude"]){
+   for(const scope of ["search","discover"]){
+    for(const page of [1,2]){
+     const loaded=await loadContentExtension(mainPath,request=>runtimeResponse({url:request.url,status:404}));
+     const value=field==="language"?"japanese":"blue sky";
+     await loaded.extension[scope]({sectionId:"latest",selections:[{fieldID:field,value,polarity}],metadata:{page}});
+     const expected=field==="language"?"/n/index-japanese.nozomi":`/n/${["female","male"].includes(field)?"tag":field}/${["female","male"].includes(field)?field+":":""}blue%20sky-english.nozomi`;
+     assert.ok(loaded.calls.some(call=>new URL(call.url).pathname===expected),`${field}.${polarity}.${scope}.${page}`);
+    }
+   }
+  }
+ }
+ for(const scope of ["search","discover"]){
+  const loaded=await loadContentExtension(mainPath,request=>runtimeResponse({url:request.url,status:404}));
+  await loaded.extension[scope]({sectionId:"latest",sort:"popular-week",metadata:{page:2}});
+  assert.equal(new URL(loaded.calls[0].url).pathname,"/n/popular/week-english.nozomi");
+  assert.equal(loaded.calls[0].headers.Range,"bytes=100-199");
+ }
 });

@@ -4,7 +4,7 @@
   "description": "Extension that pulls content from Comix.to.",
   "kind": "content",
   "apiVersion": "1.1",
-  "version": "1.0.0-alpha.53",
+  "version": "1.0.0-alpha.54",
   "language": "en",
   "languages": [
     "en"
@@ -69,7 +69,9 @@
     "status": "supported",
     "scope": "core",
     "note": null,
-    "limitations": ["Comix protected API discovery requires API 1.1 web execution."]
+    "limitations": [
+      "Comix protected API discovery requires API 1.1 web execution."
+    ]
   },
   "upstream": {
     "repository": "https://github.com/Aidoku-Community/sources",

@@ -40,12 +40,12 @@
     "sourceCommitRecordedByRegistry": null
   },
   "upstreamVersion": "1.0.0-alpha.18",
-  "releaseVersion": "1.0.0-alpha.20",
+  "releaseVersion": "1.0.0-alpha.21",
   "importedFromRegistryBuild": "2026-07-14T06:43:50.522Z",
   "adapter": {
     "name": "@manko/paperback-compat",
-    "version": "1.2.0",
+    "version": "1.3.0",
     "license": "GPL-3.0-or-later"
   },
-  "generatedMainSHA256": "6dbf70996d80c1f1efde9531aca5d0f757cadd50525f66f96e8d373382a399e5"
+  "generatedMainSHA256": "05206178d72d727a42bfa12316a3ae11dd3138fbf601bcca0319406ac8abf04d"
 }

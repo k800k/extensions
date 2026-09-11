@@ -7,10 +7,11 @@ export type Rating = "SAFE" | "MATURE" | "ADULT";
 export interface CursorPage<T> { items: T[]; metadata?: JSONValue; }
 export type SearchPolarity = "include" | "exclude";
 export interface SearchSelection { fieldID: string; value: string; title?: string; polarity: SearchPolarity; }
-export interface SearchField { id: string; title: string; queryPrefix: string; placeholder?: string; supportsExclusion?: boolean; options?: { id: string; title: string; subtitle?: string }[]; }
+export type SearchInputKind = "choice" | "lookup" | "text" | "number";
+export interface SearchField { inputKind?: SearchInputKind; maximumSelections?: number; id: string; title: string; queryPrefix: string; placeholder?: string; supportsExclusion?: boolean; options?: { id: string; title: string; subtitle?: string }[]; }
 export interface SearchSortOption { id: string; title: string; }
-export interface SearchConfiguration { id: string; title: string; fields: SearchField[]; sortOptions?: SearchSortOption[]; defaultSortID?: string; }
-export interface SearchSuggestionRequest { fieldID: string; query: string; selections?: SearchSelection[]; limit?: number; }
+export interface SearchConfiguration { supportsTextWithFilters?: boolean; id: string; title: string; fields: SearchField[]; sortOptions?: SearchSortOption[]; defaultSortID?: string; }
+export interface SearchSuggestionRequest { fieldID?: string | null; query: string; selections?: SearchSelection[]; limit?: number; }
 export interface SearchSuggestion { fieldID: string; value: string; title?: string; subtitle?: string; }
 export interface ContentSearchInput { query: string; selections?: SearchSelection[]; filters?: Record<string, string>; sort?: string | null; cursor?: JSONValue; }
 export interface ContentDiscoverInput { section: JSONValue; selections?: SearchSelection[]; filters?: Record<string, string>; sort?: string | null; cursor?: JSONValue; }
@@ -49,7 +50,7 @@ export interface RuntimeContext {
 export interface ContentExtension {
   id: string; apiVersion: APIVersion; initialize?(context: RuntimeContext): void | Promise<void>;
   settings?(): JSONValue; discoverSections?(): JSONValue[]; discover?(input: ContentDiscoverInput): Promise<CursorPage<JSONValue>>;
-  searchFilters?(): SearchConfiguration | JSONValue; searchSuggestions?(input: SearchSuggestionRequest): Promise<SearchSuggestion[]>;
+  searchFilters?(): SearchConfiguration | JSONValue | Promise<SearchConfiguration | JSONValue>; searchSuggestions?(input: SearchSuggestionRequest): Promise<SearchSuggestion[]>;
   search(input: ContentSearchInput): Promise<CursorPage<JSONValue>>; details(id: string): Promise<JSONValue>;
   installments(work: JSONValue): Promise<JSONValue[]>; imagePages(installment: JSONValue): Promise<JSONValue>;
   imagePageContent?(input: JSONValue): Promise<JSONValue>; updates?(input: JSONValue): Promise<JSONValue>;

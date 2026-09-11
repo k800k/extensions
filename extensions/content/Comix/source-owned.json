@@ -9,6 +9,7 @@
   ],
   "sharedModules": [
     "scripts/source-owned-runtime/00-runtime.js",
-    "scripts/source-owned-runtime/10-html.js"
+    "scripts/source-owned-runtime/10-html.js",
+    "scripts/source-owned-runtime/15-search.js"
   ]
 }

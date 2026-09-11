@@ -4,7 +4,7 @@ const COMIX_BASE = "https://comix.to";
 const COMIX_API = `${COMIX_BASE}/api/v1`;
 const COMIX_MAX_IMAGE_BASE64_LENGTH = Math.ceil((16 * 1024 * 1024) / 3) * 4;
 const COMIX_MAX_PROTECTED_JSON_BYTES = 256 * 1024;
-const COMIX_USER_AGENT = "manko Comix/1.0.0-alpha.53";
+const COMIX_USER_AGENT = "manko Comix/1.0.0-alpha.54";
 const comixRuntime = mrCreateRuntime({
   name: "Comix",
   baseURL: COMIX_BASE,
@@ -364,10 +364,70 @@ async function comixProtectedJSON(value) {
   return decodedValue;
 }
 
+let comixFilterConfiguration;
+let comixFilterPromise;
+let comixFilterExpires = 0;
+async function comixTerms(type, keyword = "", limit = 30) {
+  const params = new URLSearchParams({type:type || "tag",q:keyword,limit:String(limit)});
+  const response = await comixProtectedJSON(`${COMIX_API}/tags/search?${params}`);
+  const payload = response?.result ?? response;
+  const items = Array.isArray(payload) ? payload : payload?.items;
+  if (!Array.isArray(items)) throw comixRuntime.operationError("InvalidResponseError", "Comix filter terms are unavailable", "invalidResponse");
+  return items.map(item => ({id:String(item?.id || ""),title:String(item?.label ?? item?.title ?? "").trim()}))
+    .filter(item => /^[1-9][0-9]*$/.test(item.id) && item.title);
+}
+
+async function comixSearchConfiguration() {
+  if (comixFilterConfiguration && Date.now() < comixFilterExpires) return comixFilterConfiguration;
+  if (comixFilterPromise) return comixFilterPromise;
+  comixFilterPromise = (async () => {
+    const html = await comixRuntime.request(`${COMIX_BASE}/browse`);
+    const options = mrScriptJSON(html,"initial-data")?.list?.options;
+    if (!options || !["genres","formats","demographics","types","statuses","sorts"].every(key => Array.isArray(options[key]) && options[key].length)) throw new Error("Comix filter choices are unavailable. Retry Filters.");
+    const choices = values => values.map(item => ({id:String(item.id),title:String(item.label || "").trim()}));
+    const choice = (id,title,values,supportsExclusion=false,maximumSelections) => ({id,title,queryPrefix:`${id}:`,inputKind:"choice",options:values,supportsExclusion,maximumSelections});
+    const genreOptions = [...new Map(choices([...options.genres,...options.formats]).map(item=>[item.id,item])).values()].slice(0,100);
+    const fields = [
+      choice("type","Type",choices(options.types)),
+      choice("status","Release Status",choices(options.statuses)),
+      choice("demographic","Demographic",choices(options.demographics),true),
+      {...choice("genre","Genres & Tags",genreOptions,true),inputKind:"lookup"},
+      choice("genreMode","Genre Matching",[{id:"and",title:"All selected genres"},{id:"or",title:"Any selected genre"}],false,1),
+      choice("sortDirection","Sort Direction",[{id:"asc",title:"Ascending"},{id:"desc",title:"Descending"}],false,1),
+      {id:"author",title:"Author",queryPrefix:"author:",placeholder:"Find an author",inputKind:"lookup",maximumSelections:1,supportsExclusion:false,options:[]},
+      {id:"artist",title:"Artist",queryPrefix:"artist:",placeholder:"Find an artist",inputKind:"lookup",maximumSelections:1,supportsExclusion:false,options:[]}
+    ];
+    const sortOptions = [...new Map(options.sorts.map(([value,title]) => {const id=String(value).split(":")[0];return [id,{id,title:String(title).replace(/\s*\([^)]*\)$/,"")}];})).values()];
+    comixFilterConfiguration = {id:"comix-search",title:"Comix Search",fields,sortOptions};
+    comixFilterExpires = Date.now() + 300000;
+    return comixFilterConfiguration;
+  })();
+  try { return await comixFilterPromise; } catch (error) { if (comixFilterConfiguration) return comixFilterConfiguration; throw error; } finally { comixFilterPromise = null; }
+}
+
+const comixSuggestionLookup = mrCreateSuggestionLookup(async (fieldID, query) => {
+  if (fieldID && !["author","artist","genre"].includes(fieldID)) return [];
+  const field = fieldID || "genre";
+  const terms = await comixTerms(field === "genre" ? "tag" : field,query,30);
+  return terms.map(item => ({fieldID:field,value:item.id,title:item.title}));
+});
+
 async function comixList(input, order, query) {
   const page = comixRuntime.page(input);
-  const parameters = new URLSearchParams({ page: String(page), [`order[${order}]`]: "desc" });
+  const selections = input?.selections || [];
+  const chosenOrder = input?.sort || order;
+  if (selections.length || input?.sort) mrValidateSearchSelections(await comixSearchConfiguration(), selections, input?.sort);
+  const direction = selections.find(value => value.fieldID === "sortDirection")?.value || (chosenOrder === "title" ? "asc" : "desc");
+  const parameters = new URLSearchParams({ page: String(page), [`order[${chosenOrder}]`]: direction });
   if (query) parameters.set("keyword", query);
+  for (const selection of selections) {
+    const field = selection.fieldID, value = selection.value, excluded = selection.polarity === "exclude";
+    if (field === "sortDirection") continue;
+    if (field === "genreMode") { parameters.set("genres_mode",value); continue; }
+    if (["author","artist","genre","demographic"].includes(field) && !/^[1-9][0-9]*$/.test(value)) throw new Error(`Choose a valid Comix ${field} suggestion.`);
+    const key = field === "genre" ? (excluded ? "genres_ex[]" : "genres_in[]") : ({type:"types[]",status:"statuses[]",demographic:"demographics[]",author:"authors[]",artist:"artists[]"})[field];
+    parameters.append(key, excluded && field !== "genre" ? `-${value}` : value);
+  }
   const response = await comixProtectedJSON(`${COMIX_API}/manga?${parameters}`);
   const payload = response?.result;
   if (!payload || !Array.isArray(payload.items)) {
@@ -406,6 +466,8 @@ async function comixDetails(value) {
       artist: artists.join(", ") || undefined,
       author: authors.join(", ") || undefined,
       tags: [...terms(detail.demographics), ...terms(detail.genres), ...terms(detail.tags)],
+      searchFacets: [["author",detail.authors,"Authors","creator"],["artist",detail.artists,"Artists","creator"],["genre",[...(detail.genres || []),...(detail.tags || [])],"Genres & Tags","tag"],["demographic",detail.demographics,"Demographic","tag"]]
+        .flatMap(([fieldID,values,groupTitle,presentation]) => (values || []).filter(item => item?.id && item?.title).map(item => ({fieldID,value:String(item.id),title:String(item.title),groupTitle,presentation}))),
       shareUrl,
       mediaKind: card.mediaKind
     }
@@ -690,7 +752,8 @@ defineContentExtension({
     if (!order) throw comixRuntime.operationError("InvalidSectionError", "Unknown Comix discovery section", "invalidSection");
     return comixList(input, order, "");
   },
-  searchFilters: () => ({ id: "search", title: "Search", fields: [] }),
+  searchFilters: comixSearchConfiguration,
+  searchSuggestions: comixSuggestionLookup,
   search(input) {
     const query = String(input?.query ?? input?.text ?? "").trim();
     return comixList(input, query ? "relevance" : "chapter_updated_at", query);

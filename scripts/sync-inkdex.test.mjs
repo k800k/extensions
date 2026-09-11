@@ -67,15 +67,15 @@ test("the InkDex importer cannot overwrite source-owned packages", () => {
 
 test("repaired source releases declare their reviewed cover hosts", async () => {
   const expected = new Map([
-    ["Atsumaru", ["1.0.0-alpha.26", "cdn.atsu.moe"]],
-    ["Comix", ["1.0.0-alpha.53", "*.wowpic1.store"]],
-    ["HitomiLA", ["0.2.4", "atn.gold-usergeneratedcontent.net"]],
-    ["LNori", ["1.0.0-alpha.4", "cdn.lnori.com"]],
-    ["MangaBat", ["1.0.0-alpha.15", "img-r1.2xstorage.com"]],
+    ["Atsumaru", ["1.0.0-alpha.27", "cdn.atsu.moe"]],
+    ["Comix", ["1.0.0-alpha.54", "*.wowpic1.store"]],
+    ["HitomiLA", ["0.2.5", "atn.gold-usergeneratedcontent.net"]],
+    ["LNori", ["1.0.0-alpha.5", "cdn.lnori.com"]],
+    ["MangaBat", ["1.0.0-alpha.16", "img-r1.2xstorage.com"]],
     ["MangaDemon", ["1.0.0-alpha.18", "readermc.org"]],
-    ["MangaKakalot", ["1.0.0-alpha.15", "img-r1.2xstorage.com"]],
-    ["NHentai", ["0.3.3", "t.nhentai.net"]],
-    ["RoyalRoad", ["1.0.0-alpha.4", "www.royalroadcdn.com"]],
+    ["MangaKakalot", ["1.0.0-alpha.16", "img-r1.2xstorage.com"]],
+    ["NHentai", ["0.3.4", "t.nhentai.net"]],
+    ["RoyalRoad", ["1.0.0-alpha.5", "www.royalroadcdn.com"]],
     ["WeebCentral", ["1.0.0-alpha.27", "temp.compsci88.com"]]
   ]);
   for (const [id, [version, host]] of expected) {
@@ -88,13 +88,13 @@ test("repaired source releases declare their reviewed cover hosts", async () => 
 test("MangaFox and Mangago are enabled API 1.0 imports from the pinned registry artifacts", async () => {
   const expected = new Map([
     ["MangaFox", {
-      version: "1.0.0-alpha.14",
+      version: "1.0.0-alpha.15",
       contentRating: "MATURE",
       hosts: ["fanfox.net"],
       artifactSHA256: "4326a7e64c9a45fd90b46e9b70a417038e7a31e5496edbc7cacc60d6289b1f11"
     }],
     ["Mangago", {
-      version: "1.0.0-alpha.2",
+      version: "1.0.0-alpha.3",
       contentRating: "ADULT",
       hosts: ["www.mangago.me", "www.mangago.zone", "www.youhim.me"],
       artifactSHA256: "8589c51e2dfdb317756e626615157d8949ff0b0b5357f2e95c6a65909e250db3"

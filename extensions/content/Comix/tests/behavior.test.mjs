@@ -53,6 +53,10 @@ test("Comix dynamically installs secure signing and decoding for direct protecte
     mainPath,
     request => {
       const url = new URL(request.url);
+      if (url.hostname === "comix.to" && url.pathname === "/browse") {
+        const options={genres:item.genres.map(x=>({id:x.id,label:x.title})),formats:[{id:5,label:"Magic"}],demographics:item.demographics.map(x=>({id:x.id,label:x.title})),types:[{id:"manga",label:"Manga"},{id:"manhwa",label:"Manhwa"}],statuses:[{id:"releasing",label:"Releasing"},{id:"finished",label:"Finished"}],sorts:["relevance","chapter_updated_at","created_at","title","year","score","views_7d","views_30d","views_90d","views_total","follows_total"].map(x=>[x+":desc",x])};
+        return runtimeResponse({url:request.url,text:`<script id="initial-data" type="application/json">${JSON.stringify({list:{options}})}</script>`});
+      }
       if (url.hostname === "comix.to" && url.pathname === "/") return runtimeResponse({ url: request.url, text: pageHTML });
       if (url.hostname === "comix.to" && url.pathname === "/assets/main-sanitized.js") {
         return runtimeResponse({ url: request.url, text: 'import "./secure-sanitized.js";' });
@@ -64,7 +68,11 @@ test("Comix dynamically installs secure signing and decoding for direct protecte
         assert.match(url.searchParams.get("fixture-signature") || "", /^[0-9a-f]+-[1-9][0-9]*$/, "native broker receives the signed API URL");
         assert.equal(request.headers["X-Fixture-Signed"], "yes");
         let clear;
-        if (url.pathname === "/api/v1/manga" && url.searchParams.has("page")) {
+        if (url.pathname === "/api/v1/tags/search") {
+          const type = url.searchParams.get("type");
+          assert.ok(url.searchParams.has("q"));
+          clear = {result:(type === "author" ? item.authors : type === "artist" ? item.artists : item.genres).map(x=>({id:x.id,label:x.title}))};
+        } else if (url.pathname === "/api/v1/manga" && url.searchParams.has("page")) {
           clear = { result: { items: [item], meta: { page: 1, lastPage: 1 } } };
         } else if (url.pathname === "/api/v1/manga/sanitized-title") {
           clear = { result: item };
@@ -180,6 +188,32 @@ test("Comix dynamically installs secure signing and decoding for direct protecte
   assert.equal(secure.descrambleCalls, 1);
   assert.equal(loaded.calls.filter(call => new URL(call.url).pathname === "/assets/main-sanitized.js").length, 1, "bounded runtime cache reuses secure-module discovery metadata");
   assert.equal(loaded.calls.filter(call => new URL(call.url).pathname === "/assets/secure-sanitized.js").length, 1, "bounded runtime cache reuses the brokered secure-module source");
+  const configuration = await loaded.extension.searchFilters();
+  const values = {type:"manhwa",status:"finished",demographic:"3",genre:"4",genreMode:"or",sortDirection:"asc",author:"1",artist:"2"};
+  const parameters = {type:"types[]",status:"statuses[]",demographic:"demographics[]",genre:"genres_in[]",genreMode:"genres_mode",sortDirection:"order[year]",author:"authors[]",artist:"artists[]"};
+  for (const field of configuration.fields) {
+    const selection = {fieldID:field.id,value:values[field.id],polarity:"include"};
+    for (const mode of ["search","discover"]) {
+      await loaded.extension[mode]({query:"sample",sectionId:"latest",selections:[selection],sort:"year",cursor:{page:2}});
+      const url = new URL(loaded.calls.filter(call=>new URL(call.url).pathname === "/api/v1/manga").at(-1).url);
+      assert.equal(url.searchParams.get(parameters[field.id]),values[field.id],field.id + " " + mode);
+      assert.equal(url.searchParams.get("page"),"2");
+    }
+  }
+  for (const field of configuration.fields.filter(field=>field.supportsExclusion)) {
+    await loaded.extension.search({query:"sample",selections:[{fieldID:field.id,value:values[field.id],polarity:"exclude"}]});
+    const url = new URL(loaded.calls.filter(call=>new URL(call.url).pathname === "/api/v1/manga").at(-1).url);
+    assert.equal(url.searchParams.get(field.id === "genre" ? "genres_ex[]" : "demographics[]"),field.id === "genre" ? "4" : "-3");
+  }
+  for (const sort of configuration.sortOptions) {
+    await loaded.extension.search({query:"sample",sort:sort.id});
+    const url = new URL(loaded.calls.filter(call=>new URL(call.url).pathname === "/api/v1/manga").at(-1).url);
+    assert.ok(url.searchParams.has(`order[${sort.id}]`));
+  }
+  const authors = await loaded.extension.searchSuggestions({fieldID:"author",query:"Sample",limit:10});
+  assert.equal(authors[0].value,"1");
+  await assert.rejects(() => loaded.extension.search({selections:[{fieldID:"type",value:"novel",polarity:"include"}]}),/available/);
+
 });
 
 test("Comix fails closed when signing or x-enc response decoding fails", async () => {

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "sourceOwned": true,
   "id": "NHentai",
-  "releaseVersion": "0.3.3",
+  "releaseVersion": "0.3.4",
   "generator": "scripts/build-source-owned.mjs",
   "upstream": {
     "repository": "https://github.com/Aidoku-Community/sources",
@@ -16,13 +16,17 @@
   },
   "modules": [
     {
+      "file": "scripts/source-owned-runtime/15-search.js",
+      "sha256": "d6c755df25f262c84d39e8034f8eae62053adb50d45ebc8a1b5704c5840aee5b"
+    },
+    {
       "file": "extensions/content/NHentai/src/10-core.js",
-      "sha256": "d6339a55c520ea204dd60d556dc0807d7f5702e48ca1f5c29d0de55b9810da3e"
+      "sha256": "3825973188c156c66be3b98524661c41fe43a9ff27ac2bba8b97d19be2406f5b"
     },
     {
       "file": "extensions/content/NHentai/src/20-extension.js",
-      "sha256": "74bfac6527add4676ff12e3f57853a335fbe75eec23e4736bceb08beaa9b14b0"
+      "sha256": "b8dc2bd862b6b9fb926422ab4c0bb483b9740491e98cb015c7a4cfc77cb37986"
     }
   ],
-  "generatedMainSHA256": "c73f23d9dc5944389b5fac02c833ea22ba1f2a0634a6ac7ec8c3643725e53a82"
+  "generatedMainSHA256": "1ba2251d70b22e98774d48a01e858e3e5e13a20e4fcdb5da98c15a6e383ba55f"
 }

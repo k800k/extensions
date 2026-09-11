@@ -121,6 +121,30 @@ function mrDefineMangaBoxSource(configuration) {
     return result;
   }
 
+  let searchConfiguration, searchConfigurationPromise, searchConfigurationExpires = 0;
+  async function filters() {
+    if (searchConfiguration && Date.now() < searchConfigurationExpires) return searchConfiguration;
+    if (searchConfigurationPromise) return searchConfigurationPromise;
+    searchConfigurationPromise = (async () => {
+      const html = await runtime.request(`${configuration.baseURL}/genre/all?filter=1&page=1`);
+      const values = new Map();
+      for (const {html:anchor} of mrElements(html,"a")) {
+        const href = mrAttribute(anchor,"href"), title = mrTextContent(anchor);
+        let match;
+        try { match = runtime.url(mrAbsoluteURL(href,configuration.baseURL)).pathname.match(/^\/genre\/([A-Za-z0-9%._~-]+)\/?$/); } catch { continue; }
+        if (match && match[1] !== "all" && title) values.set(match[1],{id:match[1],title});
+      }
+      if (!values.size) throw new Error(`${configuration.name} genre options are unavailable. Retry Filters.`);
+      const options = [...values.values()].slice(0,100);
+      searchConfiguration = {id:"search",title:"Search",supportsTextWithFilters:false,fields:[{
+        id:"genre",title:"Genre",queryPrefix:"genre:",placeholder:"Choose a genre",inputKind:"choice",maximumSelections:1,supportsExclusion:false,options
+      }],sortOptions:[]};
+      searchConfigurationExpires = Date.now() + 300000;
+      return searchConfiguration;
+    })();
+    try { return await searchConfigurationPromise; } catch (error) { if (searchConfiguration) return searchConfiguration; throw error; } finally { searchConfigurationPromise = null; }
+  }
+
   function selectedGenre(input) {
     const selection = (Array.isArray(input?.selections) ? input.selections : [])
       .find(item => item?.fieldID === "genre" && item?.polarity !== "exclude");
@@ -140,6 +164,7 @@ function mrDefineMangaBoxSource(configuration) {
   }
 
   async function list(section, page, query, genre = "") {
+    if (genre && query) throw new Error("This source supports genre browsing or keyword search. Clear the keyword to apply a genre.");
     const html = await runtime.request(listURL(section, page, query, genre));
     const items = cards(html);
     const lastPage = mrNumber(html.match(/class\s*=\s*["'][^"']*page_last[^"']*["'][^>]*>[\s\S]{0,80}?Last\s*\((\d+)\)/i)?.[1]);
@@ -305,26 +330,19 @@ function mrDefineMangaBoxSource(configuration) {
       { id: "hot", title: "Popular", type: 0 },
       { id: "completed", title: "Completed", type: 0 }
     ],
-    discover: input => list(input?.sectionId || input?.section?.id || "new", runtime.page(input), ""),
-    searchFilters: () => ({
-      id: "search",
-      title: "Search",
-      fields: [{
-        id: "genre",
-        title: "Genre",
-        queryPrefix: "genre:",
-        placeholder: "Filter by genre",
-        supportsExclusion: false,
-        options: []
-      }],
-      sortOptions: []
-    }),
-    search: input => list(
-      "new",
-      runtime.page(input),
-      String(input?.query ?? input?.text ?? "").trim(),
-      selectedGenre(input)
-    ),
+    discover: async input => {
+      if (input?.selections?.length || input?.sort) mrValidateSearchSelections(await filters(),input.selections,input.sort);
+      return list(input?.sectionId || input?.section?.id || "new",runtime.page(input),"",selectedGenre(input));
+    },
+    searchFilters: filters,
+    searchSuggestions: async input => {
+      const config = await filters();
+      return mrRankSuggestions(input.query, config.fields[0].options.map(option=>({fieldID:"genre",value:option.id,title:option.title})),input.limit || 20,input.fieldID);
+    },
+    search: async input => {
+      if (input?.selections?.length || input?.sort) mrValidateSearchSelections(await filters(),input.selections,input.sort);
+      return list("new",runtime.page(input),String(input?.query ?? input?.text ?? "").trim(),selectedGenre(input));
+    },
     async details(value) {
       const id = workID(value);
       return detailsFromHTML(id, await runtime.request(`${configuration.baseURL}${id}`));

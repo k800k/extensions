@@ -6,11 +6,10 @@ const NH_IMAGE_HOSTS = new Set(["i.nhentai.net"]);
 const NH_THUMB_HOSTS = new Set(["t.nhentai.net"]);
 const NH_MEDIA_HOSTS = new Set([...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
 const NH_HOSTS = new Set(["nhentai.net", ...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
-const NH_USER_AGENT = "manko NHentai Extension/0.3.3 (+https://github.com/k800k/extensions)";
+const NH_USER_AGENT = "manko NHentai Extension/0.3.4 (+https://github.com/k800k/extensions)";
 const NH_SUGGESTION_FIELDS = new Set(["tag", "artist", "parody", "character", "group", "language", "category"]);
 let nhRuntime;
 const nhKnownSearchValues = new Map();
-const nhSuggestionCache = new Map();
 
 function nhContext() {
   const context = nhRuntime || globalThis.manko?.context;
@@ -171,57 +170,33 @@ function nhRememberSearchValues(tagGroups) {
 
 function nhObservedSuggestions(fieldID, query) {
   const fields = fieldID ? [fieldID] : Array.from(NH_SUGGESTION_FIELDS);
-  return fields.flatMap(currentFieldID => (nhKnownSearchValues.get(currentFieldID) || [])
-    .filter(value => !query || value.toLowerCase().includes(query))
-    .map(value => ({ fieldID: currentFieldID, value, title: value })));
+  return mrRankSuggestions(query, fields.flatMap(current => (nhKnownSearchValues.get(current) || [])
+    .map(value => ({fieldID:current,value,title:value}))), 30, fieldID || null);
 }
 
+const nhSuggestionLookup = mrCreateSuggestionLookup(async (fieldID, query) => {
+  if (fieldID && !NH_SUGGESTION_FIELDS.has(fieldID)) throw nhError("InvalidSearchTermError", "Unknown nHentai suggestion field", "invalidSearchTerm");
+  const payload = await nhJSON(`${NH_API}/tags/search`, {
+    method:"POST", headers:{"Content-Type":"application/json"}, body:{type:fieldID || null,query,limit:30}
+  });
+  if (!Array.isArray(payload)) throw nhError("InvalidResponseError", "nHentai tag suggestions are malformed", "invalidResponse");
+  if (payload.some(item => typeof item?.type !== "string"
+    || typeof item?.name !== "string" || !item.name.trim() || item.name.length > 200)) throw nhError("InvalidResponseError", "nHentai returned a malformed tag candidate", "invalidResponse");
+  return payload.filter(item => NH_SUGGESTION_FIELDS.has(item.type.toLowerCase())).map(item => ({
+      fieldID:String(item.type).toLowerCase(), value:item.name.trim(), title:item.name.trim(),
+      subtitle:Number(item.count) > 0 ? `${Math.floor(Number(item.count))} galleries` : undefined
+    }));
+});
+
 async function nhSuggestions(input) {
-  const fieldID = String(input?.fieldID || "").trim().toLowerCase();
-  const rawQuery = String(input?.query || "").trim();
-  const query = rawQuery.toLowerCase();
-  const limit = Math.max(1, Math.min(30, Number(input?.limit) || 20));
-  const observed = nhObservedSuggestions(fieldID, query);
-  if ((fieldID && !NH_SUGGESTION_FIELDS.has(fieldID)) || !rawQuery) return observed.slice(0, limit);
-
-  const cacheKey = `${fieldID || "*"}\u0000${query}`;
-  let remote = nhSuggestionCache.get(cacheKey);
-  if (!remote) {
-    try {
-      const payload = await nhJSON(`${NH_API}/tags/search`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: { type: fieldID || null, query: rawQuery, limit }
-      });
-      if (!Array.isArray(payload)) throw nhError("InvalidResponseError", "nHentai tag suggestions are malformed", "invalidResponse");
-      remote = payload
-        .filter(item => NH_SUGGESTION_FIELDS.has(String(item?.type || "").toLowerCase())
-          && typeof item?.name === "string"
-          && item.name.trim()
-          && item.name.length <= 200)
-        .map(item => {
-          const count = Number(item.count);
-          return {
-            fieldID: String(item.type).toLowerCase(),
-            value: item.name.trim(),
-            title: item.name.trim(),
-            subtitle: Number.isFinite(count) && count > 0 ? `${Math.floor(count)} galleries` : undefined
-          };
-        });
-      if (nhSuggestionCache.size >= 100) nhSuggestionCache.delete(nhSuggestionCache.keys().next().value);
-      nhSuggestionCache.set(cacheKey, remote);
-    } catch {
-      remote = [];
-    }
+  const observed = nhObservedSuggestions(input?.fieldID, input?.query);
+  if (!String(input?.query || "").trim()) return observed.slice(0,input?.limit || 20);
+  try {
+    return mrRankSuggestions(input.query, [...await nhSuggestionLookup(input), ...observed], input.limit || 20, input.fieldID);
+  } catch (error) {
+    if (observed.length) return observed.slice(0,input?.limit || 20);
+    throw error;
   }
-
-  const seen = new Set();
-  return [...remote, ...observed]
-    .filter(item => {
-      const key = `${item.fieldID}\u0000${item.value.toLowerCase()}`;
-      return !seen.has(key) && seen.add(key);
-    })
-    .slice(0, limit);
 }
 
 function nhMediaURL(path, isCover) {

@@ -290,7 +290,14 @@
       tagGroups: { genres: { fieldID: "genres", groupTitle: "Genres" } }
     },
     Atsumaru: {
-      fields: [{ id: "tags", title: "Tags", shape: "triStateArray", supportsExclusion: true }],
+      fields: [
+        { id: "tags", title: "Genres", shape: "triStateArray", supportsExclusion: true },
+        { id: "types", title: "Type", shape: "triStateArray", supportsExclusion: false },
+        { id: "statuses", title: "Status", shape: "triStateArray", supportsExclusion: false },
+        { id: "years", title: "Year", shape: "triStateArray", supportsExclusion: false },
+        { id: "minChapters", title: "Minimum Chapters", shape: "scalarArray", inputKind: "number", maximumSelections: 1, supportsExclusion: false },
+        { id: "officialTranslation", title: "Official Translation", shape: "scalarArray", maximumSelections: 1, supportsExclusion: false }
+      ],
       tagGroups: { tags: { fieldID: "tags", groupTitle: "Tags" } }
     },
     MadaraDex: {
@@ -321,7 +328,7 @@
       }
     },
     MangaFox: {
-      fields: [{ id: "genres", title: "Genres", shape: "triStateArray", supportsExclusion: false }],
+      fields: [{ id: "genres", title: "Genres", shape: "triStateArray", maximumSelections: 1, supportsExclusion: false }],
       tagGroups: { genres: { fieldID: "genres", groupTitle: "Genres" } }
     },
     Mangago: {
@@ -332,7 +339,7 @@
       fields: [
         { id: "genres", title: "Genres", shape: "triStateObject", supportsExclusion: true },
         { id: "tags", title: "Tags", shape: "triStateObject", supportsExclusion: true },
-        { id: "author", title: "Author", shape: "text", supportsExclusion: false }
+        { id: "author", title: "Author", shape: "text", inputKind: "text", maximumSelections: 1, supportsExclusion: false }
       ],
       tagGroups: {
         genres: { fieldID: "genres", groupTitle: "Genres" },
@@ -341,7 +348,7 @@
       creators: { author: { fieldID: "author", groupTitle: "Authors" } }
     },
     Webtoon: {
-      fields: [{ id: "genres", title: "Genres", shape: "valueArray", supportsExclusion: false }],
+      fields: [{ id: "genres", title: "Genres", shape: "valueArray", maximumSelections: 1, supportsExclusion: false }],
       tagGroups: {
         "0": { fieldID: "genres", groupTitle: "Genres" },
         genres: { fieldID: "genres", groupTitle: "Genres" }
@@ -438,7 +445,9 @@
       const excluded = selection?.polarity === "exclude";
       if (excluded && !field.supportsExclusion) continue;
       const state = excluded ? "excluded" : "included";
-      if (field.shape === "triStateArray") {
+      if (field.shape === "scalarArray") {
+        arrayMetadata.push({id:fieldID,value});
+      } else if (field.shape === "triStateArray") {
         let entry = arrayMetadata.find(item => item.id === fieldID);
         if (!entry) {
           entry = { id: fieldID, value: {} };
@@ -463,32 +472,103 @@
     if (arrayMetadata.length) return arrayMetadata;
     return Object.keys(objectMetadata).length ? objectMetadata : undefined;
   };
+  const searchConfigurations = new Map(), searchConfigurationFlights = new Map(), searchOptionCatalogs = new Map();
+  const optionValue = option => compact({
+    id:string(option?.id ?? option?.value ?? option),
+    title:string(option?.title ?? option?.label ?? option?.value ?? option),
+    subtitle:option?.subtitle
+  });
+  const sortIdentity = value => string(value).replace(/#(?:title|empty)$/, "");
   const paperbackSearchConfiguration = async (sourceID, instance) => {
-    const policy = paperbackSearchPolicies[sourceID];
-    const fields = (policy?.fields ?? []).map(field => ({
-      id: field.id,
-      title: field.title,
-      queryPrefix: `${field.id}:`,
-      placeholder: `Filter by ${field.title.toLowerCase()}`,
-      supportsExclusion: field.supportsExclusion,
-      options: []
-    }));
-    let sortOptions = [];
-    if (typeof instance.getSortingOptions === "function") {
-      try {
-        const values = await instance.getSortingOptions({ title: "" });
-        sortOptions = (Array.isArray(values) ? values : [])
-          .filter(value => value?.id !== undefined && value?.label !== undefined)
-          .map(value => ({ id: string(value.id), title: string(value.label) }));
-      } catch (_) {}
+    const previous = searchConfigurations.get(sourceID);
+    if (previous && Date.now() < previous.expiresAt) return previous.configuration;
+    if (searchConfigurationFlights.has(sourceID)) return searchConfigurationFlights.get(sourceID);
+    const task = (async () => {
+      const policy = paperbackSearchPolicies[sourceID];
+      const available = new Map();
+      const remember = (id, options, extras = {}) => {
+        if (!id) return;
+        const values = (Array.isArray(options) ? options : []).map(optionValue).filter(option => option.id && option.title && !/blocked in settings/i.test(option.title));
+        available.set(id,{...extras,options:[...new Map(values.map(value=>[value.id,value])).values()]});
+      };
+      if (policy?.fields.length) {
+        if (typeof instance.getSearchFilters === "function") {
+          for (const field of await instance.getSearchFilters() || []) remember(field.id,field.options,{maximumSelections:field.type === "dropdown" ? 1 : undefined,placeholder:field.placeholder});
+        } else if (typeof instance.fetchGenres === "function") {
+          remember("genres",await instance.fetchGenres());
+        } else if (typeof instance.getSearchTags === "function") {
+          for (const group of await instance.getSearchTags() || []) remember(group.id,group.tags);
+          // Some pinned MangaDex packages warm their tag cache without awaiting
+          // initialization. Fetch the same public tag catalog if it is not ready.
+          if (sourceID === "MangaDex" && !["format","genre","theme","content"].some(id => available.get(id)?.options.length)) {
+            const [, bytes] = await scheduleRequest({url:"https://api.mangadex.org/manga/tag",method:"GET",headers:{Accept:"application/json"}});
+            const payload = JSON.parse(new TextDecoder().decode(bytes));
+            if (!Array.isArray(payload.data)) throw new Error("MangaDex tag catalog is unavailable.");
+            const groups = new Map();
+            for (const tag of payload.data) {
+              const group = tag.attributes?.group;
+              if (!group || !tag.id || !tag.attributes?.name?.en) continue;
+              if (!groups.has(group)) groups.set(group,[]);
+              groups.get(group).push({id:tag.id,title:tag.attributes.name.en});
+            }
+            for (const [group,items] of groups) remember(group,items);
+          }
+        } else if (typeof instance.getSearchGenres === "function") {
+          remember("genres",(await instance.getSearchGenres()).filter(option => option.id !== "ALL"));
+        } else if (typeof instance.getAdvancedSearchForm === "function") {
+          const form = await instance.getAdvancedSearchForm({title:"",metadata:undefined});
+          for (const section of await form.getSections() || []) {
+            for (const row of section.items || []) {
+              remember(row.id,row.form?.params?.items ?? row.options ?? row.items,{placeholder:row.placeholder});
+            }
+          }
+        }
+      }
+      const fields = [];
+      for (const field of policy?.fields || []) {
+        const raw = available.get(field.id), options = raw?.options || [];
+        const liveLookup = sourceID === "MangaDot" && ["author","artist"].includes(field.id);
+        const kind = field.inputKind || (field.shape === "text" ? "text" : liveLookup || options.length > 100 ? "lookup" : "choice");
+        if (kind === "choice" && !options.length) continue;
+        fields.push(compact({id:field.id,title:field.title,queryPrefix:`${field.id}:`,placeholder:raw?.placeholder || `Find ${field.title.toLowerCase()}`,
+          supportsExclusion:field.supportsExclusion,inputKind:kind,maximumSelections:field.maximumSelections ?? raw?.maximumSelections,
+          options:kind === "choice" ? options : []}));
+      }
+      if (policy?.fields.some(field => !field.inputKind && field.shape !== "text") && ![...available.values()].some(value => value.options.length)) throw new Error("Source filter choices are unavailable. Retry Filters.");
+      let sortOptions = [];
+      // These keyword endpoints ignore their upstream browsing-only sort option.
+      if (typeof instance.getSortingOptions === "function" && !["Webtoon","Mangago"].includes(sourceID)) {
+        const values = await instance.getSortingOptions({title:""});
+        sortOptions = [...new Map((Array.isArray(values)?values:[]).filter(value => value?.id !== undefined && value?.label !== undefined)
+          .map(value => ({id:sortIdentity(value.id),title:string(value.label)})).map(value=>[value.id,value])).values()];
+      }
+      const configuration = compact({id:`${sourceID.toLowerCase()}-search`,title:`${sourceID} Search`,fields,sortOptions,
+        supportsTextWithFilters:sourceID === "Webtoon" ? false : undefined,
+        defaultSortID:["MangaDex","MangaDot"].includes(sourceID) ? undefined : sortOptions[0]?.id});
+      searchOptionCatalogs.set(sourceID,available);
+      searchConfigurations.set(sourceID,{configuration,expiresAt:Date.now()+300000});
+      return configuration;
+    })();
+    searchConfigurationFlights.set(sourceID,task);
+    try { return await task; } catch (error) { if (previous) return previous.configuration; throw error; } finally { searchConfigurationFlights.delete(sourceID); }
+  };
+  const creatorLookups = new Map();
+  const paperbackSuggestions = async (sourceID, instance, input) => {
+    const configuration = await paperbackSearchConfiguration(sourceID,instance);
+    let candidates = configuration.fields.flatMap(field => (searchOptionCatalogs.get(sourceID)?.get(field.id)?.options || []).map(option => ({fieldID:field.id,value:option.id,title:option.title,subtitle:option.subtitle})));
+    if (sourceID === "MangaDot" && String(input.query || "").trim().length >= 3) {
+      for (const fieldID of input.fieldID ? [input.fieldID] : ["author","artist"]) {
+        const method = fieldID === "author" ? "getAuthor" : fieldID === "artist" ? "getArtist" : null;
+        if (!method || typeof instance.api?.[method] !== "function") continue;
+        if (!creatorLookups.has(fieldID)) creatorLookups.set(fieldID,mrCreateSuggestionLookup(async (_,query) => {
+          const response = await instance.api[method](query);
+          if (!Array.isArray(response?.suggestions) || response.suggestions.some(value => typeof value !== "string")) throw new Error("Creator suggestions are unavailable.");
+          return response.suggestions.map(value => ({fieldID,value,title:value}));
+        }));
+        candidates.push(...await creatorLookups.get(fieldID)({fieldID,query:input.query,limit:input.limit}));
+      }
     }
-    return {
-      id: `${sourceID.toLowerCase()}-search`,
-      title: `${sourceID} Search`,
-      fields,
-      sortOptions,
-      defaultSortID: sortOptions[0]?.id
-    };
+    return mrRankSuggestions(input.query,candidates,input.limit || 20,input.fieldID);
   };
   const workFromSourceManga = (manga, fallbackMediaKind = "manga", sourceID = "") => {
     const info = manga?.mangaInfo ?? {};
@@ -532,7 +612,7 @@
     if (typeof instance.getSortingOptions !== "function") return undefined;
     const options = await instance.getSortingOptions(query);
     if (!Array.isArray(options)) return undefined;
-    return options.find(option => string(option?.id) === string(requestedID)) ?? options[0];
+    return options.find(option => sortIdentity(option?.id) === sortIdentity(requestedID)) ?? options[0];
   };
   const formSchema = async (instance, method, id, title, query) => {
     if (typeof instance[method] !== "function") return { id, title, fields: [] };
@@ -777,12 +857,25 @@
         const sections = await instance.getDiscoverSections();
         return (sections ?? []).map(section => compact({ id: string(section.id), title: string(section.title), subtitle: section.subtitle, type: number(section.type) }));
       },
-      discover: async ({ section, cursor }) => {
+      discover: async ({ section, cursor, selections, sort }) => {
+        if (selections?.length || sort) {
+          const configuration = await paperbackSearchConfiguration(id,instance);
+          mrValidateSearchSelections(configuration,selections,sort);
+          const searchQuery = compact({title:"",metadata:paperbackSearchMetadata(id,selections)});
+          const result = await instance.getSearchResults(searchQuery,cursor ?? undefined,await sortingOption(instance,searchQuery,sort));
+          return {items:(result?.items || []).map(item => ({type:"work",...mapSearchItem(item,mediaKind)})),metadata:result?.metadata ?? null};
+        }
         const result = await instance.getDiscoverSectionItems(section, cursor ?? undefined);
         return { items: (result?.items ?? []).map(mapDiscoverItem), metadata: result?.metadata ?? null };
       },
       searchFilters: () => paperbackSearchConfiguration(id, instance),
+      searchSuggestions: input => paperbackSuggestions(id,instance,input),
       search: async ({ query, selections, sort, cursor }) => {
+        if (selections?.length || sort) {
+          const configuration = await paperbackSearchConfiguration(id,instance);
+          mrValidateSearchSelections(configuration,selections,sort);
+          if (configuration.supportsTextWithFilters === false && String(query || "").trim() && selections?.length) throw new Error("This source supports genre browsing or keyword search. Clear the keyword to apply a genre.");
+        }
         const metadata = paperbackSearchMetadata(id, selections);
         const searchQuery = compact({ title: string(query), metadata });
         const result = await instance.getSearchResults(
