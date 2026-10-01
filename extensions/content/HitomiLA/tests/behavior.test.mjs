@@ -298,7 +298,7 @@ function bTreeNode(key, dataAddress, dataLength) {
   return bytes;
 }
 
-test("HitomiLA resolves plain title terms through the galleries-index B-tree", async () => {
+test("HitomiLA resolves title indexes through ordinary HTTP when native image resources are available", async () => {
   const key = createHash("sha256").update("sample", "utf8").digest().subarray(0, 4);
   const galleryData = Buffer.alloc(8);
   galleryData.writeInt32BE(1, 0);
@@ -320,6 +320,7 @@ test("HitomiLA resolves plain title terms through the galleries-index B-tree", a
     if (url.pathname === "/gg.js") return runtimeResponse({ url: request.url, text: routing });
     throw new Error(`Unexpected request ${request.url}`);
   });
+  loaded.context.http.imageResource = () => { throw new Error("Native image resources require an active image request."); };
   const result = await loaded.extension.search({ query: "sample" });
   assert.equal(result.items[0].workId, "7");
   assert.deepEqual(ranges, ["bytes=0-463", "bytes=20-27"]);
@@ -441,4 +442,50 @@ test("every Hitomi filter maps canonical namespaces through discovery, search an
   assert.equal(new URL(loaded.calls[0].url).pathname,"/n/popular/week-english.nozomi");
   assert.equal(loaded.calls[0].headers.Range,"bytes=100-199");
  }
+});
+
+
+test("HitomiLA keeps discovery and search Nozomi requests on ordinary HTTP", async () => {
+  const loaded = await loadContentExtension(mainPath, request => {
+    const url = new URL(request.url);
+    if (url.pathname.endsWith(".nozomi")) {
+      return runtimeResponse({ url: request.url, mimeType: "application/x-nozomi", bytes: nozomi([1]) });
+    }
+    if (url.pathname === "/galleries/1.js") return runtimeResponse({ url: request.url, text: galleryAssignment(1) });
+    throw new Error(`Unexpected request ${request.url}`);
+  });
+  loaded.context.http.imageResource = () => { throw new Error("Native image resources require an active image request."); };
+  for (const [method, input] of [
+    ["discover", { sectionId: "latest" }],
+    ["discover", { sectionId: "popular" }],
+    ["search", { query: "" }],
+    ["search", { query: "tag:landscape" }]
+  ]) {
+    const result = await loaded.extension[method](input);
+    assert.equal(result.items.length, 1);
+    assert.equal(result.items[0].workId, "1");
+  }
+});
+
+test("HitomiLA preserves native cover resources, base64 fallbacks, and cache invalidation", async () => {
+  const loaded = await loadContentExtension(mainPath, () => { throw new Error("unexpected legacy request"); });
+  const hash = "a".repeat(64);
+  const result = await loaded.extension.imagePageContent({
+    url: `https://atn.gold-usergeneratedcontent.net/avifbigtn/a/aa/${hash}.avif`,
+    http: { imageResource: async request => {
+      assert.equal(request.headers.Referer, "https://hitomi.la/");
+      return { status: 200, resourceID: "owned-cover", mimeType: "image/avif", headers: {} };
+    } }
+  });
+  assert.equal(result.resourceID, "owned-cover");
+  assert.equal(result.dataBase64, undefined);
+  for (const method of ["request", "imageResource"]) {
+    const fallback = await loaded.extension.imagePageContent({
+      url: `https://atn.gold-usergeneratedcontent.net/avifbigtn/a/aa/${hash}.avif`,
+      http: { [method]: async request => runtimeResponse({ url: request.url, mimeType: "image/avif", bytes: MINIMAL_AVIF_BYTES }) }
+    });
+    assert.equal(fallback.dataBase64, Buffer.from(MINIMAL_AVIF_BYTES).toString("base64"));
+    assert.equal(fallback.resourceID, undefined);
+  }
+  await loaded.extension.invalidateCache();
 });

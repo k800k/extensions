@@ -326,7 +326,7 @@
       "id": "HitomiLA",
       "name": "Hitomi.la",
       "description": "Anonymous multi-language discovery, search, gallery details, and AVIF/WebP page reading for hitomi.la.",
-      "version": "0.2.5",
+      "version": "0.2.6",
       "icon": "icons/HitomiLA.svg",
       "languages": [
         "en",
@@ -384,9 +384,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/HitomiLA/0.2.5/main.js",
-        "sha256": "0e38f397aaf7d7382dfc9ef2ae7809bf7c6085e9085e20b448a2496903c703ff",
-        "size": 48914,
+        "scriptURL": "sources/HitomiLA/0.2.6/main.js",
+        "sha256": "c216a09540f1e0a8282d9675a67f94d6676994bc732e28f4465ca01121a46708",
+        "size": 49877,
         "allowedHTTPSHosts": [
           "hitomi.la",
           "ltn.gold-usergeneratedcontent.net",
@@ -399,7 +399,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "0e38f397aaf7d7382dfc9ef2ae7809bf7c6085e9085e20b448a2496903c703ff",
+      "scriptSHA256": "c216a09540f1e0a8282d9675a67f94d6676994bc732e28f4465ca01121a46708",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -1218,7 +1218,7 @@
       "id": "NHentai",
       "name": "nHentai",
       "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
-      "version": "0.3.4",
+      "version": "0.3.5",
       "icon": "icons/NHentai.svg",
       "languages": [
         "multi",
@@ -1269,9 +1269,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/NHentai/0.3.4/main.js",
-        "sha256": "1ba2251d70b22e98774d48a01e858e3e5e13a20e4fcdb5da98c15a6e383ba55f",
-        "size": 28249,
+        "scriptURL": "sources/NHentai/0.3.5/main.js",
+        "sha256": "20eb08f2d5f015264a1174d199b093ef5f71a8eb1b61ba9b074ef666ff0189e3",
+        "size": 30629,
         "allowedHTTPSHosts": [
           "nhentai.net",
           "i.nhentai.net",
@@ -1281,7 +1281,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "1ba2251d70b22e98774d48a01e858e3e5e13a20e4fcdb5da98c15a6e383ba55f",
+      "scriptSHA256": "20eb08f2d5f015264a1174d199b093ef5f71a8eb1b61ba9b074ef666ff0189e3",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",

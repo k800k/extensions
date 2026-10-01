@@ -128,10 +128,34 @@ const NH_IMAGE_HOSTS = new Set(["i.nhentai.net"]);
 const NH_THUMB_HOSTS = new Set(["t.nhentai.net"]);
 const NH_MEDIA_HOSTS = new Set([...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
 const NH_HOSTS = new Set(["nhentai.net", ...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
-const NH_USER_AGENT = "manko NHentai Extension/0.3.4 (+https://github.com/k800k/extensions)";
+const NH_USER_AGENT = "manko NHentai Extension/0.3.5 (+https://github.com/k800k/extensions)";
 const NH_SUGGESTION_FIELDS = new Set(["tag", "artist", "parody", "character", "group", "language", "category"]);
 let nhRuntime;
 const nhKnownSearchValues = new Map();
+const nhGalleryCache = new Map();
+const nhGalleryFlights = new Map();
+let nhGalleryCacheBytes = 0;
+let nhGalleryGeneration = 0;
+const NH_GALLERY_CACHE_TTL_MS = 5 * 60 * 1000;
+const NH_GALLERY_CACHE_MAX_BYTES = 16 * 1024 * 1024;
+const NH_GALLERY_CACHE_MAX_ENTRIES = 100;
+
+function nhRememberGallery(gallery) {
+  const id = nhPositiveInteger(gallery?.id);
+  // List payloads may contain only a card; never treat those as chapter metadata.
+  if (!Array.isArray(gallery.pages) || !gallery.pages.length) return;
+  const bytes = new TextEncoder().encode(JSON.stringify(gallery)).byteLength;
+  if (bytes > NH_GALLERY_CACHE_MAX_BYTES) return;
+  nhGalleryCacheBytes -= nhGalleryCache.get(id)?.bytes || 0;
+  nhGalleryCache.delete(id);
+  nhGalleryCache.set(id, { gallery, bytes, loadedAt: Date.now() });
+  nhGalleryCacheBytes += bytes;
+  while (nhGalleryCache.size > NH_GALLERY_CACHE_MAX_ENTRIES || nhGalleryCacheBytes > NH_GALLERY_CACHE_MAX_BYTES) {
+    const oldest = nhGalleryCache.keys().next().value;
+    nhGalleryCacheBytes -= nhGalleryCache.get(oldest).bytes;
+    nhGalleryCache.delete(oldest);
+  }
+}
 
 function nhContext() {
   const context = nhRuntime || globalThis.manko?.context;
@@ -197,7 +221,9 @@ function nhIsChallenge(response, text) {
 
 async function nhRequest(url, options = {}) {
   const validated = nhValidatedURL(url);
-  const response = await nhContext().http.request({
+  const http = options.http || nhContext().http;
+  const load = options.binary && typeof http.imageResource === "function" ? http.imageResource : http.request;
+  const response = await load({
     url: validated.href,
     method: options.method || "GET",
     headers: {
@@ -375,7 +401,8 @@ function nhTitles(gallery) {
   };
 }
 
-function nhCard(gallery, preferredImage) {
+function nhCard(gallery, preferredImage, remember = true) {
+  if (remember) nhRememberGallery(gallery);
   const id = nhPositiveInteger(gallery?.id);
   const mediaID = nhPositiveInteger(gallery?.media_id, "media id");
   const titles = nhTitles(gallery);
@@ -399,7 +426,7 @@ function nhCard(gallery, preferredImage) {
 }
 
 function nhWork(gallery) {
-  const card = nhCard(gallery, gallery?.cover ?? gallery?.thumbnail);
+  const card = nhCard(gallery, gallery?.cover ?? gallery?.thumbnail, false);
   const tagGroups = nhTags(gallery);
   const titles = nhTitles(gallery);
   const pagePaths = Array.isArray(gallery?.pages) ? gallery.pages.map(page => page?.path) : [];
@@ -461,7 +488,20 @@ function nhListPayload(payload, page) {
 }
 
 async function nhGallery(id) {
-  return nhJSON(`${NH_API}/galleries/${nhPositiveInteger(id)}`);
+  const galleryID = nhPositiveInteger(id);
+  const cached = nhGalleryCache.get(galleryID);
+  if (cached && Date.now() - cached.loadedAt < NH_GALLERY_CACHE_TTL_MS) return cached.gallery;
+  if (nhGalleryFlights.has(galleryID)) return nhGalleryFlights.get(galleryID);
+  const generation = nhGalleryGeneration;
+  const flight = nhJSON(`${NH_API}/galleries/${galleryID}`).then(gallery => {
+    if (nhPositiveInteger(gallery?.id) !== galleryID) throw nhError("InvalidResponseError", "Gallery identifier does not match the request", "invalidResponse");
+    nhWork(gallery);
+    if (generation === nhGalleryGeneration) nhRememberGallery(gallery);
+    return gallery;
+  });
+  nhGalleryFlights.set(galleryID, flight);
+  try { return await flight; }
+  finally { if (nhGalleryFlights.get(galleryID) === flight) nhGalleryFlights.delete(galleryID); }
 }
 
 async function nhWorkForID(id) {
@@ -501,10 +541,18 @@ function nhSearchConfiguration() {
 defineContentExtension({
   id: "NHentai",
   apiVersion: "1.0",
+  imageRequestMode: "independent",
 
   initialize(context) {
     nhRuntime = context || globalThis.manko?.context;
     nhContext();
+  },
+
+  invalidateCache() {
+    nhGalleryGeneration++;
+    nhGalleryCache.clear();
+    nhGalleryFlights.clear();
+    nhGalleryCacheBytes = 0;
   },
 
   settings() {
@@ -601,8 +649,9 @@ defineContentExtension({
   },
 
   async imagePageContent(input) {
+    const http = input?.http || nhContext().http;
     const url = nhValidatedURL(String(input?.url || input?.pageURL || ""), NH_MEDIA_HOSTS);
-    const response = await nhRequest(url.href, { binary: true, accept: "image/avif,image/webp,image/png,image/jpeg,image/gif" });
+    const response = await nhRequest(url.href, { http, binary: true, accept: "image/avif,image/webp,image/png,image/jpeg,image/gif" });
     const mimeType = String(response.mimeType || nhHeader(response.headers, "content-type"))
       .split(";", 1)[0]
       .trim()
@@ -610,7 +659,7 @@ defineContentExtension({
     if (!/^image\/(?:jpeg|png|gif|webp|avif)$/.test(mimeType)) {
       throw nhError("InvalidResponseError", "nHentai page response is not an image", "invalidResponse", url.href);
     }
-    return { dataBase64: response.dataBase64, mimeType };
+    return response.resourceID ? { resourceID: response.resourceID, mimeType } : { dataBase64: response.dataBase64, mimeType };
   },
 
   async updates() {

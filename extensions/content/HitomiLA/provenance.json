@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "sourceOwned": true,
   "id": "HitomiLA",
-  "releaseVersion": "0.2.5",
+  "releaseVersion": "0.2.6",
   "generator": "scripts/build-source-owned.mjs",
   "upstream": {
     "repository": "https://github.com/Aidoku-Community/sources",
@@ -22,12 +22,12 @@
     },
     {
       "file": "extensions/content/HitomiLA/src/10-core.js",
-      "sha256": "38d403a839f627d590e48bd0468e20aea18f0bf730d6a45efb6ed7054a9291f5"
+      "sha256": "311d6564ea49398e13df6d6039c780bcfcb702b87db4223a9e4483ffa6072d1b"
     },
     {
       "file": "extensions/content/HitomiLA/src/20-extension.js",
-      "sha256": "45991b1fa39fc04050a3de452c687e95102a22a4d8a3f7405a6698f711be3263"
+      "sha256": "b42b0e08581769805ae2caaa580f37ebe556d896c788c7d587c64486fff1fef4"
     }
   ],
-  "generatedMainSHA256": "0e38f397aaf7d7382dfc9ef2ae7809bf7c6085e9085e20b448a2496903c703ff"
+  "generatedMainSHA256": "c216a09540f1e0a8282d9675a67f94d6676994bc732e28f4465ca01121a46708"
 }

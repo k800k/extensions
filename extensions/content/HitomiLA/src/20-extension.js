@@ -24,10 +24,21 @@ function hitSearchConfiguration() {
 defineContentExtension({
   id: "HitomiLA",
   apiVersion: "1.0",
+  imageRequestMode: "independent",
 
   initialize(context) {
     hitRuntime = context || globalThis.manko?.context;
     hitContext();
+  },
+
+  invalidateCache() {
+    hitGalleryGeneration++;
+    hitGalleryCache.clear();
+    hitGalleryFlights.clear();
+    hitGalleryCacheBytes = 0;
+    hitRoutingCache = undefined;
+    hitRoutingPromise = undefined;
+    hitIndexCache = undefined;
   },
 
   settings() {
@@ -107,14 +118,15 @@ defineContentExtension({
   },
 
   async imagePageContent(input) {
+    const http = input?.http || hitContext().http;
     const supplied = hitParsedURL(String(input?.url || input?.pageURL || ""));
     const coverPath = /^\/avifbigtn\/[0-9a-f]\/[0-9a-f]{2}\/[0-9a-f]{64}\.avif$/;
     const validCover = supplied.hostname === "atn.gold-usergeneratedcontent.net" && coverPath.test(supplied.pathname);
-    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href);
-    const response = await hitRequest(url.href, { binary: true, accept: "image/avif,image/webp,image/gif,image/jpeg,image/png" });
+    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href, http);
+    const response = await hitRequest(url.href, { http, binary: true, imageResource: true, accept: "image/avif,image/webp,image/gif,image/jpeg,image/png" });
     const mimeType = String(response.mimeType || hitHeader(response.headers, "content-type")).split(";", 1)[0].trim().toLowerCase();
     if (!/^image\/(?:avif|webp|gif|jpeg|png)$/.test(mimeType)) throw hitError("InvalidResponseError", "Hitomi.la image response has an unsupported MIME type", "invalidResponse", url.href);
-    return { dataBase64: response.dataBase64, mimeType };
+    return response.resourceID ? { resourceID: response.resourceID, mimeType } : { dataBase64: response.dataBase64, mimeType };
   },
 
   async updates() {

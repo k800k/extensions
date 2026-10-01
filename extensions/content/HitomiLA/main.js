@@ -151,6 +151,7 @@ let hitIndexCache;
 const hitGalleryCache = new Map();
 const hitGalleryFlights = new Map();
 let hitGalleryCacheBytes = 0;
+let hitGalleryGeneration = 0;
 const HIT_GALLERY_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 const HIT_GALLERY_CACHE_MAX_ENTRIES = 100;
 const HIT_GALLERY_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -236,7 +237,9 @@ function hitRegisterPageOrigin(route) {
 
 async function hitRequest(url, options = {}) {
   const validated = hitURL(url);
-  const response = await hitContext().http.request({
+  const http = options.http || hitContext().http;
+  const load = options.imageResource && typeof http.imageResource === "function" ? http.imageResource : http.request;
+  const response = await load({
     url: validated.href,
     method: "GET",
     headers: {
@@ -469,9 +472,10 @@ function hitNow() {
 async function hitIndexVersion() {
   const now = hitNow();
   if (hitIndexCache && now - hitIndexCache.loadedAt < 1800000) return hitIndexCache.value;
+  const generation = hitGalleryGeneration;
   const value = String(await hitRequest(`${HIT_STATIC}/galleriesindex/version`)).trim();
   if (!/^[0-9]{1,20}$/.test(value)) throw hitError("InvalidResponseError", "Hitomi.la galleries-index version is invalid", "invalidResponse");
-  hitIndexCache = { value, loadedAt: now };
+  if (generation === hitGalleryGeneration) hitIndexCache = { value, loadedAt: now };
   return value;
 }
 
@@ -644,13 +648,13 @@ async function hitGallery(id) {
     hitGalleryCacheBytes -= cached.bytes;
   }
   if (hitGalleryFlights.has(galleryID)) return hitGalleryFlights.get(galleryID);
-  const flight = hitLoadGallery(galleryID);
+  const flight = hitLoadGallery(galleryID, hitGalleryGeneration);
   hitGalleryFlights.set(galleryID, flight);
   try { return await flight; }
   finally { if (hitGalleryFlights.get(galleryID) === flight) hitGalleryFlights.delete(galleryID); }
 }
 
-async function hitLoadGallery(galleryID) {
+async function hitLoadGallery(galleryID, generation) {
   const source = await hitRequest(`${HIT_STATIC}/galleries/${galleryID}.js`);
   const gallery = hitGalleryAssignment(source);
   if (hitPositiveInteger(gallery.id) !== galleryID) throw hitError("InvalidResponseError", "Hitomi.la gallery metadata identifier does not match the request", "invalidResponse");
@@ -661,7 +665,7 @@ async function hitLoadGallery(galleryID) {
     if (!file || typeof file.hash !== "string" || !/^[0-9a-f]{64}$/.test(file.hash)) throw hitError("InvalidResponseError", "Hitomi.la gallery contains an invalid file hash", "invalidResponse");
   });
   const bytes = new TextEncoder().encode(JSON.stringify(gallery)).byteLength;
-  if (bytes <= HIT_GALLERY_CACHE_MAX_BYTES) {
+  if (generation === hitGalleryGeneration && bytes <= HIT_GALLERY_CACHE_MAX_BYTES) {
     hitGalleryCache.set(galleryID, { gallery, bytes, loadedAt: Date.now() });
     hitGalleryCacheBytes += bytes;
     while (hitGalleryCache.size > HIT_GALLERY_CACHE_MAX_ENTRIES || hitGalleryCacheBytes > HIT_GALLERY_CACHE_MAX_BYTES) {
@@ -702,18 +706,22 @@ function hitRoutingAssignment(source) {
   return { path, defaultRoute, overrides };
 }
 
-async function hitRouting() {
+async function hitRouting(http) {
   const now = hitNow();
   if (hitRoutingCache && now - hitRoutingCache.loadedAt < 60000) return hitRoutingCache.value;
   if (!hitRoutingPromise) {
-    hitRoutingPromise = hitRequest(`${HIT_STATIC}/gg.js`)
+    const generation = hitGalleryGeneration;
+    const flight = hitRequest(`${HIT_STATIC}/gg.js`, { http })
       .then(hitRoutingAssignment)
       .then(value => {
-        hitDynamicImageOrigins.clear();
-        hitRoutingCache = { value, loadedAt: hitNow() };
+        if (generation === hitGalleryGeneration) {
+          hitDynamicImageOrigins.clear();
+          hitRoutingCache = { value, loadedAt: hitNow() };
+        }
         return value;
       })
-      .finally(() => { hitRoutingPromise = null; });
+      .finally(() => { if (hitRoutingPromise === flight) hitRoutingPromise = null; });
+    hitRoutingPromise = flight;
   }
   return hitRoutingPromise;
 }
@@ -738,7 +746,7 @@ function hitPageURL(file, routing) {
   return hitURL(url, HIT_IMAGE_HOSTS).href;
 }
 
-async function hitAuthorizedPageURL(value) {
+async function hitAuthorizedPageURL(value, http) {
   const url = hitParsedURL(value);
   const match = /^\/([A-Za-z0-9._/-]+)\/([0-9]+)\/([0-9a-f]{64})\.(avif|webp|gif|jpe?g|png)$/.exec(url.pathname);
   if (!match || !HIT_PAGE_HOST.test(url.hostname)) {
@@ -751,7 +759,7 @@ async function hitAuthorizedPageURL(value) {
   }
   if (hitDynamicImageOrigins.has(url.origin)) return url;
 
-  const routing = await hitRouting();
+  const routing = await hitRouting(http);
   const route = routing.overrides.has(number) ? routing.overrides.get(number) : routing.defaultRoute;
   const expectedOrigin = hitPageOrigin(route);
   const expectedPath = routing.path.replace(/^\/+|\/+$/g, "");
@@ -907,10 +915,21 @@ function hitSearchConfiguration() {
 defineContentExtension({
   id: "HitomiLA",
   apiVersion: "1.0",
+  imageRequestMode: "independent",
 
   initialize(context) {
     hitRuntime = context || globalThis.manko?.context;
     hitContext();
+  },
+
+  invalidateCache() {
+    hitGalleryGeneration++;
+    hitGalleryCache.clear();
+    hitGalleryFlights.clear();
+    hitGalleryCacheBytes = 0;
+    hitRoutingCache = undefined;
+    hitRoutingPromise = undefined;
+    hitIndexCache = undefined;
   },
 
   settings() {
@@ -990,14 +1009,15 @@ defineContentExtension({
   },
 
   async imagePageContent(input) {
+    const http = input?.http || hitContext().http;
     const supplied = hitParsedURL(String(input?.url || input?.pageURL || ""));
     const coverPath = /^\/avifbigtn\/[0-9a-f]\/[0-9a-f]{2}\/[0-9a-f]{64}\.avif$/;
     const validCover = supplied.hostname === "atn.gold-usergeneratedcontent.net" && coverPath.test(supplied.pathname);
-    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href);
-    const response = await hitRequest(url.href, { binary: true, accept: "image/avif,image/webp,image/gif,image/jpeg,image/png" });
+    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href, http);
+    const response = await hitRequest(url.href, { http, binary: true, imageResource: true, accept: "image/avif,image/webp,image/gif,image/jpeg,image/png" });
     const mimeType = String(response.mimeType || hitHeader(response.headers, "content-type")).split(";", 1)[0].trim().toLowerCase();
     if (!/^image\/(?:avif|webp|gif|jpeg|png)$/.test(mimeType)) throw hitError("InvalidResponseError", "Hitomi.la image response has an unsupported MIME type", "invalidResponse", url.href);
-    return { dataBase64: response.dataBase64, mimeType };
+    return response.resourceID ? { resourceID: response.resourceID, mimeType } : { dataBase64: response.dataBase64, mimeType };
   },
 
   async updates() {

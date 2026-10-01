@@ -9,7 +9,7 @@ import { MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse } from "../..
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 const manifest = JSON.parse(await readFile(resolve(dirname(mainPath), "extension.json"), "utf8"));
-const expectedUserAgent = "manko NHentai Extension/0.3.4 (+https://github.com/k800k/extensions)";
+const expectedUserAgent = "manko NHentai Extension/0.3.5 (+https://github.com/k800k/extensions)";
 const listGallery = {
   id: 101,
   media_id: "9001",
@@ -270,4 +270,59 @@ test("every NHentai filter preserves canonical query syntax, sort and pagination
   }
  }
  await assert.rejects(loaded.extension.search({selections:[{fieldID:"pages",value:"-2",polarity:"include"}]}),/whole number/);
+});
+
+
+test("NHentai coalesces chapter metadata, reuses full search payloads, and clears on refresh", async () => {
+  const loaded = await loadContentExtension(mainPath, request => {
+    if (new URL(request.url).pathname.endsWith("/search")) return jsonResponse(request, { result: [detailGallery], num_pages: 1 });
+    return jsonResponse(request, detailGallery);
+  });
+  await loaded.extension.search({ query: "sample" });
+  await loaded.extension.details("101");
+  assert.equal(loaded.calls.length, 1, "complete search metadata should prepare the chapter without another request");
+  await loaded.extension.invalidateCache();
+  await Promise.all([loaded.extension.details("101"), loaded.extension.details("101")]);
+  assert.equal(loaded.calls.length, 2, "concurrent details must share one request");
+});
+
+test("NHentai passes native resource references through without copying image bytes", async () => {
+  const loaded = await loadContentExtension(mainPath, () => { throw new Error("unexpected legacy request"); });
+  const result = await loaded.extension.imagePageContent({
+    url: "https://i.nhentai.net/galleries/9001/1.jpg",
+    http: { imageResource: async request => {
+      assert.equal(request.headers.Referer, "https://nhentai.net/");
+      assert.equal(request.headers["User-Agent"], expectedUserAgent);
+      return { status: 200, resourceID: "owned-image", mimeType: "image/jpeg", headers: {} };
+    } }
+  });
+  assert.equal(result.resourceID, "owned-image");
+  assert.equal(result.dataBase64, undefined);
+});
+
+
+test("NHentai expires chapter metadata after five minutes and does not revive cache entries after refresh", async () => {
+  let now = 0;
+  let release;
+  let block = false;
+  const loaded = await loadContentExtension(mainPath, async request => {
+    if (block) await new Promise(resolve => { release = resolve; });
+    return jsonResponse(request, detailGallery);
+  }, { globals: { Date: class extends Date { static now() { return now; } } } });
+  await loaded.extension.details("101");
+  await loaded.extension.installments({ workId: "101" });
+  assert.equal(loaded.calls.length, 1);
+  now = 300001;
+  await loaded.extension.details("101");
+  assert.equal(loaded.calls.length, 2);
+  await loaded.extension.invalidateCache();
+  block = true;
+  const pending = loaded.extension.details("101");
+  await Promise.resolve();
+  await loaded.extension.invalidateCache();
+  block = false;
+  release();
+  await pending;
+  await loaded.extension.details("101");
+  assert.equal(loaded.calls.length, 4);
 });

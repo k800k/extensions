@@ -31,10 +31,18 @@ function nhSearchConfiguration() {
 defineContentExtension({
   id: "NHentai",
   apiVersion: "1.0",
+  imageRequestMode: "independent",
 
   initialize(context) {
     nhRuntime = context || globalThis.manko?.context;
     nhContext();
+  },
+
+  invalidateCache() {
+    nhGalleryGeneration++;
+    nhGalleryCache.clear();
+    nhGalleryFlights.clear();
+    nhGalleryCacheBytes = 0;
   },
 
   settings() {
@@ -131,8 +139,9 @@ defineContentExtension({
   },
 
   async imagePageContent(input) {
+    const http = input?.http || nhContext().http;
     const url = nhValidatedURL(String(input?.url || input?.pageURL || ""), NH_MEDIA_HOSTS);
-    const response = await nhRequest(url.href, { binary: true, accept: "image/avif,image/webp,image/png,image/jpeg,image/gif" });
+    const response = await nhRequest(url.href, { http, binary: true, accept: "image/avif,image/webp,image/png,image/jpeg,image/gif" });
     const mimeType = String(response.mimeType || nhHeader(response.headers, "content-type"))
       .split(";", 1)[0]
       .trim()
@@ -140,7 +149,7 @@ defineContentExtension({
     if (!/^image\/(?:jpeg|png|gif|webp|avif)$/.test(mimeType)) {
       throw nhError("InvalidResponseError", "nHentai page response is not an image", "invalidResponse", url.href);
     }
-    return { dataBase64: response.dataBase64, mimeType };
+    return response.resourceID ? { resourceID: response.resourceID, mimeType } : { dataBase64: response.dataBase64, mimeType };
   },
 
   async updates() {

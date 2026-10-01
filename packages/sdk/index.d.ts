@@ -19,6 +19,8 @@ export type SearchFacetPresentation = "creator" | "tag" | "metadata";
 export interface SearchFacet { fieldID: string; value: string; title: string; groupTitle?: string; presentation: SearchFacetPresentation; }
 export interface HTTPRequest { url: string; method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "HEAD"; headers?: Record<string, string>; cookies?: Record<string, string>; body?: JSONValue | string | ArrayBuffer; }
 export interface HTTPResponse { url: string; status: number; headers: Record<string, string>; mimeType?: string; cookies: unknown[]; dataBase64: string; }
+export interface ImageResourceResponse extends Omit<HTTPResponse, "dataBase64"> { resourceID?: string; dataBase64?: string; }
+export interface ImageHTTP { request(request: HTTPRequest): Promise<HTTPResponse>; imageResource?(request: HTTPRequest): Promise<ImageResourceResponse>; }
 export interface HTTPInterceptor { request?(request: HTTPRequest): HTTPRequest | Promise<HTTPRequest>; response?(request: HTTPRequest, response: HTTPResponse): void | Promise<void>; }
 export interface KeyValueState { get(key: string): JSONValue | undefined; set(key: string, value: JSONValue): void; remove(key: string): void; }
 export interface WebExecutionRequest {
@@ -34,7 +36,7 @@ export interface WebExecutionRequest {
 }
 export interface WebExecutionResult { result: JSONValue; cookies?: JSONValue[]; }
 export interface RuntimeContext {
-  http: { request(request: HTTPRequest): Promise<HTTPResponse>; registerInterceptor(interceptor: HTTPInterceptor): void };
+  http: { imageResource?(request: HTTPRequest): Promise<ImageResourceResponse>; request(request: HTTPRequest): Promise<HTTPResponse>; registerInterceptor(interceptor: HTTPInterceptor): void };
   cookies: { getAll(): JSONValue[]; setAll(cookies: JSONValue[]): void };
   state: KeyValueState & { reset(): void };
   secureState: KeyValueState;
@@ -53,6 +55,8 @@ export interface ContentExtension {
   searchFilters?(): SearchConfiguration | JSONValue | Promise<SearchConfiguration | JSONValue>; searchSuggestions?(input: SearchSuggestionRequest): Promise<SearchSuggestion[]>;
   search(input: ContentSearchInput): Promise<CursorPage<JSONValue>>; details(id: string): Promise<JSONValue>;
   installments(work: JSONValue): Promise<JSONValue[]>; imagePages(installment: JSONValue): Promise<JSONValue>;
+  imageRequestMode?: "independent";
+  invalidateCache?(): void | Promise<void>;
   imagePageContent?(input: JSONValue): Promise<JSONValue>; updates?(input: JSONValue): Promise<JSONValue>;
   publicationContent?(installment: JSONValue): Promise<JSONValue>;
   managedCollections?(input: JSONValue): Promise<JSONValue>; synchronizeManagedCollection?(collection: JSONValue): Promise<void>;
