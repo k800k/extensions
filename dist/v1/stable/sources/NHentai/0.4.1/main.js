@@ -187,7 +187,7 @@ const NH_IMAGE_HOSTS = new Set(["i.nhentai.net"]);
 const NH_THUMB_HOSTS = new Set(["t.nhentai.net"]);
 const NH_MEDIA_HOSTS = new Set([...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
 const NH_HOSTS = new Set(["nhentai.net", ...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
-const NH_USER_AGENT = "manko NHentai Extension/0.4.0 (+https://github.com/k800k/extensions)";
+const NH_USER_AGENT = "manko NHentai Extension/0.4.1 (+https://github.com/k800k/extensions)";
 const NH_SUGGESTION_FIELDS = new Set(["tag", "artist", "parody", "character", "group", "language", "category"]);
 let nhRuntime;
 const nhKnownSearchValues = new Map();
@@ -596,7 +596,8 @@ function nhSearchConfiguration() {
         { id: "popular-week", title: "Popular This Week" },
         { id: "popular", title: "Popular All Time" }
       ],
-      defaultSortID: "date"
+      defaultSortID: "date",
+      sortedBrowseSectionID: "latest"
     };
 }
 
@@ -670,9 +671,8 @@ defineContentExtension({
       const gallery = await nhGallery(query);
       return { items: [nhCard(gallery, gallery?.cover ?? gallery?.thumbnail)], metadata: null };
     }
-    const endpoint = query || sort !== "date"
-      ? `${NH_API}/search?query=${encodeURIComponent(query)}&sort=${encodeURIComponent(sort)}&page=${page}`
-      : `${NH_API}/galleries?page=${page}`;
+    // The search API rejects an empty query; whitespace means the full catalog.
+    const endpoint = `${NH_API}/search?query=${encodeURIComponent(query || " ")}&sort=${encodeURIComponent(sort)}&page=${page}`;
     const payload = await nhJSON(endpoint);
     return nhListPayload(payload, page);
   },

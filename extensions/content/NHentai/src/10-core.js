@@ -6,7 +6,7 @@ const NH_IMAGE_HOSTS = new Set(["i.nhentai.net"]);
 const NH_THUMB_HOSTS = new Set(["t.nhentai.net"]);
 const NH_MEDIA_HOSTS = new Set([...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
 const NH_HOSTS = new Set(["nhentai.net", ...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
-const NH_USER_AGENT = "manko NHentai Extension/0.4.0 (+https://github.com/k800k/extensions)";
+const NH_USER_AGENT = "manko NHentai Extension/0.4.1 (+https://github.com/k800k/extensions)";
 const NH_SUGGESTION_FIELDS = new Set(["tag", "artist", "parody", "character", "group", "language", "category"]);
 let nhRuntime;
 const nhKnownSearchValues = new Map();

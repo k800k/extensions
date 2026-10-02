@@ -257,7 +257,7 @@
       "id": "HitomiLA",
       "name": "Hitomi.la",
       "description": "Anonymous multi-language discovery, search, gallery details, and AVIF/WebP page reading for hitomi.la.",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "icon": "icons/HitomiLA.svg",
       "languages": [
         "en",
@@ -315,9 +315,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/HitomiLA/0.3.1/main.js",
-        "sha256": "b347c8af0889d3624fb4cf4b39ebcd6c2f286ab58fd4d9f9085ca5a463862524",
-        "size": 57000,
+        "scriptURL": "sources/HitomiLA/0.3.2/main.js",
+        "sha256": "20cc38076bec803c253b4b03df06b1a9a0d20c3386358f235af71499e314817e",
+        "size": 57054,
         "allowedHTTPSHosts": [
           "hitomi.la",
           "ltn.gold-usergeneratedcontent.net",
@@ -930,7 +930,7 @@
       "id": "NHentai",
       "name": "nHentai",
       "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "icon": "icons/NHentai.svg",
       "languages": [
         "multi",
@@ -981,9 +981,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/NHentai/0.4.0/main.js",
-        "sha256": "6ec0526a36f844107974c61359f12d104943a42d3c96251983c7c0062e710727",
-        "size": 34147,
+        "scriptURL": "sources/NHentai/0.4.1/main.js",
+        "sha256": "aae323784fd321a6adee36deb5b956979ebe5cfda4505c85a48e55768aaf4101",
+        "size": 34198,
         "allowedHTTPSHosts": [
           "nhentai.net",
           "i.nhentai.net",

@@ -24,7 +24,8 @@ function nhSearchConfiguration() {
         { id: "popular-week", title: "Popular This Week" },
         { id: "popular", title: "Popular All Time" }
       ],
-      defaultSortID: "date"
+      defaultSortID: "date",
+      sortedBrowseSectionID: "latest"
     };
 }
 
@@ -98,9 +99,8 @@ defineContentExtension({
       const gallery = await nhGallery(query);
       return { items: [nhCard(gallery, gallery?.cover ?? gallery?.thumbnail)], metadata: null };
     }
-    const endpoint = query || sort !== "date"
-      ? `${NH_API}/search?query=${encodeURIComponent(query)}&sort=${encodeURIComponent(sort)}&page=${page}`
-      : `${NH_API}/galleries?page=${page}`;
+    // The search API rejects an empty query; whitespace means the full catalog.
+    const endpoint = `${NH_API}/search?query=${encodeURIComponent(query || " ")}&sort=${encodeURIComponent(sort)}&page=${page}`;
     const payload = await nhJSON(endpoint);
     return nhListPayload(payload, page);
   },

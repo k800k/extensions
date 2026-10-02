@@ -226,6 +226,35 @@ test("HitomiLA random catalog pagination works without filters or a host cache",
   }
 });
 
+test("HitomiLA accepts decoded complete catalogs when the HTTP transport retains gzip headers", async () => {
+  for (const sort of [...sortIndexes.map(([id]) => id), "random"]) {
+    for (const method of ["discover", "search"]) {
+      const loaded = await loadContentExtension(mainPath, request => {
+        const path = new URL(request.url).pathname;
+        if (path.endsWith(".nozomi")) {
+          assert.equal(request.headers.Range, undefined);
+          return runtimeResponse({
+            url: request.url, mimeType: "application/x-nozomi",
+            headers: { "Content-Encoding": "gzip", "Content-Length": "37" },
+            bytes: nozomi(catalogIDs)
+          });
+        }
+        const match = /^\/galleries\/(\d+)\.js$/.exec(path);
+        if (match) return runtimeResponse({ url: request.url, text: galleryAssignment(Number(match[1])) });
+        throw new Error(`Unexpected request ${request.url}`);
+      }, { cache: metadataCacheFixture() });
+      const input = { sectionId: "latest", sort };
+      const first = await loaded.extension[method](input);
+      const second = await loaded.extension[method]({ ...input, metadata: first.metadata });
+      assert.equal(first.items.length, 25, `${method}.${sort}`);
+      assert.equal(second.items.length, 25);
+      assert.equal(loaded.calls.filter(call => call.url.endsWith(".nozomi")).length, 1);
+      const ids = Array.from([...first.items, ...second.items], item => item.workId);
+      assert.equal(new Set(ids).size, 50);
+    }
+  }
+});
+
 test("HitomiLA decodes ranged Nozomi IDs, limits metadata concurrency, and caches routing", async () => {
   let active = 0;
   let maximum = 0;

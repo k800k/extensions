@@ -9,7 +9,7 @@ import { MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse, metadataCach
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 const manifest = JSON.parse(await readFile(resolve(dirname(mainPath), "extension.json"), "utf8"));
-const expectedUserAgent = "manko NHentai Extension/0.4.0 (+https://github.com/k800k/extensions)";
+const expectedUserAgent = "manko NHentai Extension/0.4.1 (+https://github.com/k800k/extensions)";
 const listGallery = {
   id: 101,
   media_id: "9001",
@@ -167,6 +167,76 @@ test("NHentai composes structured selections and forwards sort", async () => {
       { fieldID: "tag", value: "blocked", title: "blocked", polarity: "exclude" }
     ]
   });
+});
+
+test("NHentai keeps its homepage and opts into a catalog only after sorting", async () => {
+  const loaded = await loadContentExtension(mainPath, request => {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/v2/galleries/popular") return jsonResponse(request, [listGallery]);
+    assert.equal(url.pathname, "/api/v2/galleries");
+    assert.equal(url.searchParams.get("page"), "1");
+    return jsonResponse(request, { result: [listGallery], num_pages: 2 });
+  });
+  const configuration = loaded.extension.searchFilters();
+  assert.equal(configuration.sortedBrowseSectionID, "latest");
+  assert.equal(configuration.defaultSortID, "date");
+  assert.deepEqual(Array.from(configuration.sortOptions, option => option.id), ["date", "popular-today", "popular-week", "popular"]);
+  assert.deepEqual(Array.from(loaded.extension.discoverSections(), section => [section.id, section.title, section.type]), [
+    ["latest", "Latest", 0], ["popular", "Popular Today", 0]
+  ]);
+  await loaded.extension.discover({ sectionId: "latest" });
+  await loaded.extension.discover({ sectionId: "popular" });
+  assert.equal(loaded.calls.length, 2);
+});
+
+test("NHentai all four catalog orders preserve ranking, filters and page cursors", async () => {
+  const orders = { date: [303, 301, 302], "popular-today": [302, 303, 301], "popular-week": [301, 303, 302], popular: [302, 301, 303] };
+  const loaded = await loadContentExtension(mainPath, request => {
+    const url = new URL(request.url);
+    assert.equal(url.pathname, "/api/v2/search");
+    // Reproduce the live API's rejection instead of accepting empty test queries.
+    if (url.searchParams.get("query") === "") return jsonResponse(request, { error: "query is required" }, 400);
+    const page = Number(url.searchParams.get("page"));
+    const ids = orders[url.searchParams.get("sort")].map(id => id + (page - 1) * 10);
+    return jsonResponse(request, { result: ids.map(id => ({ ...listGallery, id })), num_pages: 2 });
+  });
+  const contexts = [
+    { query: "", expected: " " },
+    { query: "   ", expected: " " },
+    { selections: [{ fieldID: "language", value: "english", polarity: "include" }], expected: "language:english" },
+    { query: "landscape", selections: [{ fieldID: "tag", value: "scenery", polarity: "include" }, { fieldID: "artist", value: "Sample Creator", polarity: "exclude" }], expected: 'landscape tag:scenery -artist:"Sample Creator"' }
+  ];
+  for (const [sort, ids] of Object.entries(orders)) {
+    for (const { expected, ...context } of contexts) {
+      for (const method of ["discover", "search"]) {
+        const first = await loaded.extension[method]({ sectionId: "latest", sort, ...context });
+        assert.equal(new URL(loaded.calls.at(-1).url).searchParams.get("query"), expected);
+        assert.deepEqual(Array.from(first.items, item => item.workId), ids.map(String));
+        assert.equal(first.metadata.page, 2);
+        const second = await loaded.extension[method]({ sectionId: "latest", sort, ...context, cursor: first.metadata });
+        assert.equal(new URL(loaded.calls.at(-1).url).searchParams.get("page"), "2");
+        assert.deepEqual(Array.from(second.items, item => item.workId), ids.map(id => String(id + 10)));
+        assert.equal(second.metadata, null);
+      }
+    }
+  }
+});
+
+test("NHentai empty sorted rankings finish without falling back to newest", async () => {
+  const loaded = await loadContentExtension(mainPath, request => {
+    const url = new URL(request.url);
+    assert.equal(url.pathname, "/api/v2/search");
+    assert.equal(url.searchParams.get("query"), " ");
+    return jsonResponse(request, { result: [], num_pages: 0 });
+  });
+  for (const sort of ["date", "popular-today", "popular-week", "popular"]) {
+    for (const method of ["discover", "search"]) {
+      const page = await loaded.extension[method]({ sectionId: "latest", sort });
+      assert.deepEqual(Array.from(page.items), []);
+      assert.equal(page.metadata, null);
+    }
+  }
+  assert.equal(loaded.calls.length, 8);
 });
 
 test("NHentai uses the unpaged v2 popular endpoint", async () => {

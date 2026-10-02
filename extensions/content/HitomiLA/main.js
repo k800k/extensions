@@ -437,8 +437,9 @@ async function hitNozomiAll(state) {
     const response = await hitRequest(url, { binary: true, missingOK: true });
     if (!response) return [];
     const type = String(response.mimeType || hitHeader(response.headers, "content-type")).split(";", 1)[0].trim().toLowerCase();
-    const encoding = hitHeader(response.headers, "content-encoding").trim().toLowerCase();
-    if (response.status !== 200 || (type && !["application/x-nozomi", "application/octet-stream"].includes(type)) || (encoding && encoding !== "identity")) {
+    // The HTTP transport decodes complete responses while retaining wire headers.
+    // Encoding must only be identity for byte ranges, where offsets refer to the wire representation.
+    if (response.status !== 200 || (type && !["application/x-nozomi", "application/octet-stream"].includes(type))) {
       throw hitError("InvalidResponseError", "Hitomi.la returned an invalid complete Nozomi representation", "invalidResponse");
     }
     return hitDecodeNozomi(hitBytes(response.dataBase64));
