@@ -31,12 +31,12 @@
     },
     {
       "file": "scripts/source-owned-runtime/15-search.js",
-      "sha256": "d6c755df25f262c84d39e8034f8eae62053adb50d45ebc8a1b5704c5840aee5b"
+      "sha256": "3c3a30507d0da1dc18295cf1dfe706ac302aad50e57d4162571bd1cfb25fdd46"
     },
     {
       "file": "extensions/content/MangaBat/src/20-extension.js",
       "sha256": "c3e330889080060b7d4aa6632c6b2675a825056e44947b1a338f2170ef80cef5"
     }
   ],
-  "generatedMainSHA256": "43662a50363802868b12b033e9287e5d1e4f65f24b5aa467a3e0a4e26ebea660"
+  "generatedMainSHA256": "bbd39de310556183db9cd0abea6e4bb3e804f23bfa9bcf98e7a9d0d5c25f7ffe"
 }

@@ -14,8 +14,13 @@ function hitSearchConfiguration() {
         { id: "type", title: "Type", queryPrefix: "type:", placeholder: "Filter by gallery type", supportsExclusion: true, inputKind: "lookup", options: [] }
       ],
       sortOptions: [
-        { id: "newest", title: "Newest" },
-        { id: "popular-week", title: "Popular This Week" }
+        { id: "newest", title: "Newest (Date Added)" },
+        { id: "date-published", title: "Date Published" },
+        { id: "popular-today", title: "Popular Today" },
+        { id: "popular-week", title: "Popular This Week" },
+        { id: "popular-month", title: "Popular This Month" },
+        { id: "popular-year", title: "Popular This Year" },
+        { id: "random", title: "Random" }
       ],
       defaultSortID: "newest"
     };
@@ -24,6 +29,7 @@ function hitSearchConfiguration() {
 defineContentExtension({
   id: "HitomiLA",
   apiVersion: "1.0",
+  cachePolicy: "metadata",
   imageRequestMode: "independent",
 
   initialize(context) {
@@ -33,6 +39,7 @@ defineContentExtension({
 
   invalidateCache() {
     hitGalleryGeneration++;
+    hitMetadataCache.clear();
     hitGalleryCache.clear();
     hitGalleryFlights.clear();
     hitGalleryCacheBytes = 0;
@@ -47,23 +54,15 @@ defineContentExtension({
 
   discoverSections() {
     return [
-      { id: "latest", title: "Latest (English)", type: 0 },
-      { id: "popular", title: "Popular This Week (English)", type: 0 }
+      { id: "latest", title: "Catalog (English)", type: 3 }
     ];
   },
 
   async discover(input) {
     mrValidateSearchSelections(hitSearchConfiguration(), input?.selections, input?.sort);
-    const page = hitPage(input);
     const section = input?.sectionId || input?.section?.id || "latest";
     if (section !== "latest" && section !== "popular") throw hitError("InvalidSectionError", "Unknown Hitomi.la discovery section");
-    const composed = hitComposedQuery(input);
-    if (composed) {
-      return this.search({ ...input, query: composed, selections: [], sort: input?.sort || (section === "popular" ? "popular-week" : "newest") });
-    }
-    const state = (input?.sort || (section === "popular" ? "popular-week" : "newest")) === "popular-week" ? { language: "english", popular: "week" } : { language: "english", area: "all" };
-    const result = await hitNozomiRange(state, page);
-    return { items: await hitCards(result.ids), metadata: result.hasNext ? { page: page + 1 } : null };
+    return this.search({ ...input, sort: input?.sort || (section === "popular" ? "popular-week" : "newest") });
   },
 
   searchFilters: hitSearchConfiguration,
@@ -80,15 +79,20 @@ defineContentExtension({
       return { items: await hitCards([Number(hitPositiveInteger(raw))]), metadata: null };
     }
     const query = hitQuery({ query: raw });
-    if (!query.positive.length && !query.negative.length) {
-      const state = hitSort(input) === "popular-week" ? {language:query.language,popular:"week"} : {language:query.language,area:"all"};
-      const result = await hitNozomiRange(state, page);
+    const sort = hitSort(input);
+    if (sort !== "random" && !query.positive.length && !query.negative.length) {
+      const result = await hitNozomiRange(hitSortState(query.language, sort), page);
       return { items: await hitCards(result.ids), metadata: result.hasNext ? { page: page + 1 } : null };
     }
-    const ids = await hitSortedSearchIDs(query, hitSort(input));
+    const randomSeed = sort === "random" ? hitRandomSeed(input, page) : undefined;
+    const ordered = await hitSortedSearchIDs(query, sort);
+    const ids = sort === "random" ? hitShuffledIDs(ordered, randomSeed) : ordered;
     const start = (page - 1) * HIT_PAGE_SIZE;
     const selected = ids.slice(start, start + HIT_PAGE_SIZE);
-    return { items: await hitCards(selected), metadata: start + HIT_PAGE_SIZE < ids.length ? { page: page + 1 } : null };
+    return {
+      items: await hitCards(selected),
+      metadata: start + HIT_PAGE_SIZE < ids.length ? { page: page + 1, ...(sort === "random" ? { randomSeed } : {}) } : null
+    };
   },
 
   async details(id) {
@@ -122,7 +126,7 @@ defineContentExtension({
     const supplied = hitParsedURL(String(input?.url || input?.pageURL || ""));
     const coverPath = /^\/avifbigtn\/[0-9a-f]\/[0-9a-f]{2}\/[0-9a-f]{64}\.avif$/;
     const validCover = supplied.hostname === "atn.gold-usergeneratedcontent.net" && coverPath.test(supplied.pathname);
-    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href, http);
+    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href, http, input?.cache);
     const response = await hitRequest(url.href, { http, binary: true, imageResource: true, accept: "image/avif,image/webp,image/gif,image/jpeg,image/png" });
     const mimeType = String(response.mimeType || hitHeader(response.headers, "content-type")).split(";", 1)[0].trim().toLowerCase();
     if (!/^image\/(?:avif|webp|gif|jpeg|png)$/.test(mimeType)) throw hitError("InvalidResponseError", "Hitomi.la image response has an unsupported MIME type", "invalidResponse", url.href);

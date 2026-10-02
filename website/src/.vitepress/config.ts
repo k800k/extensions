@@ -18,7 +18,7 @@ export default defineConfig({
     hostname: "https://k800k.github.io/extensions/",
   },
   head: [
-    ["meta", { name: "theme-color", content: "#0b6e75" }],
+    ["meta", { name: "theme-color", content: "#ff9500" }],
     ["meta", { name: "color-scheme", content: "light dark" }],
     ["meta", { name: "referrer", content: "no-referrer-when-downgrade" }],
   ],

@@ -25,15 +25,15 @@ No. Adding a repository makes its catalog visible to manko. You still choose eac
 ## Installation and repositories
 
 ::: details What is a compatible custom catalog?
-For manko installation, it is an HTTPS directory containing `versioning.json`, or the full URL to that file. The website's optional catalog browser also accepts `catalog.json`. Each source must have a unique ID and be a content or tracker extension; theme entries are rejected.
+For manko installation, it is an HTTPS directory containing `versioning.json`, or the full URL to that file. Each source must have a unique ID and be a content or tracker extension; theme entries are rejected. Add other publishers' repositories directly in Manko.
 :::
 
 ::: details Where are custom catalogs stored?
-Only in local storage for the current browser profile. There is no website account or cross-device synchronization.
+Repositories are managed inside Manko. The website displays this repository's catalog without an account or saved selections.
 :::
 
 ::: details Why will a custom catalog not load?
-Common causes are a missing `catalog.json`, invalid JSON, duplicate source IDs, an unsupported extension kind, an HTTP error, or a server that does not allow cross-origin browser access.
+For repositories added in Manko, check the repository address and its `versioning.json`. If this website cannot load its catalog, choose **Try Again**. Invalid metadata or an HTTP error disables the website's installation actions until the catalog loads successfully.
 :::
 
 ## Support

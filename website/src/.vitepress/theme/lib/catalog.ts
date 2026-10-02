@@ -263,9 +263,13 @@ export function buildAddRepositoryLink(repositoryURL: string): string {
 export function buildInstallLink(repositoryURL: string, sourceIDs: Iterable<string>): string {
   const ids = [...new Set(sourceIDs)].filter(Boolean);
   if (ids.length === 0) throw new RangeError("Choose at least one extension.");
+  if (ids.length > 100) throw new RangeError("Choose at most 100 extensions.");
   const link = new URL("install", MANKO_REPOSITORY_URL);
   link.searchParams.set("url", normalizeRepositoryURL(repositoryURL));
   ids.forEach((id) => link.searchParams.append("source", id));
+  if (new TextEncoder().encode(link.href).length > 8192) {
+    throw new RangeError("This selection exceeds Manko's 8 KiB link limit.");
+  }
   return link.href;
 }
 

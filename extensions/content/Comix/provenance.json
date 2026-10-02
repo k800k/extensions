@@ -26,12 +26,12 @@
     },
     {
       "file": "scripts/source-owned-runtime/15-search.js",
-      "sha256": "d6c755df25f262c84d39e8034f8eae62053adb50d45ebc8a1b5704c5840aee5b"
+      "sha256": "3c3a30507d0da1dc18295cf1dfe706ac302aad50e57d4162571bd1cfb25fdd46"
     },
     {
       "file": "extensions/content/Comix/src/20-extension.js",
       "sha256": "53f8d77ef06c69374d037bf3aa7eb4967fca34aa2bfef33691b4ce4e9a65ae09"
     }
   ],
-  "generatedMainSHA256": "0f2f6208be0e5f5fc2c5d500248de750e28892b8744ef5f24d03610dc4e0df21"
+  "generatedMainSHA256": "2c90f4367603b41072674340f6e4a9e15271cb728636de9e87cf82823239f59b"
 }

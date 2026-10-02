@@ -6,7 +6,7 @@ const NH_IMAGE_HOSTS = new Set(["i.nhentai.net"]);
 const NH_THUMB_HOSTS = new Set(["t.nhentai.net"]);
 const NH_MEDIA_HOSTS = new Set([...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
 const NH_HOSTS = new Set(["nhentai.net", ...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
-const NH_USER_AGENT = "manko NHentai Extension/0.3.5 (+https://github.com/k800k/extensions)";
+const NH_USER_AGENT = "manko NHentai Extension/0.4.0 (+https://github.com/k800k/extensions)";
 const NH_SUGGESTION_FIELDS = new Set(["tag", "artist", "parody", "character", "group", "language", "category"]);
 let nhRuntime;
 const nhKnownSearchValues = new Map();
@@ -14,7 +14,8 @@ const nhGalleryCache = new Map();
 const nhGalleryFlights = new Map();
 let nhGalleryCacheBytes = 0;
 let nhGalleryGeneration = 0;
-const NH_GALLERY_CACHE_TTL_MS = 5 * 60 * 1000;
+const NH_GALLERY_CACHE_TTL_MS = 30 * 60 * 1000;
+const nhMetadataCache = mrCreateMetadataCache(nhContext);
 const NH_GALLERY_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 const NH_GALLERY_CACHE_MAX_ENTRIES = 100;
 
@@ -212,7 +213,7 @@ const nhSuggestionLookup = mrCreateSuggestionLookup(async (fieldID, query) => {
       fieldID:String(item.type).toLowerCase(), value:item.name.trim(), title:item.name.trim(),
       subtitle:Number(item.count) > 0 ? `${Math.floor(Number(item.count))} galleries` : undefined
     }));
-});
+}, nhMetadataCache);
 
 async function nhSuggestions(input) {
   const observed = nhObservedSuggestions(input?.fieldID, input?.query);
@@ -280,7 +281,7 @@ function nhTitles(gallery) {
 }
 
 function nhCard(gallery, preferredImage, remember = true) {
-  if (remember) nhRememberGallery(gallery);
+  if (remember && Array.isArray(gallery?.pages) && gallery.pages.length) { nhValidateGallery(gallery, nhPositiveInteger(gallery.id)); nhRememberGallery(gallery); }
   const id = nhPositiveInteger(gallery?.id);
   const mediaID = nhPositiveInteger(gallery?.media_id, "media id");
   const titles = nhTitles(gallery);
@@ -355,31 +356,33 @@ function nhWork(gallery) {
   };
 }
 
-function nhListPayload(payload, page) {
+async function nhListPayload(payload, page) {
   if (!payload || !Array.isArray(payload.result) || !Number.isInteger(payload.num_pages) || payload.num_pages < 0) {
     throw nhError("InvalidResponseError", "nHentai gallery list is malformed", "invalidResponse");
   }
+  await Promise.all(payload.result.map(nhSeedGallery));
   return {
     items: payload.result.map(gallery => nhCard(gallery)),
     metadata: page < payload.num_pages ? { page: page + 1 } : null
   };
 }
 
+function nhValidateGallery(gallery, id) {
+  if (nhPositiveInteger(gallery?.id) !== id) throw nhError("InvalidResponseError", "Gallery identifier does not match the request", "invalidResponse");
+  nhWork(gallery);
+  gallery.pages.forEach(page => nhMediaURL(page.path, false));
+}
+async function nhSeedGallery(gallery) {
+  if (!Array.isArray(gallery?.pages) || !gallery.pages.length) return;
+  const id = nhPositiveInteger(gallery.id);
+  // Complete list/search payloads are validated before becoming detail data.
+  nhValidateGallery(gallery, id);
+  await nhMetadataCache.remember(["gallery", id], 1800, async () => gallery, value => nhValidateGallery(value, id));
+}
 async function nhGallery(id) {
   const galleryID = nhPositiveInteger(id);
-  const cached = nhGalleryCache.get(galleryID);
-  if (cached && Date.now() - cached.loadedAt < NH_GALLERY_CACHE_TTL_MS) return cached.gallery;
-  if (nhGalleryFlights.has(galleryID)) return nhGalleryFlights.get(galleryID);
-  const generation = nhGalleryGeneration;
-  const flight = nhJSON(`${NH_API}/galleries/${galleryID}`).then(gallery => {
-    if (nhPositiveInteger(gallery?.id) !== galleryID) throw nhError("InvalidResponseError", "Gallery identifier does not match the request", "invalidResponse");
-    nhWork(gallery);
-    if (generation === nhGalleryGeneration) nhRememberGallery(gallery);
-    return gallery;
-  });
-  nhGalleryFlights.set(galleryID, flight);
-  try { return await flight; }
-  finally { if (nhGalleryFlights.get(galleryID) === flight) nhGalleryFlights.delete(galleryID); }
+  return nhMetadataCache.remember(["gallery", galleryID], 1800,
+    () => nhJSON(`${NH_API}/galleries/${galleryID}`), value => nhValidateGallery(value, galleryID));
 }
 
 async function nhWorkForID(id) {

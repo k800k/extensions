@@ -31,6 +31,7 @@ function nhSearchConfiguration() {
 defineContentExtension({
   id: "NHentai",
   apiVersion: "1.0",
+  cachePolicy: "metadata",
   imageRequestMode: "independent",
 
   initialize(context) {
@@ -40,6 +41,7 @@ defineContentExtension({
 
   invalidateCache() {
     nhGalleryGeneration++;
+    nhMetadataCache.clear();
     nhGalleryCache.clear();
     nhGalleryFlights.clear();
     nhGalleryCacheBytes = 0;
@@ -74,6 +76,7 @@ defineContentExtension({
       if (page > 1) return { items: [], metadata: null };
       const payload = await nhJSON(`${NH_API}/galleries/popular`);
       if (!Array.isArray(payload)) throw nhError("InvalidResponseError", "nHentai popular galleries are malformed", "invalidResponse");
+      await Promise.all(payload.map(nhSeedGallery));
       return { items: payload.map(gallery => nhCard(gallery)), metadata: null };
     }
     const payload = await nhJSON(`${NH_API}/galleries?page=${page}`);

@@ -9,14 +9,61 @@
 
 /* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
+// Resource keys live inside the host's repository/version/config/account partition.
+// Old hosts use one bounded, disposable memory cache instead.
+function mrCreateMetadataCache(getContext) {
+  const memory = new Map(), flights = new Map();
+  let bytes = 0, generation = 0;
+  const clone = value => JSON.parse(JSON.stringify(value));
+  function drop(key) { bytes -= memory.get(key)?.bytes || 0; memory.delete(key); }
+  async function remember(key, ttlSeconds, loader, validate, cacheOverride) {
+    const resource = JSON.stringify(key);
+    const checkedLoad = async () => {
+      const value = await loader();
+      validate(value);
+      return clone(value);
+    };
+    const host = cacheOverride || getContext().cache;
+    if (typeof host?.remember === "function") {
+      let value = await host.remember(resource, { ttlSeconds }, checkedLoad);
+      try { validate(value); } catch (_) {
+        await host.remove(resource);
+        value = await host.remember(resource, { ttlSeconds }, checkedLoad);
+        validate(value);
+      }
+      return value;
+    }
+    const saved = memory.get(resource);
+    if (saved && (ttlSeconds === null || Date.now() - saved.time < ttlSeconds * 1000)) {
+      try { validate(saved.value); memory.delete(resource); memory.set(resource, saved); return clone(saved.value); }
+      catch (_) { drop(resource); }
+    }
+    if (flights.has(resource)) return clone(await flights.get(resource));
+    const token = generation;
+    const flight = (async () => {
+      const value = await checkedLoad(), size = new TextEncoder().encode(JSON.stringify(value)).byteLength;
+      if (token === generation && size <= 16 * 1024 * 1024) {
+        drop(resource); memory.set(resource, { value, bytes: size, time: Date.now() }); bytes += size;
+        while (memory.size > 100 || bytes > 16 * 1024 * 1024) drop(memory.keys().next().value);
+      }
+      return value;
+    })();
+    flights.set(resource, flight);
+    try { return clone(await flight); } finally { if (flights.get(resource) === flight) flights.delete(resource); }
+  }
+  return { remember, get generation() { return generation; }, clear() { generation++; memory.clear(); flights.clear(); bytes = 0; } };
+}
+
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+
 function mrSearchNormalized(value) {
   return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[_-]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function mrSearchDistance(left, right, limit) {
-  const a = Array.from(left), b = Array.from(right);
-  if (Math.abs(a.length - b.length) > limit || a.length > 100 || b.length > 100) return null;
+  const a = Array.from(left), b = Array.from(right).slice(0,Array.from(left).length+limit);
+  if (b.length < Math.max(1,a.length-limit) || a.length > 100 || b.length > 100) return null;
   let previous = Array.from({length:b.length + 1}, (_, i) => i), before = previous;
   for (let i = 1; i <= a.length; i++) {
     const current = [i];
@@ -24,9 +71,11 @@ function mrSearchDistance(left, right, limit) {
       current[j] = Math.min(current[j-1]+1, previous[j]+1, previous[j-1]+(a[i-1] === b[j-1] ? 0 : 1));
       if (i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) current[j] = Math.min(current[j], before[j-2]+1);
     }
+    if (Math.min(...current) > limit) return null;
     before = previous; previous = current;
   }
-  return previous[b.length] <= limit ? previous[b.length] : null;
+  const best = Math.min(...previous.slice(Math.max(1,a.length-limit)));
+  return best <= limit ? best : null;
 }
 
 function mrSearchScore(query, candidate) {
@@ -36,7 +85,7 @@ function mrSearchScore(query, candidate) {
   if (c.split(" ").some(word => word.startsWith(q))) return 200;
   if (c.includes(q)) return 300;
   if (q.length < 3 || q.length > 100 || /^\d+$/.test(q)) return null;
-  const distances = [c, ...c.split(" ")].map(value => mrSearchDistance(q, value, q.length < 6 ? 1 : 2)).filter(value => value !== null);
+  const distances = [c, ...c.split(" ")].map(value => mrSearchDistance(q,value,q.length < 6 ? 1 : 2)).filter(value => value !== null);
   return distances.length ? 400 + Math.min(...distances) : null;
 }
 
@@ -52,23 +101,31 @@ function mrRankSuggestions(query, candidates, limit = 30, fieldID) {
   }).sort((a,b) => a.score - b.score || a.index - b.index).slice(0,limit).map(value => value.candidate);
 }
 
-// Bounded candidate lookup: one literal request and, only when needed, two
-// broadened requests. Every suggested value still comes from the provider.
-function mrCreateSuggestionLookup(fetchCandidates) {
+// One literal lookup and at most one sequential prefix fallback. The native
+// search budget also covers the fallback; values always come from the provider.
+function mrCreateSuggestionLookup(fetchCandidates, metadataCache = null) {
   const cache = new Map(), flights = new Map();
+  let generation = metadataCache?.generation;
   async function loadCandidates(fieldID, query) {
+    const token = generation;
     const key = `${fieldID || "*"}\u0000${query}`;
     const saved = cache.get(key);
-    if (saved && Date.now() - saved.time < 300000) return saved.values;
+    if (!metadataCache && saved && Date.now() - saved.time < 300000) return saved.values;
     cache.delete(key);
     if (flights.has(key)) return flights.get(key);
     const task = (async () => {
-      const values = await fetchCandidates(fieldID, query);
+      const validate = values => {
+        if (!Array.isArray(values) || values.some(value => !value || typeof value.fieldID !== "string" || !value.fieldID || typeof value.value !== "string" || !value.value
+            || value.value.length > 256 || String(value.title ?? value.value).length > 256)) throw new Error("The source returned invalid suggestions.");
+      };
+      const values = metadataCache
+        ? await metadataCache.remember(["suggestions", fieldID, query], 300, async () => JSON.parse(JSON.stringify(await fetchCandidates(fieldID, query))), validate)
+        : await fetchCandidates(fieldID, query);
       if (!Array.isArray(values)) throw new Error("The source returned invalid suggestions.");
       if (values.some(value => !value || typeof value.fieldID !== "string" || !value.fieldID || typeof value.value !== "string"
         || !value.value || value.value.length > 256 || String(value.title ?? value.value).length > 256)) throw new Error("The source returned invalid suggestions.");
       const bounded = values.slice(0,100);
-      cache.set(key, {time:Date.now(),values:bounded});
+      if (token === generation) cache.set(key, {time:Date.now(),values:bounded});
       while (cache.size > 100) cache.delete(cache.keys().next().value);
       return bounded;
     })();
@@ -78,21 +135,23 @@ function mrCreateSuggestionLookup(fetchCandidates) {
   return async input => {
     const field = input?.fieldID || null, query = mrSearchNormalized(input?.query);
     const limit = Math.min(30,Math.max(1,Number(input?.limit) || 20));
+    if (generation !== metadataCache?.generation) {
+      generation = metadataCache?.generation; cache.clear(); flights.clear();
+    }
     if (!query) return [];
-    const direct = await loadCandidates(field,query);
     const cached = [...cache.values()].filter(value => Date.now() - value.time < 300000).flatMap(value => value.values);
+    let ranked = mrRankSuggestions(query,cached,limit,field);
+    // A known exact canonical value needs no discovery request. Prefix results
+    // are partial: they must never prove coverage for a different query.
+    if (ranked.some(value => mrSearchScore(query,value.title ?? value.value) === 0)) return ranked;
+    const direct = await loadCandidates(field,query);
     let candidates = [...direct,...cached];
-    let ranked = mrRankSuggestions(query,candidates,limit,field);
-    if (!ranked.some(value => (mrSearchScore(query,value.title ?? value.value) ?? 1000) < 400) && query.length > 3) {
-      const letters = Array.from(query);
-      const alternatives = [...new Set([letters.slice(0,3).join(""),letters.slice(-3).join("")])].filter(value => value.trim() && value !== query);
-      const results = await Promise.allSettled(alternatives.map(value => loadCandidates(field,value)));
-      candidates = candidates.concat(results.flatMap(result => result.status === "fulfilled" ? result.value : []));
+    ranked = mrRankSuggestions(query,candidates,limit,field);
+    if (!ranked.length && query.length > 3) {
+      const prefix = Array.from(query).slice(0,3).join("");
+      try { candidates.push(...await loadCandidates(field,prefix)); }
+      catch (error) { if (!ranked.length) throw error; }
       ranked = mrRankSuggestions(query,candidates,limit,field);
-      if (!ranked.length) {
-        const failure = results.find(result => result.status === "rejected");
-        if (failure) throw failure.reason;
-      }
     }
     return ranked;
   };
@@ -154,7 +213,8 @@ let hitGalleryCacheBytes = 0;
 let hitGalleryGeneration = 0;
 const HIT_GALLERY_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 const HIT_GALLERY_CACHE_MAX_ENTRIES = 100;
-const HIT_GALLERY_CACHE_TTL_MS = 5 * 60 * 1000;
+const HIT_GALLERY_CACHE_TTL_MS = 30 * 60 * 1000;
+const hitMetadataCache = mrCreateMetadataCache(hitContext);
 
 function hitContext() {
   const context = hitRuntime || globalThis.manko?.context;
@@ -311,6 +371,7 @@ function hitSegment(value, label, allowColon = false) {
 function hitNozomiURL(state) {
   const language = hitSegment(state.language, "language");
   if (state.popular) return `${HIT_STATIC}/n/popular/${hitSegment(state.popular, "popularity period")}-${language}.nozomi`;
+  if (state.datePublished) return `${HIT_STATIC}/n/date/published-${language}.nozomi`;
   if (!state.area || state.area === "all") return `${HIT_STATIC}/n/index-${language}.nozomi`;
   const area = hitSegment(state.area, "namespace");
   const tag = hitSegment(state.tag, "tag", true);
@@ -318,6 +379,10 @@ function hitNozomiURL(state) {
 }
 
 async function hitNozomiRange(state, page) {
+  if (typeof hitContext().cache?.remember === "function") {
+    const ids = await hitNozomiAll(state), start = (page - 1) * HIT_PAGE_SIZE;
+    return { ids: ids.slice(start, start + HIT_PAGE_SIZE), hasNext: start + HIT_PAGE_SIZE < ids.length };
+  }
   const start = (page - 1) * HIT_PAGE_SIZE * 4;
   const end = start + HIT_PAGE_SIZE * 4 - 1;
   const response = await hitRequest(hitNozomiURL(state), { binary: true, range: [start, end], missingOK: true });
@@ -367,8 +432,17 @@ async function hitNozomiRange(state, page) {
 }
 
 async function hitNozomiAll(state) {
-  const response = await hitRequest(hitNozomiURL(state), { binary: true, missingOK: true });
-  return response ? hitDecodeNozomi(hitBytes(response.dataBase64)) : [];
+  const url = hitNozomiURL(state);
+  return hitMetadataCache.remember(["nozomi", url], 300, async () => {
+    const response = await hitRequest(url, { binary: true, missingOK: true });
+    if (!response) return [];
+    const type = String(response.mimeType || hitHeader(response.headers, "content-type")).split(";", 1)[0].trim().toLowerCase();
+    const encoding = hitHeader(response.headers, "content-encoding").trim().toLowerCase();
+    if (response.status !== 200 || (type && !["application/x-nozomi", "application/octet-stream"].includes(type)) || (encoding && encoding !== "identity")) {
+      throw hitError("InvalidResponseError", "Hitomi.la returned an invalid complete Nozomi representation", "invalidResponse");
+    }
+    return hitDecodeNozomi(hitBytes(response.dataBase64));
+  }, hitValidateIDs);
 }
 
 function hitRotate(value, count) {
@@ -457,11 +531,11 @@ function hitDecodeNode(bytes) {
 }
 
 function hitCompareBytes(left, right) {
-  const length = Math.min(left.byteLength, right.byteLength);
+  const length = Math.min(left.length, right.length);
   for (let index = 0; index < length; index++) {
     if (left[index] !== right[index]) return left[index] < right[index] ? -1 : 1;
   }
-  return left.byteLength === right.byteLength ? 0 : left.byteLength < right.byteLength ? -1 : 1;
+  return left.length === right.length ? 0 : left.length < right.length ? -1 : 1;
 }
 
 function hitNow() {
@@ -470,13 +544,14 @@ function hitNow() {
 }
 
 async function hitIndexVersion() {
-  const now = hitNow();
-  if (hitIndexCache && now - hitIndexCache.loadedAt < 1800000) return hitIndexCache.value;
-  const generation = hitGalleryGeneration;
-  const value = String(await hitRequest(`${HIT_STATIC}/galleriesindex/version`)).trim();
-  if (!/^[0-9]{1,20}$/.test(value)) throw hitError("InvalidResponseError", "Hitomi.la galleries-index version is invalid", "invalidResponse");
-  if (generation === hitGalleryGeneration) hitIndexCache = { value, loadedAt: now };
-  return value;
+  return hitMetadataCache.remember(["index-version"], 1800,
+    async () => String(await hitRequest(`${HIT_STATIC}/galleriesindex/version`)).trim(), value => {
+      if (typeof value !== "string" || !/^[0-9]{1,20}$/.test(value)) throw hitError("InvalidResponseError", "Hitomi.la galleries-index version is invalid", "invalidResponse");
+    });
+}
+
+function hitValidateIDs(ids) {
+  if (!Array.isArray(ids) || ids.some(id => !Number.isSafeInteger(id) || id <= 0)) throw hitError("InvalidResponseError", "Hitomi.la identifier list is invalid", "invalidResponse");
 }
 
 async function hitIndexBytes(version, suffix, range) {
@@ -485,15 +560,29 @@ async function hitIndexBytes(version, suffix, range) {
 }
 
 async function hitTitleIDs(term) {
-  const key = hitSHA256(term).slice(0, 4);
   const version = await hitIndexVersion();
+  return hitMetadataCache.remember(["title-ids", version, term], null, () => hitFindTitleIDs(term, version), hitValidateIDs);
+}
+async function hitFindTitleIDs(term, version) {
+  const key = hitSHA256(term).slice(0, 4);
   let address = 0;
   for (let depth = 0; depth < 64; depth++) {
-    const node = hitDecodeNode(await hitIndexBytes(version, "index", [address, address + 463]));
+    const node = await hitMetadataCache.remember(["index-node", version, address], null,
+      async () => {
+        const decoded = hitDecodeNode(await hitIndexBytes(version, "index", [address, address + 463]));
+        return { ...decoded, keys: decoded.keys.map(key => Array.from(key)) };
+      }, value => {
+        if (!value || !Array.isArray(value.keys) || value.keys.length > 16 || !Array.isArray(value.data) || !Array.isArray(value.children)
+            || value.data.length !== value.keys.length || value.children.length !== 17
+            || value.keys.some(key => !Array.isArray(key) || (key.length < 1 || key.length > 32) || key.some(byte => !Number.isInteger(byte) || byte < 0 || byte > 255))
+            || value.data.some(pair => !Array.isArray(pair) || pair.length !== 2 || pair.some(number => !Number.isSafeInteger(number) || number < 0))
+            || value.children.some(number => !Number.isSafeInteger(number) || number < 0)) throw hitError("InvalidResponseError", "Hitomi.la cached B-tree node is invalid", "invalidResponse");
+      });
     let position = 0;
     while (position < node.keys.length && hitCompareBytes(key, node.keys[position]) > 0) position++;
     if (position < node.keys.length && hitCompareBytes(key, node.keys[position]) === 0) {
       const [dataAddress, length] = node.data[position];
+      return hitMetadataCache.remember(["title-data", version, dataAddress, length], null, async () => {
       const bytes = await hitIndexBytes(version, "data", [dataAddress, dataAddress + length - 1]);
       const count = hitReadInt32(bytes, 0);
       if (count <= 0 || count > 10000000 || bytes.byteLength !== count * 4 + 4) throw hitError("InvalidResponseError", "Hitomi.la title-index gallery data is malformed", "invalidResponse");
@@ -504,6 +593,7 @@ async function hitTitleIDs(term) {
         ids.push(id);
       }
       return ids;
+      }, hitValidateIDs);
     }
     if (node.children.every(child => child === 0)) return [];
     address = node.children[position];
@@ -550,15 +640,45 @@ function hitComposedQuery(input) {
 
 function hitSort(input) {
   const value = String(input?.sort || "newest");
-  return value === "popular-week" ? value : "newest";
+  return hitSearchConfiguration().sortOptions.some(option => option.id === value) ? value : "newest";
+}
+
+function hitSortState(language, sort) {
+  if (sort.startsWith("popular-")) return { language, popular: sort.slice("popular-".length) };
+  if (sort === "date-published") return { language, datePublished: true };
+  return { language, area: "all" };
+}
+
+function hitRandomSeed(input, page) {
+  if (page === 1) return Math.floor(Math.random() * 0xffffffff) + 1;
+  const seed = (input?.metadata ?? input?.cursor)?.randomSeed;
+  if (!Number.isInteger(seed) || seed < 1 || seed > 0xffffffff) {
+    throw hitError("InvalidResponseError", "Hitomi.la random pagination seed is invalid", "invalidResponse");
+  }
+  return seed;
+}
+
+function hitShuffledIDs(ids, seed) {
+  const shuffled = ids.slice();
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    const target = Math.floor((seed >>> 0) / 0x100000000 * (index + 1));
+    [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
+  }
+  return shuffled;
 }
 
 async function hitSortedSearchIDs(query, sort) {
-  const ids = await hitSearchIDs(query);
-  if (sort !== "popular-week") return ids;
-  const allowed = new Set(ids);
-  const popular = await hitNozomiAll({ language: query.language, popular: "week" });
-  return popular.filter(id => allowed.has(id));
+  const version = [...query.positive, ...query.negative].some(term => !term.includes(":")) ? await hitIndexVersion() : "nozomi";
+  return hitMetadataCache.remember(["query-ids", version, query, sort], 300, async () => {
+    const ids = await hitSearchIDs(query);
+    if (sort === "random" || !ids.length) return ids;
+    const allowed = new Set(ids);
+    const ordered = await hitNozomiAll(hitSortState(query.language, sort));
+    return ordered.filter(id => allowed.has(id));
+  }, hitValidateIDs);
 }
 
 function hitSuggestionNamespace(key) {
@@ -590,7 +710,7 @@ const hitSuggestionLookup = mrCreateSuggestionLookup(async (fieldID, query) => {
     const count = Number(item[1]);
     return [{fieldID:namespace, value:item[0], title:item[0], subtitle:Number.isFinite(count) && count > 0 ? `${count} galleries` : undefined}];
   });
-});
+}, hitMetadataCache);
 
 async function hitSuggestions(input) { return hitSuggestionLookup(input); }
 
@@ -636,22 +756,16 @@ function hitGalleryAssignment(source) {
   return value;
 }
 
+function hitValidateGallery(gallery, id) {
+  if (hitPositiveInteger(gallery?.id) !== id || typeof gallery.title !== "string" || !gallery.title.trim()
+      || !Array.isArray(gallery.files) || !gallery.files.length || gallery.files.some(file => !/^[0-9a-f]{64}$/.test(file?.hash || ""))) {
+    throw hitError("InvalidResponseError", "Hitomi.la gallery metadata is incomplete or belongs to another title", "invalidResponse");
+  }
+}
 async function hitGallery(id) {
   const galleryID = hitPositiveInteger(id);
-  const cached = hitGalleryCache.get(galleryID);
-  if (cached) {
-    hitGalleryCache.delete(galleryID);
-    if (Date.now() - cached.loadedAt < HIT_GALLERY_CACHE_TTL_MS) {
-      hitGalleryCache.set(galleryID, cached);
-      return cached.gallery;
-    }
-    hitGalleryCacheBytes -= cached.bytes;
-  }
-  if (hitGalleryFlights.has(galleryID)) return hitGalleryFlights.get(galleryID);
-  const flight = hitLoadGallery(galleryID, hitGalleryGeneration);
-  hitGalleryFlights.set(galleryID, flight);
-  try { return await flight; }
-  finally { if (hitGalleryFlights.get(galleryID) === flight) hitGalleryFlights.delete(galleryID); }
+  return hitMetadataCache.remember(["gallery", galleryID], 1800,
+    () => hitLoadGallery(galleryID, hitGalleryGeneration), value => hitValidateGallery(value, galleryID));
 }
 
 async function hitLoadGallery(galleryID, generation) {
@@ -706,24 +820,19 @@ function hitRoutingAssignment(source) {
   return { path, defaultRoute, overrides };
 }
 
-async function hitRouting(http) {
-  const now = hitNow();
-  if (hitRoutingCache && now - hitRoutingCache.loadedAt < 60000) return hitRoutingCache.value;
-  if (!hitRoutingPromise) {
-    const generation = hitGalleryGeneration;
-    const flight = hitRequest(`${HIT_STATIC}/gg.js`, { http })
-      .then(hitRoutingAssignment)
-      .then(value => {
-        if (generation === hitGalleryGeneration) {
-          hitDynamicImageOrigins.clear();
-          hitRoutingCache = { value, loadedAt: hitNow() };
-        }
-        return value;
-      })
-      .finally(() => { if (hitRoutingPromise === flight) hitRoutingPromise = null; });
-    hitRoutingPromise = flight;
-  }
-  return hitRoutingPromise;
+async function hitRouting(http, cache) {
+  const value = await hitMetadataCache.remember(["routing"], 60, async () => {
+    const parsed = hitRoutingAssignment(await hitRequest(`${HIT_STATIC}/gg.js`, { http }));
+    return { path: parsed.path, defaultRoute: parsed.defaultRoute, overrides: [...parsed.overrides] };
+  }, value => {
+    if (!value || typeof value.path !== "string" || !/^[A-Za-z0-9._/-]+$/.test(value.path) || value.path.includes("..") || value.path.includes("//")
+        || !Number.isInteger(value.defaultRoute) || value.defaultRoute < 0 || value.defaultRoute > HIT_MAX_ROUTE_OFFSET
+        || !Array.isArray(value.overrides) || value.overrides.some(pair => !Array.isArray(pair) || pair.length !== 2
+          || !Number.isInteger(pair[0]) || pair[0] < 0 || pair[0] > 4095 || !Number.isInteger(pair[1]) || pair[1] < 0 || pair[1] > HIT_MAX_ROUTE_OFFSET)) {
+      throw hitError("InvalidResponseError", "Hitomi.la cached routing is invalid", "invalidResponse");
+    }
+  }, cache);
+  return { ...value, overrides: new Map(value.overrides) };
 }
 
 function hitPageURL(file, routing) {
@@ -746,7 +855,7 @@ function hitPageURL(file, routing) {
   return hitURL(url, HIT_IMAGE_HOSTS).href;
 }
 
-async function hitAuthorizedPageURL(value, http) {
+async function hitAuthorizedPageURL(value, http, cache) {
   const url = hitParsedURL(value);
   const match = /^\/([A-Za-z0-9._/-]+)\/([0-9]+)\/([0-9a-f]{64})\.(avif|webp|gif|jpe?g|png)$/.exec(url.pathname);
   if (!match || !HIT_PAGE_HOST.test(url.hostname)) {
@@ -759,7 +868,7 @@ async function hitAuthorizedPageURL(value, http) {
   }
   if (hitDynamicImageOrigins.has(url.origin)) return url;
 
-  const routing = await hitRouting(http);
+  const routing = await hitRouting(http, cache);
   const route = routing.overrides.has(number) ? routing.overrides.get(number) : routing.defaultRoute;
   const expectedOrigin = hitPageOrigin(route);
   const expectedPath = routing.path.replace(/^\/+|\/+$/g, "");
@@ -905,8 +1014,13 @@ function hitSearchConfiguration() {
         { id: "type", title: "Type", queryPrefix: "type:", placeholder: "Filter by gallery type", supportsExclusion: true, inputKind: "lookup", options: [] }
       ],
       sortOptions: [
-        { id: "newest", title: "Newest" },
-        { id: "popular-week", title: "Popular This Week" }
+        { id: "newest", title: "Newest (Date Added)" },
+        { id: "date-published", title: "Date Published" },
+        { id: "popular-today", title: "Popular Today" },
+        { id: "popular-week", title: "Popular This Week" },
+        { id: "popular-month", title: "Popular This Month" },
+        { id: "popular-year", title: "Popular This Year" },
+        { id: "random", title: "Random" }
       ],
       defaultSortID: "newest"
     };
@@ -915,6 +1029,7 @@ function hitSearchConfiguration() {
 defineContentExtension({
   id: "HitomiLA",
   apiVersion: "1.0",
+  cachePolicy: "metadata",
   imageRequestMode: "independent",
 
   initialize(context) {
@@ -924,6 +1039,7 @@ defineContentExtension({
 
   invalidateCache() {
     hitGalleryGeneration++;
+    hitMetadataCache.clear();
     hitGalleryCache.clear();
     hitGalleryFlights.clear();
     hitGalleryCacheBytes = 0;
@@ -938,23 +1054,15 @@ defineContentExtension({
 
   discoverSections() {
     return [
-      { id: "latest", title: "Latest (English)", type: 0 },
-      { id: "popular", title: "Popular This Week (English)", type: 0 }
+      { id: "latest", title: "Catalog (English)", type: 3 }
     ];
   },
 
   async discover(input) {
     mrValidateSearchSelections(hitSearchConfiguration(), input?.selections, input?.sort);
-    const page = hitPage(input);
     const section = input?.sectionId || input?.section?.id || "latest";
     if (section !== "latest" && section !== "popular") throw hitError("InvalidSectionError", "Unknown Hitomi.la discovery section");
-    const composed = hitComposedQuery(input);
-    if (composed) {
-      return this.search({ ...input, query: composed, selections: [], sort: input?.sort || (section === "popular" ? "popular-week" : "newest") });
-    }
-    const state = (input?.sort || (section === "popular" ? "popular-week" : "newest")) === "popular-week" ? { language: "english", popular: "week" } : { language: "english", area: "all" };
-    const result = await hitNozomiRange(state, page);
-    return { items: await hitCards(result.ids), metadata: result.hasNext ? { page: page + 1 } : null };
+    return this.search({ ...input, sort: input?.sort || (section === "popular" ? "popular-week" : "newest") });
   },
 
   searchFilters: hitSearchConfiguration,
@@ -971,15 +1079,20 @@ defineContentExtension({
       return { items: await hitCards([Number(hitPositiveInteger(raw))]), metadata: null };
     }
     const query = hitQuery({ query: raw });
-    if (!query.positive.length && !query.negative.length) {
-      const state = hitSort(input) === "popular-week" ? {language:query.language,popular:"week"} : {language:query.language,area:"all"};
-      const result = await hitNozomiRange(state, page);
+    const sort = hitSort(input);
+    if (sort !== "random" && !query.positive.length && !query.negative.length) {
+      const result = await hitNozomiRange(hitSortState(query.language, sort), page);
       return { items: await hitCards(result.ids), metadata: result.hasNext ? { page: page + 1 } : null };
     }
-    const ids = await hitSortedSearchIDs(query, hitSort(input));
+    const randomSeed = sort === "random" ? hitRandomSeed(input, page) : undefined;
+    const ordered = await hitSortedSearchIDs(query, sort);
+    const ids = sort === "random" ? hitShuffledIDs(ordered, randomSeed) : ordered;
     const start = (page - 1) * HIT_PAGE_SIZE;
     const selected = ids.slice(start, start + HIT_PAGE_SIZE);
-    return { items: await hitCards(selected), metadata: start + HIT_PAGE_SIZE < ids.length ? { page: page + 1 } : null };
+    return {
+      items: await hitCards(selected),
+      metadata: start + HIT_PAGE_SIZE < ids.length ? { page: page + 1, ...(sort === "random" ? { randomSeed } : {}) } : null
+    };
   },
 
   async details(id) {
@@ -1013,7 +1126,7 @@ defineContentExtension({
     const supplied = hitParsedURL(String(input?.url || input?.pageURL || ""));
     const coverPath = /^\/avifbigtn\/[0-9a-f]\/[0-9a-f]{2}\/[0-9a-f]{64}\.avif$/;
     const validCover = supplied.hostname === "atn.gold-usergeneratedcontent.net" && coverPath.test(supplied.pathname);
-    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href, http);
+    const url = validCover ? hitURL(supplied.href, HIT_IMAGE_HOSTS) : await hitAuthorizedPageURL(supplied.href, http, input?.cache);
     const response = await hitRequest(url.href, { http, binary: true, imageResource: true, accept: "image/avif,image/webp,image/gif,image/jpeg,image/png" });
     const mimeType = String(response.mimeType || hitHeader(response.headers, "content-type")).split(";", 1)[0].trim().toLowerCase();
     if (!/^image\/(?:avif|webp|gif|jpeg|png)$/.test(mimeType)) throw hitError("InvalidResponseError", "Hitomi.la image response has an unsupported MIME type", "invalidResponse", url.href);

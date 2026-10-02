@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MINIMAL_AVIF_BYTES, MINIMAL_GIF_BYTES, MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse } from "../../test-runtime.mjs";
+import { MINIMAL_AVIF_BYTES, MINIMAL_GIF_BYTES, MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse, metadataCacheFixture } from "../../test-runtime.mjs";
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 const manifest = JSON.parse(await readFile(resolve(dirname(mainPath), "extension.json"), "utf8"));
@@ -66,6 +66,165 @@ b: '123/'
 function galleryAssignment(id) {
   return `var galleryinfo = ${JSON.stringify(gallery(id))};`;
 }
+
+const sortIndexes = [
+  ["newest", "index"],
+  ["date-published", "date/published"],
+  ["popular-today", "popular/today"],
+  ["popular-week", "popular/week"],
+  ["popular-month", "popular/month"],
+  ["popular-year", "popular/year"]
+];
+const catalogIDs = Array.from({ length: 60 }, (_, index) => index + 1);
+
+function sortResponder(indexPath, ids, extraIndexes = {}) {
+  return request => {
+    const path = new URL(request.url).pathname;
+    if (path === indexPath) return runtimeResponse({ url: request.url, bytes: nozomi(ids) });
+    if (Object.hasOwn(extraIndexes, path)) return runtimeResponse({ url: request.url, bytes: nozomi(extraIndexes[path]) });
+    const match = /^\/galleries\/(\d+)\.js$/.exec(path);
+    if (match) return runtimeResponse({ url: request.url, text: galleryAssignment(Number(match[1])) });
+    throw new Error(`Unexpected request ${request.url}`);
+  };
+}
+
+test("HitomiLA exposes one paginated catalog and every site order", async () => {
+  const loaded = await loadContentExtension(mainPath, () => { throw new Error("No network expected"); });
+  assert.deepEqual(Array.from(loaded.extension.discoverSections(), section => ({ ...section })), [
+    { id: "latest", title: "Catalog (English)", type: 3 }
+  ]);
+  const configuration = loaded.extension.searchFilters();
+  assert.equal(configuration.defaultSortID, "newest");
+  assert.deepEqual(Array.from(configuration.sortOptions, option => [option.id, option.title]), [
+    ["newest", "Newest (Date Added)"], ["date-published", "Date Published"],
+    ["popular-today", "Popular Today"], ["popular-week", "Popular This Week"],
+    ["popular-month", "Popular This Month"], ["popular-year", "Popular This Year"], ["random", "Random"]
+  ]);
+});
+
+test("HitomiLA pages each site index in order for browsing, searching and language-only selections", async () => {
+  for (const [sort, index] of sortIndexes) {
+    for (const method of ["discover", "search"]) {
+      for (const language of ["english", "japanese"]) {
+        for (const cache of [undefined, metadataCacheFixture()]) {
+          const ids = sort === "newest" ? catalogIDs : catalogIDs.slice().reverse();
+          const path = `/n/${index}-${language}.nozomi`;
+          const loaded = await loadContentExtension(mainPath, sortResponder(path, ids), { cache });
+          const input = { sectionId: "latest", sort, ...(language === "japanese" ? {
+            selections: [{ fieldID: "language", value: language, polarity: "include" }]
+          } : {}) };
+          const first = await loaded.extension[method](input);
+          const second = await loaded.extension[method]({ ...input, metadata: first.metadata });
+          const third = await loaded.extension[method]({ ...input, metadata: second.metadata });
+          assert.deepEqual(Array.from([...first.items, ...second.items, ...third.items], item => Number(item.workId)), ids,
+            `${method}.${sort}.${language}.${Boolean(cache)}`);
+          assert.equal(third.metadata, null);
+          const indexes = loaded.calls.filter(call => call.url.endsWith(".nozomi"));
+          assert.ok(indexes.every(call => new URL(call.url).pathname === path));
+          assert.equal(indexes.length, cache ? 1 : 3);
+        }
+      }
+    }
+  }
+});
+
+test("HitomiLA applies inclusions and exclusions without replacing the site's ranking order", async () => {
+  for (const [sort, index] of sortIndexes) {
+    for (const method of ["discover", "search"]) {
+      const ranked = [8, 1, 5, 3, 7, 4, 2, 6];
+      const path = `/n/${index}-japanese.nozomi`;
+      const loaded = await loadContentExtension(mainPath, sortResponder(path, ranked, {
+        "/n/tag/landscape-japanese.nozomi": [1, 2, 4, 5, 7, 8],
+        "/n/artist/sample-japanese.nozomi": [1, 4, 5, 7, 8],
+        "/n/tag/blocked-japanese.nozomi": [5, 7]
+      }));
+      const result = await loaded.extension[method]({
+        sectionId: "latest", sort, query: "artist:sample",
+        selections: [
+          { fieldID: "language", value: "japanese", polarity: "include" },
+          { fieldID: "tag", value: "landscape", polarity: "include" },
+          { fieldID: "tag", value: "blocked", polarity: "exclude" }
+        ]
+      });
+      assert.deepEqual(Array.from(result.items, item => Number(item.workId)), [8, 1, 4], `${method}.${sort}`);
+      assert.equal(result.metadata, null);
+    }
+  }
+});
+
+test("HitomiLA returns empty pages for missing or empty rankings, including filtered searches", async () => {
+  for (const [sort, index] of sortIndexes) {
+    for (const method of ["discover", "search"]) {
+      for (const status of [200, 404]) {
+        const loaded = await loadContentExtension(mainPath, request => {
+          const path = new URL(request.url).pathname;
+          if (path === `/n/${index}-english.nozomi`) return runtimeResponse({ url: request.url, status, bytes: nozomi([]) });
+          if (path === "/n/tag/landscape-english.nozomi") return runtimeResponse({ url: request.url, bytes: nozomi([1, 2]) });
+          throw new Error(`Unexpected request ${request.url}`);
+        });
+        for (const query of ["", "tag:landscape"]) {
+          const result = await loaded.extension[method]({ sectionId: "latest", sort, query });
+          assert.equal(result.items.length, 0, `${method}.${sort}.${status}.${query}`);
+          assert.equal(result.metadata, null);
+        }
+      }
+    }
+  }
+});
+
+test("HitomiLA random ordering survives pagination and runtime restart, and refresh chooses a new seed", async () => {
+  for (const method of ["discover", "search"]) {
+    const cache = metadataCacheFixture();
+    let random = 0.2;
+    const seededMath = Object.create(Math);
+    seededMath.random = () => random;
+    const responder = sortResponder("/n/index-japanese.nozomi", catalogIDs, {
+      "/n/tag/landscape-japanese.nozomi": catalogIDs,
+      "/n/tag/blocked-japanese.nozomi": [2, 9, 12]
+    });
+    const options = { cache, globals: { Math: seededMath } };
+    const loaded = await loadContentExtension(mainPath, responder, options);
+    const input = { sectionId: "latest", sort: "random", selections: [
+      { fieldID: "language", value: "japanese", polarity: "include" },
+      { fieldID: "tag", value: "landscape", polarity: "include" },
+      { fieldID: "tag", value: "blocked", polarity: "exclude" }
+    ] };
+    const first = await loaded.extension[method](input);
+    const restarted = await loadContentExtension(mainPath, responder, options);
+    const second = await restarted.extension[method]({ ...input, metadata: first.metadata });
+    const repeated = await restarted.extension[method]({ ...input, metadata: first.metadata });
+    const third = await restarted.extension[method]({ ...input, metadata: second.metadata });
+    assert.deepEqual(Array.from(second.items, item => item.workId), Array.from(repeated.items, item => item.workId));
+    assert.equal(second.metadata.randomSeed, first.metadata.randomSeed);
+    const actual = Array.from([...first.items, ...second.items, ...third.items], item => Number(item.workId));
+    const eligible = catalogIDs.filter(id => ![2, 9, 12].includes(id));
+    assert.deepEqual(actual.slice().sort((left, right) => left - right), eligible);
+    assert.notDeepEqual(actual, eligible);
+    assert.equal(third.metadata, null);
+    const callsBeforeRefresh = restarted.calls.length;
+    random = 0.8;
+    const refreshed = await restarted.extension[method](input);
+    assert.notEqual(refreshed.metadata.randomSeed, first.metadata.randomSeed);
+    assert.notDeepEqual(Array.from(refreshed.items, item => item.workId), Array.from(first.items, item => item.workId));
+    assert.equal(restarted.calls.length, callsBeforeRefresh, "new shuffles reuse the cached candidate list and gallery metadata");
+    assert.ok(!restarted.calls.some(call => call.url.endsWith(".nozomi")), "pagination reuses candidate IDs after a runtime restart");
+    await assert.rejects(() => loaded.extension[method]({ ...input, metadata: { page: 2, randomSeed: 0 } }), /seed is invalid/);
+  }
+});
+
+test("HitomiLA random catalog pagination works without filters or a host cache", async () => {
+  for (const method of ["discover", "search"]) {
+    const loaded = await loadContentExtension(mainPath, sortResponder("/n/index-english.nozomi", catalogIDs));
+    const input = { sectionId: "latest", sort: "random" };
+    const first = await loaded.extension[method](input);
+    const second = await loaded.extension[method]({ ...input, metadata: first.metadata });
+    const third = await loaded.extension[method]({ ...input, metadata: second.metadata });
+    const ids = Array.from([...first.items, ...second.items, ...third.items], item => Number(item.workId));
+    assert.deepEqual(ids.slice().sort((left, right) => left - right), catalogIDs);
+    assert.equal(third.metadata, null);
+    assert.equal(loaded.calls.filter(call => call.url.endsWith(".nozomi")).length, 1);
+  }
+});
 
 test("HitomiLA decodes ranged Nozomi IDs, limits metadata concurrency, and caches routing", async () => {
   let active = 0;
@@ -172,6 +331,7 @@ test("HitomiLA applies language overrides, namespaces, intersections, and negati
       if (url.pathname.includes("/artist/sample-japanese.nozomi")) return runtimeResponse({ url: request.url, bytes: nozomi([1, 2]) });
       if (url.pathname.includes("/tag/female:blue%20sky-japanese.nozomi")) return runtimeResponse({ url: request.url, bytes: nozomi([1, 3]) });
       if (url.pathname.includes("/tag/blocked-japanese.nozomi")) return runtimeResponse({ url: request.url, bytes: nozomi([2]) });
+      if (url.pathname === "/n/index-japanese.nozomi") return runtimeResponse({ url: request.url, bytes: nozomi([3, 2, 1]) });
     }
     if (url.pathname === "/galleries/1.js") return runtimeResponse({ url: request.url, text: galleryAssignment(1) });
     if (url.pathname === "/gg.js") return runtimeResponse({ url: request.url, text: routing });
@@ -181,7 +341,8 @@ test("HitomiLA applies language overrides, namespaces, intersections, and negati
   assert.deepEqual(indexURLs, [
     "/n/artist/sample-japanese.nozomi",
     "/n/tag/female:blue%20sky-japanese.nozomi",
-    "/n/tag/blocked-japanese.nozomi"
+    "/n/tag/blocked-japanese.nozomi",
+    "/n/index-japanese.nozomi"
   ]);
   assert.equal(result.items.length, 1);
   assert.equal(result.items[0].workId, "1");
@@ -316,6 +477,7 @@ test("HitomiLA resolves title indexes through ordinary HTTP when native image re
       ranges.push(request.headers.Range);
       return runtimeResponse({ url: request.url, status: 206, bytes: galleryData });
     }
+    if (url.pathname === "/n/index-english.nozomi") return runtimeResponse({ url: request.url, bytes: nozomi([7]) });
     if (url.pathname === "/galleries/7.js") return runtimeResponse({ url: request.url, text: galleryAssignment(7) });
     if (url.pathname === "/gg.js") return runtimeResponse({ url: request.url, text: routing });
     throw new Error(`Unexpected request ${request.url}`);
@@ -400,7 +562,7 @@ test("HitomiLA reuses gallery metadata across the typed app bridge, coalesces re
   const typedChapter = { installmentId: chapter.installmentId, workId: chapter.workId };
   assert.equal((await loaded.extension.imagePages(typedChapter)).pages.length, 1);
   assert.equal(galleryRequests, 1, "details → installments → pages must reuse the validated gallery");
-  now += 5 * 60 * 1000;
+  now += 30 * 60 * 1000;
   await loaded.extension.details("42");
   assert.equal(galleryRequests, 2);
 });
@@ -488,4 +650,45 @@ test("HitomiLA preserves native cover resources, base64 fallbacks, and cache inv
     assert.equal(fallback.resourceID, undefined);
   }
   await loaded.extension.invalidateCache();
+});
+
+
+test("Hitomi cache-aware pagination shares complete ID lists and metadata across restart", async () => {
+  const cache = metadataCacheFixture();
+  const bytes = Buffer.alloc(30 * 4);
+  for (let index = 0; index < 30; index++) bytes.writeInt32BE(index + 1, index * 4);
+  const responder = request => {
+    const url = new URL(request.url);
+    if (url.pathname.endsWith(".nozomi")) {
+      assert.equal(request.headers.Range, undefined);
+      return runtimeResponse({url: request.url, mimeType:"application/x-nozomi", bytes});
+    }
+    const id = /\/galleries\/(\d+)\.js$/.exec(url.pathname)?.[1];
+    if (id) return runtimeResponse({url:request.url, text:galleryAssignment(Number(id))});
+    if (url.pathname === "/gg.js") return runtimeResponse({url:request.url, text:routing});
+    throw new Error(`Unexpected ${request.url}`);
+  };
+  const loaded = await loadContentExtension(mainPath, responder, {cache});
+  const first = await loaded.extension.discover({sectionId:"latest"});
+  const second = await loaded.extension.discover({sectionId:"latest", metadata:first.metadata});
+  assert.equal(first.items.length,25); assert.equal(second.items.length,5);
+  assert.equal(loaded.calls.filter(call => call.url.endsWith(".nozomi")).length,1);
+  const restarted = await loadContentExtension(mainPath, responder, {cache});
+  await restarted.extension.details("1");
+  assert.equal(restarted.calls.length,0);
+  cache.setReload(true);
+  await restarted.extension.details("1");
+  cache.setReload(false);
+  await restarted.extension.details("2");
+  assert.equal(restarted.calls.filter(call => call.url.includes("/galleries/")).length,1);
+});
+
+test("Hitomi invalid cached galleries are removed and index versions partition immutable data", async () => {
+  const cache = metadataCacheFixture();
+  cache.entries.set(JSON.stringify(["gallery","42"]), {value:{id:99,title:"Wrong",files:[]},time:0});
+  const loaded = await loadContentExtension(mainPath, request => runtimeResponse({url:request.url,text:galleryAssignment(42)}), {cache});
+  await loaded.extension.details("42");
+  assert.equal(loaded.calls.length,1);
+  cache.advance(1799); await loaded.extension.details("42"); assert.equal(loaded.calls.length,1);
+  cache.advance(1); await loaded.extension.details("42"); assert.equal(loaded.calls.length,2);
 });

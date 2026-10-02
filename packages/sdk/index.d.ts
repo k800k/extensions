@@ -35,7 +35,17 @@ export interface WebExecutionRequest {
   payloadMimeType?: string;
 }
 export interface WebExecutionResult { result: JSONValue; cookies?: JSONValue[]; }
+/** JSON values only; loaders must validate provider payloads before returning. */
+export type CacheJSON = null | boolean | number | string | CacheJSON[] | { [key: string]: CacheJSON };
+export interface MetadataCache {
+  /** Positive TTL in seconds, or null for version-addressed immutable data. */
+  remember<T extends CacheJSON>(key: string, options: { ttlSeconds: number | null }, loader: () => Promise<T>): Promise<T>;
+  remove(key: string): Promise<void>;
+}
+
 export interface RuntimeContext {
+  /** Optional on API 1.0/1.1 hosts. Cache parsed, validated metadata, never secrets or HTTP envelopes. */
+  cache?: MetadataCache;
   http: { imageResource?(request: HTTPRequest): Promise<ImageResourceResponse>; request(request: HTTPRequest): Promise<HTTPResponse>; registerInterceptor(interceptor: HTTPInterceptor): void };
   cookies: { getAll(): JSONValue[]; setAll(cookies: JSONValue[]): void };
   state: KeyValueState & { reset(): void };
@@ -56,6 +66,8 @@ export interface ContentExtension {
   search(input: ContentSearchInput): Promise<CursorPage<JSONValue>>; details(id: string): Promise<JSONValue>;
   installments(work: JSONValue): Promise<JSONValue[]>; imagePages(installment: JSONValue): Promise<JSONValue>;
   imageRequestMode?: "independent";
+  /** Adopt task-scoped metadata refresh; legacy hosts still call invalidateCache. */
+  cachePolicy?: "metadata";
   invalidateCache?(): void | Promise<void>;
   imagePageContent?(input: JSONValue): Promise<JSONValue>; updates?(input: JSONValue): Promise<JSONValue>;
   publicationContent?(installment: JSONValue): Promise<JSONValue>;

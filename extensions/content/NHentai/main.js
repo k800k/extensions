@@ -9,14 +9,61 @@
 
 /* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
 
+// Resource keys live inside the host's repository/version/config/account partition.
+// Old hosts use one bounded, disposable memory cache instead.
+function mrCreateMetadataCache(getContext) {
+  const memory = new Map(), flights = new Map();
+  let bytes = 0, generation = 0;
+  const clone = value => JSON.parse(JSON.stringify(value));
+  function drop(key) { bytes -= memory.get(key)?.bytes || 0; memory.delete(key); }
+  async function remember(key, ttlSeconds, loader, validate, cacheOverride) {
+    const resource = JSON.stringify(key);
+    const checkedLoad = async () => {
+      const value = await loader();
+      validate(value);
+      return clone(value);
+    };
+    const host = cacheOverride || getContext().cache;
+    if (typeof host?.remember === "function") {
+      let value = await host.remember(resource, { ttlSeconds }, checkedLoad);
+      try { validate(value); } catch (_) {
+        await host.remove(resource);
+        value = await host.remember(resource, { ttlSeconds }, checkedLoad);
+        validate(value);
+      }
+      return value;
+    }
+    const saved = memory.get(resource);
+    if (saved && (ttlSeconds === null || Date.now() - saved.time < ttlSeconds * 1000)) {
+      try { validate(saved.value); memory.delete(resource); memory.set(resource, saved); return clone(saved.value); }
+      catch (_) { drop(resource); }
+    }
+    if (flights.has(resource)) return clone(await flights.get(resource));
+    const token = generation;
+    const flight = (async () => {
+      const value = await checkedLoad(), size = new TextEncoder().encode(JSON.stringify(value)).byteLength;
+      if (token === generation && size <= 16 * 1024 * 1024) {
+        drop(resource); memory.set(resource, { value, bytes: size, time: Date.now() }); bytes += size;
+        while (memory.size > 100 || bytes > 16 * 1024 * 1024) drop(memory.keys().next().value);
+      }
+      return value;
+    })();
+    flights.set(resource, flight);
+    try { return clone(await flight); } finally { if (flights.get(resource) === flight) flights.delete(resource); }
+  }
+  return { remember, get generation() { return generation; }, clear() { generation++; memory.clear(); flights.clear(); bytes = 0; } };
+}
+
+/* Copyright 2026 manko Extension Contributors; SPDX-License-Identifier: Apache-2.0 */
+
 function mrSearchNormalized(value) {
   return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .toLowerCase().replace(/[_-]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function mrSearchDistance(left, right, limit) {
-  const a = Array.from(left), b = Array.from(right);
-  if (Math.abs(a.length - b.length) > limit || a.length > 100 || b.length > 100) return null;
+  const a = Array.from(left), b = Array.from(right).slice(0,Array.from(left).length+limit);
+  if (b.length < Math.max(1,a.length-limit) || a.length > 100 || b.length > 100) return null;
   let previous = Array.from({length:b.length + 1}, (_, i) => i), before = previous;
   for (let i = 1; i <= a.length; i++) {
     const current = [i];
@@ -24,9 +71,11 @@ function mrSearchDistance(left, right, limit) {
       current[j] = Math.min(current[j-1]+1, previous[j]+1, previous[j-1]+(a[i-1] === b[j-1] ? 0 : 1));
       if (i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) current[j] = Math.min(current[j], before[j-2]+1);
     }
+    if (Math.min(...current) > limit) return null;
     before = previous; previous = current;
   }
-  return previous[b.length] <= limit ? previous[b.length] : null;
+  const best = Math.min(...previous.slice(Math.max(1,a.length-limit)));
+  return best <= limit ? best : null;
 }
 
 function mrSearchScore(query, candidate) {
@@ -36,7 +85,7 @@ function mrSearchScore(query, candidate) {
   if (c.split(" ").some(word => word.startsWith(q))) return 200;
   if (c.includes(q)) return 300;
   if (q.length < 3 || q.length > 100 || /^\d+$/.test(q)) return null;
-  const distances = [c, ...c.split(" ")].map(value => mrSearchDistance(q, value, q.length < 6 ? 1 : 2)).filter(value => value !== null);
+  const distances = [c, ...c.split(" ")].map(value => mrSearchDistance(q,value,q.length < 6 ? 1 : 2)).filter(value => value !== null);
   return distances.length ? 400 + Math.min(...distances) : null;
 }
 
@@ -52,23 +101,31 @@ function mrRankSuggestions(query, candidates, limit = 30, fieldID) {
   }).sort((a,b) => a.score - b.score || a.index - b.index).slice(0,limit).map(value => value.candidate);
 }
 
-// Bounded candidate lookup: one literal request and, only when needed, two
-// broadened requests. Every suggested value still comes from the provider.
-function mrCreateSuggestionLookup(fetchCandidates) {
+// One literal lookup and at most one sequential prefix fallback. The native
+// search budget also covers the fallback; values always come from the provider.
+function mrCreateSuggestionLookup(fetchCandidates, metadataCache = null) {
   const cache = new Map(), flights = new Map();
+  let generation = metadataCache?.generation;
   async function loadCandidates(fieldID, query) {
+    const token = generation;
     const key = `${fieldID || "*"}\u0000${query}`;
     const saved = cache.get(key);
-    if (saved && Date.now() - saved.time < 300000) return saved.values;
+    if (!metadataCache && saved && Date.now() - saved.time < 300000) return saved.values;
     cache.delete(key);
     if (flights.has(key)) return flights.get(key);
     const task = (async () => {
-      const values = await fetchCandidates(fieldID, query);
+      const validate = values => {
+        if (!Array.isArray(values) || values.some(value => !value || typeof value.fieldID !== "string" || !value.fieldID || typeof value.value !== "string" || !value.value
+            || value.value.length > 256 || String(value.title ?? value.value).length > 256)) throw new Error("The source returned invalid suggestions.");
+      };
+      const values = metadataCache
+        ? await metadataCache.remember(["suggestions", fieldID, query], 300, async () => JSON.parse(JSON.stringify(await fetchCandidates(fieldID, query))), validate)
+        : await fetchCandidates(fieldID, query);
       if (!Array.isArray(values)) throw new Error("The source returned invalid suggestions.");
       if (values.some(value => !value || typeof value.fieldID !== "string" || !value.fieldID || typeof value.value !== "string"
         || !value.value || value.value.length > 256 || String(value.title ?? value.value).length > 256)) throw new Error("The source returned invalid suggestions.");
       const bounded = values.slice(0,100);
-      cache.set(key, {time:Date.now(),values:bounded});
+      if (token === generation) cache.set(key, {time:Date.now(),values:bounded});
       while (cache.size > 100) cache.delete(cache.keys().next().value);
       return bounded;
     })();
@@ -78,21 +135,23 @@ function mrCreateSuggestionLookup(fetchCandidates) {
   return async input => {
     const field = input?.fieldID || null, query = mrSearchNormalized(input?.query);
     const limit = Math.min(30,Math.max(1,Number(input?.limit) || 20));
+    if (generation !== metadataCache?.generation) {
+      generation = metadataCache?.generation; cache.clear(); flights.clear();
+    }
     if (!query) return [];
-    const direct = await loadCandidates(field,query);
     const cached = [...cache.values()].filter(value => Date.now() - value.time < 300000).flatMap(value => value.values);
+    let ranked = mrRankSuggestions(query,cached,limit,field);
+    // A known exact canonical value needs no discovery request. Prefix results
+    // are partial: they must never prove coverage for a different query.
+    if (ranked.some(value => mrSearchScore(query,value.title ?? value.value) === 0)) return ranked;
+    const direct = await loadCandidates(field,query);
     let candidates = [...direct,...cached];
-    let ranked = mrRankSuggestions(query,candidates,limit,field);
-    if (!ranked.some(value => (mrSearchScore(query,value.title ?? value.value) ?? 1000) < 400) && query.length > 3) {
-      const letters = Array.from(query);
-      const alternatives = [...new Set([letters.slice(0,3).join(""),letters.slice(-3).join("")])].filter(value => value.trim() && value !== query);
-      const results = await Promise.allSettled(alternatives.map(value => loadCandidates(field,value)));
-      candidates = candidates.concat(results.flatMap(result => result.status === "fulfilled" ? result.value : []));
+    ranked = mrRankSuggestions(query,candidates,limit,field);
+    if (!ranked.length && query.length > 3) {
+      const prefix = Array.from(query).slice(0,3).join("");
+      try { candidates.push(...await loadCandidates(field,prefix)); }
+      catch (error) { if (!ranked.length) throw error; }
       ranked = mrRankSuggestions(query,candidates,limit,field);
-      if (!ranked.length) {
-        const failure = results.find(result => result.status === "rejected");
-        if (failure) throw failure.reason;
-      }
     }
     return ranked;
   };
@@ -128,7 +187,7 @@ const NH_IMAGE_HOSTS = new Set(["i.nhentai.net"]);
 const NH_THUMB_HOSTS = new Set(["t.nhentai.net"]);
 const NH_MEDIA_HOSTS = new Set([...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
 const NH_HOSTS = new Set(["nhentai.net", ...NH_IMAGE_HOSTS, ...NH_THUMB_HOSTS]);
-const NH_USER_AGENT = "manko NHentai Extension/0.3.5 (+https://github.com/k800k/extensions)";
+const NH_USER_AGENT = "manko NHentai Extension/0.4.0 (+https://github.com/k800k/extensions)";
 const NH_SUGGESTION_FIELDS = new Set(["tag", "artist", "parody", "character", "group", "language", "category"]);
 let nhRuntime;
 const nhKnownSearchValues = new Map();
@@ -136,7 +195,8 @@ const nhGalleryCache = new Map();
 const nhGalleryFlights = new Map();
 let nhGalleryCacheBytes = 0;
 let nhGalleryGeneration = 0;
-const NH_GALLERY_CACHE_TTL_MS = 5 * 60 * 1000;
+const NH_GALLERY_CACHE_TTL_MS = 30 * 60 * 1000;
+const nhMetadataCache = mrCreateMetadataCache(nhContext);
 const NH_GALLERY_CACHE_MAX_BYTES = 16 * 1024 * 1024;
 const NH_GALLERY_CACHE_MAX_ENTRIES = 100;
 
@@ -334,7 +394,7 @@ const nhSuggestionLookup = mrCreateSuggestionLookup(async (fieldID, query) => {
       fieldID:String(item.type).toLowerCase(), value:item.name.trim(), title:item.name.trim(),
       subtitle:Number(item.count) > 0 ? `${Math.floor(Number(item.count))} galleries` : undefined
     }));
-});
+}, nhMetadataCache);
 
 async function nhSuggestions(input) {
   const observed = nhObservedSuggestions(input?.fieldID, input?.query);
@@ -402,7 +462,7 @@ function nhTitles(gallery) {
 }
 
 function nhCard(gallery, preferredImage, remember = true) {
-  if (remember) nhRememberGallery(gallery);
+  if (remember && Array.isArray(gallery?.pages) && gallery.pages.length) { nhValidateGallery(gallery, nhPositiveInteger(gallery.id)); nhRememberGallery(gallery); }
   const id = nhPositiveInteger(gallery?.id);
   const mediaID = nhPositiveInteger(gallery?.media_id, "media id");
   const titles = nhTitles(gallery);
@@ -477,31 +537,33 @@ function nhWork(gallery) {
   };
 }
 
-function nhListPayload(payload, page) {
+async function nhListPayload(payload, page) {
   if (!payload || !Array.isArray(payload.result) || !Number.isInteger(payload.num_pages) || payload.num_pages < 0) {
     throw nhError("InvalidResponseError", "nHentai gallery list is malformed", "invalidResponse");
   }
+  await Promise.all(payload.result.map(nhSeedGallery));
   return {
     items: payload.result.map(gallery => nhCard(gallery)),
     metadata: page < payload.num_pages ? { page: page + 1 } : null
   };
 }
 
+function nhValidateGallery(gallery, id) {
+  if (nhPositiveInteger(gallery?.id) !== id) throw nhError("InvalidResponseError", "Gallery identifier does not match the request", "invalidResponse");
+  nhWork(gallery);
+  gallery.pages.forEach(page => nhMediaURL(page.path, false));
+}
+async function nhSeedGallery(gallery) {
+  if (!Array.isArray(gallery?.pages) || !gallery.pages.length) return;
+  const id = nhPositiveInteger(gallery.id);
+  // Complete list/search payloads are validated before becoming detail data.
+  nhValidateGallery(gallery, id);
+  await nhMetadataCache.remember(["gallery", id], 1800, async () => gallery, value => nhValidateGallery(value, id));
+}
 async function nhGallery(id) {
   const galleryID = nhPositiveInteger(id);
-  const cached = nhGalleryCache.get(galleryID);
-  if (cached && Date.now() - cached.loadedAt < NH_GALLERY_CACHE_TTL_MS) return cached.gallery;
-  if (nhGalleryFlights.has(galleryID)) return nhGalleryFlights.get(galleryID);
-  const generation = nhGalleryGeneration;
-  const flight = nhJSON(`${NH_API}/galleries/${galleryID}`).then(gallery => {
-    if (nhPositiveInteger(gallery?.id) !== galleryID) throw nhError("InvalidResponseError", "Gallery identifier does not match the request", "invalidResponse");
-    nhWork(gallery);
-    if (generation === nhGalleryGeneration) nhRememberGallery(gallery);
-    return gallery;
-  });
-  nhGalleryFlights.set(galleryID, flight);
-  try { return await flight; }
-  finally { if (nhGalleryFlights.get(galleryID) === flight) nhGalleryFlights.delete(galleryID); }
+  return nhMetadataCache.remember(["gallery", galleryID], 1800,
+    () => nhJSON(`${NH_API}/galleries/${galleryID}`), value => nhValidateGallery(value, galleryID));
 }
 
 async function nhWorkForID(id) {
@@ -541,6 +603,7 @@ function nhSearchConfiguration() {
 defineContentExtension({
   id: "NHentai",
   apiVersion: "1.0",
+  cachePolicy: "metadata",
   imageRequestMode: "independent",
 
   initialize(context) {
@@ -550,6 +613,7 @@ defineContentExtension({
 
   invalidateCache() {
     nhGalleryGeneration++;
+    nhMetadataCache.clear();
     nhGalleryCache.clear();
     nhGalleryFlights.clear();
     nhGalleryCacheBytes = 0;
@@ -584,6 +648,7 @@ defineContentExtension({
       if (page > 1) return { items: [], metadata: null };
       const payload = await nhJSON(`${NH_API}/galleries/popular`);
       if (!Array.isArray(payload)) throw nhError("InvalidResponseError", "nHentai popular galleries are malformed", "invalidResponse");
+      await Promise.all(payload.map(nhSeedGallery));
       return { items: payload.map(gallery => nhCard(gallery)), metadata: null };
     }
     const payload = await nhJSON(`${NH_API}/galleries?page=${page}`);

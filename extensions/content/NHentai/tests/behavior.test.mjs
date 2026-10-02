@@ -5,11 +5,11 @@ import assert from "node:assert/strict";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readFile } from "node:fs/promises";
-import { MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse } from "../../test-runtime.mjs";
+import { MINIMAL_WEBP_BYTES, loadContentExtension, runtimeResponse, metadataCacheFixture } from "../../test-runtime.mjs";
 
 const mainPath = resolve(dirname(fileURLToPath(import.meta.url)), "../main.js");
 const manifest = JSON.parse(await readFile(resolve(dirname(mainPath), "extension.json"), "utf8"));
-const expectedUserAgent = "manko NHentai Extension/0.3.5 (+https://github.com/k800k/extensions)";
+const expectedUserAgent = "manko NHentai Extension/0.4.0 (+https://github.com/k800k/extensions)";
 const listGallery = {
   id: 101,
   media_id: "9001",
@@ -138,7 +138,7 @@ test("NHentai uses live typed suggestions, caches them, and falls back to observ
 
   const typed = await loaded.extension.searchSuggestions({ fieldID: "tag", query: "big breasts", limit: 5 });
   assert.deepEqual(Array.from(typed, suggestion => suggestion.value), ["big breasts"]);
-  assert.equal(suggestionRequests, 2);
+  assert.equal(suggestionRequests, 1, "a canonical tag learned from cross-field lookup needs no second request");
 
   await loaded.extension.details("101");
   const fallback = await loaded.extension.searchSuggestions({ fieldID: "artist", query: "sample", limit: 5 });
@@ -241,9 +241,7 @@ test("NHentai fails closed on malformed JSON, traversal, and undeclared returned
   mode = "notFound";
   await assert.rejects(() => loaded.extension.details("101"), error => error.name === "NotFoundError");
   mode = "path";
-  const work = await loaded.extension.details("101");
-  const [installment] = await loaded.extension.installments(work);
-  await assert.rejects(() => loaded.extension.imagePages(installment), error => error.name === "InvalidResponseError");
+  await assert.rejects(() => loaded.extension.details("101"), error => error.name === "InvalidResponseError");
 
   const badHostGallery = { ...listGallery, thumbnail: "https://outside.example/thumb.webp" };
   const badHost = await loadContentExtension(mainPath, request => jsonResponse(request, { result: [badHostGallery], num_pages: 1, per_page: 25, total: 1 }));
@@ -301,7 +299,7 @@ test("NHentai passes native resource references through without copying image by
 });
 
 
-test("NHentai expires chapter metadata after five minutes and does not revive cache entries after refresh", async () => {
+test("NHentai expires chapter metadata after thirty minutes and does not revive cache entries after refresh", async () => {
   let now = 0;
   let release;
   let block = false;
@@ -312,7 +310,7 @@ test("NHentai expires chapter metadata after five minutes and does not revive ca
   await loaded.extension.details("101");
   await loaded.extension.installments({ workId: "101" });
   assert.equal(loaded.calls.length, 1);
-  now = 300001;
+  now = 1800001;
   await loaded.extension.details("101");
   assert.equal(loaded.calls.length, 2);
   await loaded.extension.invalidateCache();
@@ -325,4 +323,31 @@ test("NHentai expires chapter metadata after five minutes and does not revive ca
   await pending;
   await loaded.extension.details("101");
   assert.equal(loaded.calls.length, 4);
+});
+
+
+test("NHentai complete search galleries persist across restart and targeted refresh keeps other galleries", async () => {
+  const cache = metadataCacheFixture();
+  const responder = request => jsonResponse(request, request.url.includes("/search") ? {result:[detailGallery], num_pages:1} : {...detailGallery,id:Number(/\/(\d+)$/.exec(request.url)?.[1] || 101)});
+  const loaded = await loadContentExtension(mainPath, responder, {cache});
+  await loaded.extension.search({query:"sample"});
+  await loaded.extension.details("101");
+  assert.equal(loaded.calls.length,1);
+  const restarted = await loadContentExtension(mainPath, responder, {cache});
+  const work = await restarted.extension.details("101");
+  await restarted.extension.installments(work);
+  assert.equal(restarted.calls.length,0);
+  await restarted.extension.details("102");
+  cache.setReload(true); await restarted.extension.details("101"); cache.setReload(false);
+  await restarted.extension.details("102");
+  assert.equal(restarted.calls.length,2);
+});
+
+test("NHentai partial cards never seed persisted chapter metadata", async () => {
+  const cache = metadataCacheFixture();
+  const partial = {...listGallery}; delete partial.pages;
+  const loaded = await loadContentExtension(mainPath, request => jsonResponse(request, request.url.includes("/search") ? {result:[partial],num_pages:1} : detailGallery), {cache});
+  await loaded.extension.search({query:"sample"});
+  await loaded.extension.details("101");
+  assert.equal(loaded.calls.length,2);
 });

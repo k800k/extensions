@@ -3,10 +3,10 @@
 /* Copyright © 2026 manko Extension Contributors */
 
 :root {
-  --vp-c-brand-1: #0b6e75;
-  --vp-c-brand-2: #0f8189;
-  --vp-c-brand-3: #075b61;
-  --vp-c-brand-soft: rgb(11 110 117 / 14%);
+  --vp-c-brand-1: #ff9500;
+  --vp-c-brand-2: #e68600;
+  --vp-c-brand-3: #cc7700;
+  --vp-c-brand-soft: rgb(255 149 0 / 14%);
   --vp-button-brand-border: transparent;
   --vp-button-brand-text: #fff;
   --vp-button-brand-bg: var(--vp-c-brand-1);
@@ -17,16 +17,16 @@
   --vp-button-brand-active-text: #fff;
   --vp-button-brand-active-bg: var(--vp-c-brand-3);
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(120deg, #0b6e75 20%, #14a2a6 70%);
-  --vp-home-hero-image-background-image: radial-gradient(circle, rgb(20 162 166 / 38%), transparent 65%);
+  --vp-home-hero-name-background: linear-gradient(120deg, #ff9500 20%, #ffb340 70%);
+  --vp-home-hero-image-background-image: radial-gradient(circle, rgb(255 179 64 / 38%), transparent 65%);
   --vp-home-hero-image-filter: blur(48px);
 }
 
 .dark {
-  --vp-c-brand-1: #5bd2d0;
-  --vp-c-brand-2: #75ddda;
-  --vp-c-brand-3: #38b8ba;
-  --vp-c-brand-soft: rgb(91 210 208 / 14%);
+  --vp-c-brand-1: #ff9f0a;
+  --vp-c-brand-2: #ffb340;
+  --vp-c-brand-3: #e68f09;
+  --vp-c-brand-soft: rgb(255 159 10 / 14%);
 }
 
 .sr-only {
@@ -83,13 +83,13 @@
 
 .brand-button {
   color: #fff !important;
-  background: #0b6e75;
-  border-color: #0b6e75;
+  background: #ff9500;
+  border-color: #ff9500;
 }
 
 .brand-button:hover:not(:disabled) {
-  background: #0f8189;
-  border-color: #0f8189;
+  background: #e68600;
+  border-color: #e68600;
 }
 
 .brand-button:active:not(:disabled),
@@ -165,8 +165,8 @@ input:focus-visible {
   width: 52px;
   height: 52px;
   border-radius: 13px;
-  background: linear-gradient(145deg, #0b6e75, #14a2a6);
-  box-shadow: 0 8px 20px rgb(11 110 117 / 20%);
+  background: linear-gradient(145deg, #ff9500, #ffb340);
+  box-shadow: 0 8px 20px rgb(255 149 0 / 20%);
 }
 
 .repository-install-mark span {
@@ -542,7 +542,7 @@ input:focus-visible {
   border: 1px solid var(--vp-c-divider);
   border-radius: 13px;
   color: #fff;
-  background: linear-gradient(145deg, #0b6e75, #14a2a6);
+  background: linear-gradient(145deg, #ff9500, #ffb340);
   font-size: 1.25rem;
   font-weight: 800;
   box-shadow: 0 5px 14px rgb(0 0 0 / 10%);

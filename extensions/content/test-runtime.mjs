@@ -58,6 +58,7 @@ async function loadExtension(mainPath, responder, kind, options = {}) {
   const secureState = new Map(Object.entries(options.secureState || {}));
   let cookies = structuredClone(options.initialCookies || []);
   const context = {
+    ...(options.cache ? { cache: options.cache } : {}),
     http: {
       async request(request) {
         calls.push(request);
@@ -138,4 +139,27 @@ export function loadContentExtension(mainPath, responder, options = {}) {
 
 export function loadTrackerExtension(mainPath, responder, options = {}) {
   return loadExtension(mainPath, responder, "tracker", options);
+}
+
+
+// A host cache fixture retained across VM restarts. Swift tests cover the native
+// disk broker and fencing; source tests use this to assert request reuse.
+export function metadataCacheFixture() {
+  const entries = new Map();
+  let now = 0, reload = false, generation = 0;
+  return {
+    entries,
+    advance(seconds) { now += seconds; },
+    setReload(value) { reload = value; },
+    clear() { generation++; entries.clear(); },
+    async remove(key) { generation++; entries.delete(key); },
+    async remember(key, { ttlSeconds }, loader) {
+      const entry = entries.get(key);
+      if (entry && !(reload && ttlSeconds !== null) && (ttlSeconds === null || now - entry.time < ttlSeconds)) return structuredClone(entry.value);
+      const token = generation;
+      const value = await loader();
+      if (token === generation && Buffer.byteLength(JSON.stringify(value)) <= 16777216) entries.set(key, { value: structuredClone(value), time: now });
+      return structuredClone(value);
+    }
+  };
 }

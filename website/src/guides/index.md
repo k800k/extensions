@@ -8,12 +8,7 @@ manko content and tracker extensions connect the app to external services. The r
 
 ## Browse extensions
 
-The [Extension List](/extension-list) presents:
-
-1. **Package identity** — name, version, kind, language, and content rating.
-2. **Compatibility** — supported manko API version, features, and known limitations.
-3. **Package information** — compressed size, contributors, and repository.
-4. **Source and provenance** — extension source, upstream snapshot, license, and revision links.
+The [Extension List](/extension-list) shows the extension's icon, name, current version, content rating, and provider website. Sources are grouped by language, with Multi-Language first. Content and tracker extensions appear in the same list.
 
 ::: tip Keep extensions current
 Refresh a repository to check for newer manifest versions, then use Update for the extensions you want to replace.
@@ -21,36 +16,25 @@ Refresh a repository to check for newer manifest versions, then use Update for t
 
 ## Custom catalogs
 
-The catalog browser accepts either a full `catalog.json` URL or the directory containing it. A compatible catalog must:
+To use another publisher's repository, add its HTTPS repository URL inside Manko. A compatible repository contains `versioning.json` and versioned extension scripts. The website displays this repository's catalog; manage other repositories in the app.
 
-- be served over HTTP or HTTPS without embedded credentials;
-- expose a JSON object with a `sources` array;
-- give every source a unique, non-empty `id`;
-- contain content or tracker extensions (`kind: "content"` or `kind: "tracker"`; an omitted kind defaults to content);
-- publish versioned script and icon paths relative to its repository URL; and
-- permit browser access with appropriate cross-origin response headers.
+## Install an extension
 
-Custom catalog URLs are saved in local browser storage. They are never synchronized to an account because this website has no sign-in or backend. Shared catalog links include the custom URLs required to reproduce the view.
+Search by name, ID, or provider website, or filter by **Language** and **Content Rating**. The total count updates as you filter, and language groups with no matching sources disappear.
 
-To remove a custom catalog, open **Repositories** on the Extension List and select the × button next to it.
+Choose the arrow on a source row to open Manko's installation review for that extension. Confirm inside Manko to install it. Retired and unavailable entries have disabled arrows. **Add Repository** opens the repository review without selecting an extension.
 
 ## Content ratings
 
 | Rating | Intended use |
 | --- | --- |
 | Safe | General-audience material. |
-| Mature | Material that may include stronger themes or imagery. |
-| Adult | Explicit material intended only for adults where lawful. |
+| Contains NSFW (17+) | The publisher marks this source as Mature. |
+| NSFW (18+) | The publisher marks this source as Adult. |
 | Unknown | The publisher did not provide a recognized rating. |
 
-The Extension List begins with **Safe** included when opened without a shared state. Click a filter once to include it, twice to exclude it, and a third time to clear it. Clearing all rating filters shows every rating.
+The Extension List shows every rating by default. Choose a rating from the **Content Rating** menu to filter the catalog; choose **All Content Ratings** to show every rating again.
 
 ## Troubleshooting catalogs
 
-If a custom catalog does not load:
-
-- confirm that its address resolves to `catalog.json`;
-- open the JSON address directly and check for an HTTP error;
-- make sure the catalog server allows cross-origin browser requests;
-- check that `sources` is an array with no duplicate IDs; and
-- remove credentials, fragments, and unrelated JSON filenames from the URL.
+If the website cannot load catalog metadata, installation actions are disabled. Choose **Try Again** to reload it. If the problem persists, check your connection or report the error through [Support](/support).

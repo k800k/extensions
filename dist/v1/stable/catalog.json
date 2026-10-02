@@ -52,8 +52,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/AllPornComic/1.0.0-alpha.17/main.js",
-        "sha256": "93ea8f85d0c69836ff94716b75a54cbbab5a18091b5bc64aa12ef6d28d82fa42",
-        "size": 367607,
+        "sha256": "67428413b12ed3bafbae56ae18e2ad8eb7f3be807f759071c4b52858a2d2c6ff",
+        "size": 368444,
         "allowedHTTPSHosts": [
           "allporncomic.com"
         ],
@@ -61,7 +61,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "93ea8f85d0c69836ff94716b75a54cbbab5a18091b5bc64aa12ef6d28d82fa42",
+      "scriptSHA256": "67428413b12ed3bafbae56ae18e2ad8eb7f3be807f759071c4b52858a2d2c6ff",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -199,8 +199,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/Atsumaru/1.0.0-alpha.27/main.js",
-        "sha256": "c33603ed953f3ec4c37d9bdc7c5406ed4f7e0610076b21dcc4fef87b85628a8c",
-        "size": 83979,
+        "sha256": "0f6fe77615b8f33a949c80cf4e51acf3168781a3526489ccbea472817ae00148",
+        "size": 84816,
         "allowedHTTPSHosts": [
           "atsu.moe",
           "cdn.atsu.moe"
@@ -209,7 +209,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "c33603ed953f3ec4c37d9bdc7c5406ed4f7e0610076b21dcc4fef87b85628a8c",
+      "scriptSHA256": "0f6fe77615b8f33a949c80cf4e51acf3168781a3526489ccbea472817ae00148",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -284,8 +284,8 @@
       "extension": {
         "apiVersion": "1.1",
         "scriptURL": "sources/Comix/1.0.0-alpha.54/main.js",
-        "sha256": "0f2f6208be0e5f5fc2c5d500248de750e28892b8744ef5f24d03610dc4e0df21",
-        "size": 59211,
+        "sha256": "2c90f4367603b41072674340f6e4a9e15271cb728636de9e87cf82823239f59b",
+        "size": 60048,
         "allowedHTTPSHosts": [
           "comix.to",
           "static.comix.to",
@@ -303,7 +303,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "0f2f6208be0e5f5fc2c5d500248de750e28892b8744ef5f24d03610dc4e0df21",
+      "scriptSHA256": "2c90f4367603b41072674340f6e4a9e15271cb728636de9e87cf82823239f59b",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -326,7 +326,7 @@
       "id": "HitomiLA",
       "name": "Hitomi.la",
       "description": "Anonymous multi-language discovery, search, gallery details, and AVIF/WebP page reading for hitomi.la.",
-      "version": "0.2.6",
+      "version": "0.3.1",
       "icon": "icons/HitomiLA.svg",
       "languages": [
         "en",
@@ -384,9 +384,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/HitomiLA/0.2.6/main.js",
-        "sha256": "c216a09540f1e0a8282d9675a67f94d6676994bc732e28f4465ca01121a46708",
-        "size": 49877,
+        "scriptURL": "sources/HitomiLA/0.3.1/main.js",
+        "sha256": "b347c8af0889d3624fb4cf4b39ebcd6c2f286ab58fd4d9f9085ca5a463862524",
+        "size": 57000,
         "allowedHTTPSHosts": [
           "hitomi.la",
           "ltn.gold-usergeneratedcontent.net",
@@ -399,7 +399,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "c216a09540f1e0a8282d9675a67f94d6676994bc732e28f4465ca01121a46708",
+      "scriptSHA256": "b347c8af0889d3624fb4cf4b39ebcd6c2f286ab58fd4d9f9085ca5a463862524",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -462,8 +462,8 @@
       "extension": {
         "apiVersion": "1.1",
         "scriptURL": "sources/LNori/1.0.0-alpha.5/main.js",
-        "sha256": "98989c62132caf92cf6dc2aa514956d94679f702df5710dd70070a3abce14318",
-        "size": 347100,
+        "sha256": "80d68ffb1e081be6da31ac13db0ad137bf400b7a3c145416706c780827a2acda",
+        "size": 347937,
         "allowedHTTPSHosts": [
           "cdn.lnori.com",
           "lnori.com"
@@ -472,7 +472,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "98989c62132caf92cf6dc2aa514956d94679f702df5710dd70070a3abce14318",
+      "scriptSHA256": "80d68ffb1e081be6da31ac13db0ad137bf400b7a3c145416706c780827a2acda",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -546,8 +546,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/MadaraDex/1.0.0-alpha.18/main.js",
-        "sha256": "2a763af1e550c688fc88bf179b9bbfa6f3eb28ac1a044c1b6634b1cd2f82337a",
-        "size": 368775,
+        "sha256": "20a0844aac0808d934d85a83cbfe172d169b4009b42aec1ef87b0b7ab57bbbe0",
+        "size": 369612,
         "allowedHTTPSHosts": [
           "madaradex.org"
         ],
@@ -555,7 +555,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "2a763af1e550c688fc88bf179b9bbfa6f3eb28ac1a044c1b6634b1cd2f82337a",
+      "scriptSHA256": "20a0844aac0808d934d85a83cbfe172d169b4009b42aec1ef87b0b7ab57bbbe0",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -629,8 +629,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/MangaBat/1.0.0-alpha.16/main.js",
-        "sha256": "43662a50363802868b12b033e9287e5d1e4f65f24b5aa467a3e0a4e26ebea660",
-        "size": 36892,
+        "sha256": "bbd39de310556183db9cd0abea6e4bb3e804f23bfa9bcf98e7a9d0d5c25f7ffe",
+        "size": 37729,
         "allowedHTTPSHosts": [
           "img-r1.2xstorage.com",
           "img-r2.2xstorage.com",
@@ -641,7 +641,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "43662a50363802868b12b033e9287e5d1e4f65f24b5aa467a3e0a4e26ebea660",
+      "scriptSHA256": "bbd39de310556183db9cd0abea6e4bb3e804f23bfa9bcf98e7a9d0d5c25f7ffe",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -789,8 +789,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/MangaDex/1.0.0-alpha.30/main.js",
-        "sha256": "d46d0d415158ba49265aa0952da33cc36d1bb1648c47429f5e5f339b1e82047f",
-        "size": 430714,
+        "sha256": "cf09dcfb1da3653ccc7d5138da779268fd1dcc704773a103c630007063aeb47f",
+        "size": 431551,
         "allowedHTTPSHosts": [
           "*.mangadex.network",
           "api.mangadex.org",
@@ -801,7 +801,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "d46d0d415158ba49265aa0952da33cc36d1bb1648c47429f5e5f339b1e82047f",
+      "scriptSHA256": "cf09dcfb1da3653ccc7d5138da779268fd1dcc704773a103c630007063aeb47f",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -875,8 +875,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/MangaDot/1.0.0-alpha.7/main.js",
-        "sha256": "9e185716d19fca01051815f001f4883dbf4f7ff7bc2042e5f75f52ee8a30bbc4",
-        "size": 95626,
+        "sha256": "3baa66ac272bff110975912265139027f553458655578c202561c4f074fc03e8",
+        "size": 96463,
         "allowedHTTPSHosts": [
           "mangadot.net"
         ],
@@ -884,7 +884,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "9e185716d19fca01051815f001f4883dbf4f7ff7bc2042e5f75f52ee8a30bbc4",
+      "scriptSHA256": "3baa66ac272bff110975912265139027f553458655578c202561c4f074fc03e8",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -959,8 +959,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/MangaFox/1.0.0-alpha.15/main.js",
-        "sha256": "7d43ca9ba694dd23e040e0d55e104af94a97ad1ea39fd17c6a9a97632ba66828",
-        "size": 366008,
+        "sha256": "d79c8a0e6fc9e540c7d2b65298f072ad6407acefccbc807d9b5af3a50cdbd944",
+        "size": 366845,
         "allowedHTTPSHosts": [
           "fanfox.net"
         ],
@@ -968,7 +968,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "7d43ca9ba694dd23e040e0d55e104af94a97ad1ea39fd17c6a9a97632ba66828",
+      "scriptSHA256": "d79c8a0e6fc9e540c7d2b65298f072ad6407acefccbc807d9b5af3a50cdbd944",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -1042,8 +1042,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/Mangago/1.0.0-alpha.3/main.js",
-        "sha256": "9d6019568a7139359bbbf9f316c2b940e4b336b7154df311b130abf1f7048f97",
-        "size": 377579,
+        "sha256": "c56db9352b623192a05bd6f3d952fe1ae3f61fab0824238157240db8f30c5625",
+        "size": 378416,
         "allowedHTTPSHosts": [
           "www.mangago.me",
           "www.mangago.zone",
@@ -1053,7 +1053,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "9d6019568a7139359bbbf9f316c2b940e4b336b7154df311b130abf1f7048f97",
+      "scriptSHA256": "c56db9352b623192a05bd6f3d952fe1ae3f61fab0824238157240db8f30c5625",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -1127,8 +1127,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/MangaKakalot/1.0.0-alpha.16/main.js",
-        "sha256": "5b748db994403977afdc43e5c3efce04a60e896ec271dc7d2f7bc3e40571ed73",
-        "size": 36920,
+        "sha256": "3d6e5010c188da4712d726b51ddc142c5dac5fe3a5947dfd1479552850bc636d",
+        "size": 37757,
         "allowedHTTPSHosts": [
           "img-r1.2xstorage.com",
           "img-r2.2xstorage.com",
@@ -1139,7 +1139,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "5b748db994403977afdc43e5c3efce04a60e896ec271dc7d2f7bc3e40571ed73",
+      "scriptSHA256": "3d6e5010c188da4712d726b51ddc142c5dac5fe3a5947dfd1479552850bc636d",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -1218,7 +1218,7 @@
       "id": "NHentai",
       "name": "nHentai",
       "description": "Anonymous discovery, search, gallery details, and page reading for nhentai.net.",
-      "version": "0.3.5",
+      "version": "0.4.0",
       "icon": "icons/NHentai.svg",
       "languages": [
         "multi",
@@ -1269,9 +1269,9 @@
       },
       "extension": {
         "apiVersion": "1.0",
-        "scriptURL": "sources/NHentai/0.3.5/main.js",
-        "sha256": "20eb08f2d5f015264a1174d199b093ef5f71a8eb1b61ba9b074ef666ff0189e3",
-        "size": 30629,
+        "scriptURL": "sources/NHentai/0.4.0/main.js",
+        "sha256": "6ec0526a36f844107974c61359f12d104943a42d3c96251983c7c0062e710727",
+        "size": 34147,
         "allowedHTTPSHosts": [
           "nhentai.net",
           "i.nhentai.net",
@@ -1281,7 +1281,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "20eb08f2d5f015264a1174d199b093ef5f71a8eb1b61ba9b074ef666ff0189e3",
+      "scriptSHA256": "6ec0526a36f844107974c61359f12d104943a42d3c96251983c7c0062e710727",
       "license": "Apache-2.0",
       "compatibility": {
         "adapter": "source-owned-js",
@@ -1349,8 +1349,8 @@
       "extension": {
         "apiVersion": "1.1",
         "scriptURL": "sources/RoyalRoad/1.0.0-alpha.5/main.js",
-        "sha256": "d4e88accbee033c1cf04f670d91f26c7dfc24d0c1c4d81b389d7aacdb1e854ce",
-        "size": 363896,
+        "sha256": "d27e40d556dd22b9b3e094e63b52d94c8d0124af0ede0e360f10d0500e0e5126",
+        "size": 364733,
         "allowedHTTPSHosts": [
           "www.royalroad.com",
           "www.royalroadcdn.com"
@@ -1359,7 +1359,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "d4e88accbee033c1cf04f670d91f26c7dfc24d0c1c4d81b389d7aacdb1e854ce",
+      "scriptSHA256": "d27e40d556dd22b9b3e094e63b52d94c8d0124af0ede0e360f10d0500e0e5126",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",
@@ -1431,8 +1431,8 @@
       "extension": {
         "apiVersion": "1.0",
         "scriptURL": "sources/Webtoon/1.0.0-alpha.21/main.js",
-        "sha256": "05206178d72d727a42bfa12316a3ae11dd3138fbf601bcca0319406ac8abf04d",
-        "size": 357437,
+        "sha256": "0bb2341ad56d0c704a590e035d4817c21e0564d1ebd98de784cacc85e7d65433",
+        "size": 358274,
         "allowedHTTPSHosts": [
           "m.webtoons.com",
           "swebtoon-phinf.pstatic.net",
@@ -1443,7 +1443,7 @@
           "none"
         ]
       },
-      "scriptSHA256": "05206178d72d727a42bfa12316a3ae11dd3138fbf601bcca0319406ac8abf04d",
+      "scriptSHA256": "0bb2341ad56d0c704a590e035d4817c21e0564d1ebd98de784cacc85e7d65433",
       "license": "GPL-3.0-or-later",
       "compatibility": {
         "adapter": "paperback-0.9",

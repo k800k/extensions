@@ -16,7 +16,7 @@ test("candidate ranking normalizes only matching and keeps canonical namespaces"
  assert.deepEqual(Array.from(result,x=>[x.fieldID,x.value]),[["tag","glass"],["female","glasses"],["male","glasses"],["tag","blue glasses"],["tag","sunglasses"]]);
  assert.equal(c.mrRankSuggestions("glases",[candidate("glasses","female"),candidate("glasses","male")],30,"male").length,1);
 });
-test("lookups coalesce, broaden at most twice, cache only successes and recover",async()=>{
+test("lookups coalesce, broaden at most once, cache only successes and recover",async()=>{
  const c=runtime(); let release; let calls=[];
  const lookup=c.mrCreateSuggestionLookup(async(field,query)=>{ calls.push(query); if(query==="glass") await new Promise(r=>release=r); return query==="gla"||query==="glass"?[candidate("glasses")]:[]; });
  const first=lookup({query:"glass"}),second=lookup({query:"GLASS"});
@@ -27,6 +27,29 @@ test("lookups coalesce, broaden at most twice, cache only successes and recover"
  await assert.rejects(recovering({query:"glass"}),/unavailable/); assert.equal((await recovering({query:"glass"})).length,1);
  let malformed=true; const repair=c.mrCreateSuggestionLookup(async()=>malformed?[{value:"invalid"}]:[]);
  await assert.rejects(repair({query:"foo"}),/invalid/); malformed=false; assert.equal((await repair({query:"foo"})).length,0);
+});
+test("a learned exact tag returns without another discovery request",async()=>{
+ const c=runtime(); const calls=[];
+ const lookup=c.mrCreateSuggestionLookup(async(_,q)=>{calls.push(q);return [candidate("glasses")];});
+ await lookup({query:"glass"});
+ assert.equal((await lookup({query:"glasses"}))[0].value,"glasses");
+ assert.deepEqual(calls,["glass"]);
+ assert.equal(c.mrSearchScore("gals","glasses"),401);
+});
+test("cold misses use one sequential fallback and truncated prefixes do not prove query coverage",async()=>{
+ const c=runtime(); const calls=[];
+ const lookup=c.mrCreateSuggestionLookup(async(_,q)=>{calls.push(q);return q==="gla"?[candidate("glasses")]:[];});
+ assert.equal((await lookup({query:"glases"}))[0].value,"glasses");
+ assert.deepEqual(calls,["glases","gla"]);
+ await lookup({query:"glazing"});
+ assert.ok(calls.includes("glazing"));
+});
+test("metadata invalidation removes the learned shortcut too",async()=>{
+ const c=runtime();let calls=0;
+ const metadata={generation:0,remember:async(_,ttl,loader)=>loader()};
+ const lookup=c.mrCreateSuggestionLookup(async()=>{calls++;return [candidate("glasses")];},metadata);
+ await lookup({query:"glass"});await lookup({query:"glasses"});assert.equal(calls,1);
+ metadata.generation++;await lookup({query:"glasses"});assert.equal(calls,2);
 });
 test("successful suggestion caches expire and evict beyond 100 entries",async()=>{
  let now=0,calls=0; const c=runtime({Date:{now:()=>now}});

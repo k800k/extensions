@@ -98,3 +98,24 @@ Suggestion requests are debounced and may be cancelled or superseded whenever th
 Detail responses can make metadata searchable by adding `workInfo.searchFacets`. Each facet contains `fieldID`, the source query `value`, a display `title`, an optional `groupTitle`, and a `presentation` of `creator`, `tag`, or `metadata`. Field IDs must match the IDs declared by `searchFilters()`.
 
 All methods are additive and optional. Older manko versions ignore the extra keys, and current versions fall back to raw search when the configuration or suggestions are unavailable. Keep field IDs unique, return no more than 24 fields or 30 suggestions, and never put URLs, credentials, or executable content in search metadata.
+
+
+## Parsed metadata cache
+
+API 1.0 and 1.1 extensions can feature-detect `context.cache`. It shares Manko's disposable content storage budget (1 GB by default) and survives runtime restart. Keys are automatically partitioned by repository/source, package version, configuration, account and cache epoch.
+
+```js
+const gallery = context.cache
+  ? await context.cache.remember(`gallery:${id}`, { ttlSeconds: 1800 }, loadValidatedGallery)
+  : await loadWithBoundedMemoryCache(id);
+```
+
+The loader must return validated, JSON-compatible metadata belonging to the requested resource. Never cache credentials, cookies, HTTP response envelopes, challenge responses, errors or malformed payloads. Entries over 16 MiB remain usable but are not persisted. Revalidate values returned from the cache; call `await context.cache.remove(key)` and load again if validation fails.
+
+A positive `ttlSeconds` sets freshness. Use `null` only for immutable, version-addressed resources such as a Hitomi index node keyed by index version and offset. Manko coalesces identical loads in a runtime, falls back to the loader on cache I/O failure, and fences writes after cancellation, removal, Clear Cache, privacy changes and newer forced reloads.
+
+App snapshots derived from cached metadata expire with the earliest mutable dependency. Reusing a nearly expired ID list does not start a new freshness window for the displayed results.
+
+Set `cachePolicy: "metadata"` on an adopting content extension. Pull-to-refresh reloads mutable keys used by that invocation and replaces them only after a successful load. Immutable entries and unrelated titles remain available. Legacy extensions continue to receive `invalidateCache()` on explicit refresh. Incognito bypasses persistent reads and writes; privacy transitions discard transient source metadata. Retain a bounded memory fallback and an `invalidateCache()` implementation for older hosts.
+
+Hitomi and nhentai gallery metadata uses 30 minutes; Hitomi Nozomi/query ID lists and both sources' suggestion candidates use 5 minutes; Hitomi index versions use 30 minutes; versioned index nodes/title-ID data are immutable; Hitomi routing uses 1 minute. Cache matching ID lists before slicing pages, and only seed nhentai galleries from complete, validated list/search payloads.

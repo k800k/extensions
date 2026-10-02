@@ -13,7 +13,7 @@ const expectedCatalogEntries = [
   { id: "AniList", version: "1.0.1", kind: "tracker", contentRating: "SAFE", compatibilityStatus: null, apiVersion: "1.1", icon: "icons/AniList.svg", license: "Apache-2.0" },
   { id: "Atsumaru", version: "1.0.0-alpha.27", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/Atsumaru.ico", license: "GPL-3.0-or-later" },
   { id: "Comix", version: "1.0.0-alpha.54", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.1", icon: "icons/Comix.png", license: "Apache-2.0" },
-  { id: "HitomiLA", version: "0.2.5", kind: "content", contentRating: "ADULT", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/HitomiLA.svg", license: "Apache-2.0" },
+  { id: "HitomiLA", version: "0.3.0", kind: "content", contentRating: "ADULT", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/HitomiLA.svg", license: "Apache-2.0" },
   { id: "LNori", version: "1.0.0-alpha.5", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.1", icon: "icons/LNori.png", license: "GPL-3.0-or-later" },
   { id: "MadaraDex", version: "1.0.0-alpha.18", kind: "content", contentRating: "ADULT", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/MadaraDex.png", license: "GPL-3.0-or-later" },
   { id: "MangaBat", version: "1.0.0-alpha.16", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/MangaBat.png", license: "Apache-2.0" },
@@ -24,7 +24,7 @@ const expectedCatalogEntries = [
   { id: "Mangago", version: "1.0.0-alpha.3", kind: "content", contentRating: "ADULT", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/Mangago.png", license: "GPL-3.0-or-later" },
   { id: "MangaKakalot", version: "1.0.0-alpha.16", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/MangaKakalot.png", license: "Apache-2.0" },
   { id: "MyAnimeList", version: "1.0.1", kind: "tracker", contentRating: "SAFE", compatibilityStatus: null, apiVersion: "1.1", icon: "icons/MyAnimeList.svg", license: "Apache-2.0" },
-  { id: "NHentai", version: "0.3.4", kind: "content", contentRating: "ADULT", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/NHentai.svg", license: "Apache-2.0" },
+  { id: "NHentai", version: "0.4.0", kind: "content", contentRating: "ADULT", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/NHentai.svg", license: "Apache-2.0" },
   { id: "RoyalRoad", version: "1.0.0-alpha.5", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.1", icon: "icons/RoyalRoad.png", license: "GPL-3.0-or-later" },
   { id: "Webtoon", version: "1.0.0-alpha.21", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/Webtoon.png", license: "GPL-3.0-or-later" },
   { id: "WeebCentral", version: "1.0.0-alpha.27", kind: "content", contentRating: "SAFE", compatibilityStatus: "supported", apiVersion: "1.0", icon: "icons/WeebCentral.png", license: "Apache-2.0" }
